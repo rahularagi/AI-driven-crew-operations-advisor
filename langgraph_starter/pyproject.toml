@@ -1,0 +1,19 @@
+[project]
+name = "langgraph-starter"
+version = "0.1.0"
+description = "Minimal LangGraph + Gemini starter: connection setup and a multi-stage tool-calling agent example"
+requires-python = ">=3.10"
+dependencies = [
+    "langgraph>=0.2.0",
+    "langchain-google-genai>=2.0.0",
+    "langchain-core>=0.3.0",
+    "playwright>=1.45.0",
+    "python-dotenv>=1.0.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["langgraph_starter*"]

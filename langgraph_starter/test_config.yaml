@@ -1,0 +1,7 @@
+base_url: https://the-internet.herokuapp.com
+
+scenarios:
+  - "test that login works with valid credentials"
+  - "test that login fails with wrong password and shows error"
+  - "test that the forgot password form submits successfully"
+  - "test that the secure area loads after successful login"
