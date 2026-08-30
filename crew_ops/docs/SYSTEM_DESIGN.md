@@ -30,10 +30,12 @@
 └──────────────┬───────────────────────────────────────────────────────┘
                │ FlightDisrupted
                │                    ┌─── PlanDisrupted (from Planner Job B)
-               ▼                    ▼
+               │                    │
+               │                    │    ┌─── CrewDisrupted (from Ops Desk / API)
+               ▼                    ▼    ▼
 ┌──────────────────────────────────────────────────────────────────────┐
 │  3. DISRUPTION HANDLER                                               │
-│    Receives FlightDisrupted OR PlanDisrupted                         │
+│    Receives FlightDisrupted OR PlanDisrupted OR CrewDisrupted        │
 │    Checks FTL impact → finds replacement → updates roster            │
 │    Emits: RosterModified, CrewNotified                               │
 └──────────────┬───────────────────────────────────────────────────────┘
@@ -93,9 +95,10 @@ Pass 3 — Full horizon validation
 ```
 
 **Output:**
-- `RosterEntry` rows → `crew_roster` table (status = PLANNED)
-- `CrewReserveSchedule` rows → standby slots
-- On controller approval → emit `RosterPublished`
+- `roster_leg` rows → roster display table (status = DRAFT)
+- `roster_crew_assignment` rows → crew alignment per leg
+- `crew_reserve_schedule` rows → standby slots (separate from roster view)
+- On controller approval → status = PUBLISHED, emit `RosterPublished`
 
 ---
 
@@ -233,8 +236,8 @@ Watches every leg that has crew assigned and is departing today. Polls the live 
 
 ## Service 3 — Disruption Handler
 
-Receives `FlightDisrupted` (from Observer) OR `PlanDisrupted` (from Planner validator).
-Same pipeline handles both — it does not care where the event came from.
+Receives `FlightDisrupted` (from Observer), `PlanDisrupted` (from Planner validator), or `CrewDisrupted` (from Ops Desk via API).
+Same pipeline handles all three — it does not care where the event came from.
 
 **Processing pipeline:**
 
@@ -242,6 +245,9 @@ Same pipeline handles both — it does not care where the event came from.
 Step 1 — Classify
   FlightDisrupted → live disruption, urgency based on severity field
   PlanDisrupted   → future disruption, urgency based on days_until_departure
+  CrewDisrupted   → find all roster_crew_assignment rows for this crew
+                    between affected_from and affected_until
+                    urgency based on days_until_departure of earliest affected leg
 
 Step 2 — FTL impact check
   For each crew member on the affected leg:
@@ -274,7 +280,8 @@ Step 7 — Human decision point
   LOW             → auto-resolve if clean replacement found, notify controller
 
 Step 8 — Closed loop (on approval)
-  Update crew_roster: old crew CANCELLED, new crew ASSIGNED
+  Update roster_crew_assignment: remove old crew entry, add new crew entry
+  Refresh roster_leg status if flight is now fully crewed
   Update crew_ftl_state: for both removed and replacement crew
   Emit RosterModified → Planner re-validates future weeks
   Emit CrewNotified → notification service sends messages
@@ -328,6 +335,7 @@ Every midnight — rolling counter recalculation:
 | `RosterPublished` | Weekly Planner (Job A) | Observer (starts watching today's legs) |
 | `PlanDisrupted` | Weekly Planner (Job B) | Disruption Handler |
 | `FlightDisrupted` | Observer | Disruption Handler |
+| `CrewDisrupted` | Ops Desk via API (human in loop) | Disruption Handler |
 | `LegCompleted` | Observer | FTL Service |
 | `RosterModified` | Disruption Handler | Weekly Planner (re-validate future), FTL Service |
 | `CrewNotified` | Disruption Handler | Notification Service |
@@ -341,8 +349,8 @@ Every midnight — rolling counter recalculation:
 6–7 weeks before departure
   Planner Job A runs
   Assigns crew to leg
-  Writes crew_roster entry (PLANNED)
-  Emits RosterPublished
+  Writes roster_leg + roster_crew_assignment (status = DRAFT)
+  On controller approval → status = PUBLISHED, emits RosterPublished
         │
         ▼
 Every morning (3AM) until departure
@@ -366,6 +374,8 @@ Day of departure — Observer takes over
         │
         ├── delay detected → FlightDisrupted → Disruption Handler
         ├── cancelled → FlightDisrupted CRITICAL → Disruption Handler
+        ├── crew goes sick → Ops Desk calls POST /v1/crew/{id}/unavailable
+        │                  → CrewDisrupted → Disruption Handler
         │
         ▼
 Flight lands
@@ -384,6 +394,59 @@ FTL Service receives LegCompleted
 
 ---
 
+## Crew-Side Disruption — Human in Loop
+
+Crew-side disruptions are entered manually by the Ops Desk. The system handles everything after that.
+
+**Trigger:** Controller calls `POST /v1/crew/{crew_id}/unavailable`
+
+**CrewDisrupted event shape:**
+
+```json
+{
+  "event": "CrewDisrupted",
+  "source": "OPS_DESK",
+  "crew_id": "C-003",
+  "crew_name": "Capt Ravi Singh",
+  "disruption_type": "SICK_CALL",
+  "affected_from": "2024-02-05",
+  "affected_until": "2024-02-05",
+  "entered_by": "controller_id",
+  "entered_at": "2024-02-05T05:30:00+05:30"
+}
+```
+
+**disruption_type values:**
+
+| type | Cause |
+|------|-------|
+| `SICK_CALL` | Crew calls in sick |
+| `EMERGENCY_LEAVE` | Family emergency, bereavement |
+| `MEDICAL_GROUNDING` | Doctor grounds crew immediately |
+| `NO_SHOW` | Crew did not report at check-in |
+| `URGENT_TRAINING` | Regulator mandates emergency simulator check |
+
+**Severity based on days_until_departure of earliest affected leg:**
+
+| days_until_departure | Severity | Action |
+|---------------------|----------|--------|
+| < 1 day | CRITICAL | Immediate — activate nearest reserve |
+| 1 – 2 days | HIGH | Disruption Handler runs now |
+| 2 – 7 days | HIGH | Full replacement pipeline |
+| 7 – 14 days | MEDIUM | Controller notified, fix this week |
+| > 14 days | LOW | Planner re-assigns in next cycle |
+
+**API endpoint:**
+
+```
+POST /v1/crew/{crew_id}/unavailable
+  body: { disruption_type, affected_from, affected_until }
+  → emits CrewDisrupted
+  → returns list of all affected legs immediately so controller sees full impact
+```
+
+---
+
 ## What Each Service Owns
 
 | | Planner Job A | Planner Job B | Observer | Disruption Handler | FTL Service |
@@ -391,7 +454,8 @@ FTL Service receives LegCompleted
 | Reads flight schedule API | ✅ | ❌ | ✅ (today only) | ❌ | ❌ |
 | Reads crew FTL state | ✅ (simulated) | ✅ (live) | ❌ | ✅ (live) | ✅ (live) |
 | Runs legality checker | ✅ (future) | ✅ (future) | ❌ | ✅ (live) | ❌ |
-| Writes crew_roster | ✅ PLANNED | ❌ | ❌ | ✅ MODIFIED | ❌ |
+| Writes `roster_leg` + `roster_crew_assignment` | ✅ DRAFT→PUBLISHED | ❌ | ❌ | ❌ | ❌ |
+| Modifies `roster_crew_assignment` | ❌ | ❌ | ❌ | ✅ | ❌ |
 | Writes crew_ftl_state | ❌ | ❌ | ❌ | ✅ | ✅ |
 | Notifies crew | ❌ | ❌ | ❌ | ✅ | ✅ (alerts) |
 | Needs LLM | ❌ | ❌ | ❌ | ✅ (narration only) | ❌ |
@@ -414,7 +478,9 @@ crew_ops/
 │   ├── leg.py                        Leg, Aircraft
 │   ├── crew.py                       CrewMember (static profile)
 │   ├── crew_ftl_state.py             CrewFTLState (live ledger)
-│   ├── roster_entry.py               RosterEntry
+│   ├── roster.py                     Roster (week header)
+│   ├── roster_leg.py                 RosterLeg (one row per leg)
+│   ├── roster_crew_assignment.py     RosterCrewAssignment (one row per crew per leg)
 │   ├── crew_leave.py                 CrewLeave
 │   ├── crew_reserve.py               CrewReserveSchedule
 │   ├── disruption.py                 DisruptionEvent
@@ -440,7 +506,7 @@ crew_ops/
 │   └── flight_client.py              thin wrapper around flight status API
 │
 ├── disruption/                       ← Service 3: Disruption Handler
-│   ├── handler.py                    main pipeline (handles both event types)
+│   ├── handler.py                    main pipeline (handles FlightDisrupted, PlanDisrupted, CrewDisrupted)
 │   ├── candidate_finder.py           find + filter candidates (pure Python)
 │   └── ranker.py                     score + rank candidates (pure Python)
 │

@@ -507,35 +507,128 @@ These are the legs seeded in `data/seed_legs.py`. Designed to cover all demo sce
 
 ---
 
-## How the 3 Services Use This Data
+## Disruption Types
+
+The system handles two categories of disruption:
+
+### Type 1 — Flight-Side Disruption
+
+**Trigger:** Something happens to the flight — delay, cancellation, diversion, aircraft swap.
+**Detected by:** Observer (live polling, today only).
+**Event:** `FlightDisrupted`
+
+### Type 2 — Crew-Side Disruption (Human in Loop)
+
+**Trigger:** Something happens to the crew member — sick call, emergency leave, medical grounding, no-show, urgent training.
+**Detected by:** Ops Desk enters it manually via API. System handles everything after that.
+**Event:** `CrewDisrupted`
+
+**CrewDisrupted event shape:**
+
+```json
+{
+  "event": "CrewDisrupted",
+  "source": "OPS_DESK",
+  "crew_id": "C-003",
+  "crew_name": "Capt Ravi Singh",
+  "disruption_type": "SICK_CALL",
+  "affected_from": "2024-02-05",
+  "affected_until": "2024-02-05",
+  "entered_by": "controller_id",
+  "entered_at": "2024-02-05T05:30:00+05:30"
+}
+```
+
+**disruption_type values:**
+
+| type | Cause |
+|------|-------|
+| `SICK_CALL` | Crew calls in sick |
+| `EMERGENCY_LEAVE` | Family emergency, bereavement |
+| `MEDICAL_GROUNDING` | Doctor grounds crew immediately |
+| `NO_SHOW` | Crew did not report at check-in |
+| `URGENT_TRAINING` | Regulator mandates emergency simulator check |
+
+**Flow after CrewDisrupted is emitted:**
+
+```
+System finds all roster_crew_assignment rows
+  for this crew between affected_from and affected_until
+        │
+        ▼
+For each affected leg → compute days_until_departure
+  < 1 day  → CRITICAL — activate nearest reserve immediately
+  1–2 days → HIGH — Disruption Handler runs now
+  2–7 days → HIGH — full replacement pipeline
+  7–14 days → MEDIUM — controller notified, fix this week
+  > 14 days → LOW — Planner re-assigns in next cycle
+        │
+        ▼
+Disruption Handler runs replacement pipeline
+  (same pipeline as FlightDisrupted)
+        │
+        ▼
+roster_crew_assignment updated
+RosterModified emitted → Planner Job B re-validates future weeks
+CrewNotified sent to replacement crew
+```
+
+**API endpoint:**
+
+```
+POST /v1/crew/{crew_id}/unavailable
+  body: { disruption_type, affected_from, affected_until }
+  → emits CrewDisrupted
+  → returns list of all affected legs so controller sees full impact immediately
+```
+
+---
+
+## Disruption Handler — Classify Step (updated)
+
+Handler now receives 3 event types, all routed through the same pipeline:
+
+```
+FlightDisrupted → urgency from severity field
+PlanDisrupted   → urgency from days_until_departure
+CrewDisrupted   → find all affected legs, urgency from days_until_departure of earliest leg
+```
+
+---
+
+## API Endpoints — Disruption
+
+```
+POST /v1/crew/{crew_id}/unavailable
+  body: { disruption_type, affected_from, affected_until }
+  → emits CrewDisrupted event
+  → returns affected_legs[] with severity for each
+
+GET  /v1/disruptions/active
+  → returns all open disruptions (FlightDisrupted + CrewDisrupted) pending resolution
+```
+
+---
+
+## How the 3 Services Use This Data (updated)
 
 ```
 WEEKLY PLANNER
-  reads:  seed_legs (all 15 legs)
-          seed_crew (25 crew profiles + licenses)
-          seed_ftl  (carry-over FTL states)
-          seed_leave (3 leave entries)
-          seed_reserve (existing standby slots)
-          fdp_table.json
-          cost_config.json
-  writes: crew_roster (one row per crew × leg)
-          crew_reserve_schedule (standby slots)
+  reads:  seed_legs, seed_crew, seed_ftl, seed_leave, seed_reserve
+          fdp_table.json, cost_config.json
+  writes: roster_leg, roster_crew_assignment (DRAFT → PUBLISHED)
+          crew_reserve_schedule
 
 OBSERVER
-  reads:  crew_roster (which legs have crew → which to watch)
+  reads:  roster_leg (which legs to watch today)
   calls:  Aviationstack live status API every 15–60 sec
-  writes: nothing (emits events only)
   emits:  FlightDisrupted, LegCompleted
 
 DISRUPTION HANDLER
-  reads:  crew_roster (who is on the affected leg)
-          crew_ftl_state (live legality check)
-          crew_reserve_schedule (standby pool)
-          crew_leave (confirm not on leave)
-          fdp_table.json
-          cost_config.json
-  writes: crew_roster (MODIFIED / CANCELLED entries)
-          crew_ftl_state (updated for affected crew)
+  receives: FlightDisrupted, PlanDisrupted, CrewDisrupted
+  reads:  roster_crew_assignment, crew_ftl_state, crew_reserve_schedule, crew_leave
+  writes: roster_crew_assignment (remove old, add new)
+          crew_ftl_state (updated for affected + replacement crew)
   emits:  RosterModified, CrewNotified
 ```
 
@@ -551,3 +644,85 @@ DISRUPTION HANDLER
 | Airborne legs | Observer | Every 60 sec | `estimated_arrival` changes |
 | Landed / cancelled legs | Observer | Stop polling | LegCompleted event emitted |
 | Crew FTL state | FTL Service | On every duty event (not polled) | LegCompleted, RosterModified |
+
+---
+
+## Roster Schema — Organisational View
+
+> Display schema only — what the planner writes after publishing and what the UI reads.
+> No FTL fields, no legality fields, no processing data.
+> Shows scheduled flights, legs, and crew alignment for the week.
+
+### Table 1 — `roster` (week header)
+
+```
+roster_id        str       "ROSTER-AI-2024-W06"
+airline_iata     str       "AI"
+week_start       date      2024-02-05
+week_end         date      2024-02-11
+status           enum      DRAFT / PUBLISHED
+created_at       datetime
+published_at     datetime | null
+```
+
+### Table 2 — `roster_leg` (one row per leg)
+
+```
+leg_id           str       "AI854-PNQ-DEL-20240205"
+roster_id        str       FK → roster
+flight_number    str       "AI854"
+origin           str       "PNQ"
+destination      str       "DEL"
+scheduled_dep    datetime  2024-02-05T06:00:00+05:30
+scheduled_arr    datetime  2024-02-05T08:15:00+05:30
+aircraft_type    str       "A320"
+aircraft_reg     str       "VT-ABC"
+status           enum      SCHEDULED / CANCELLED
+```
+
+### Table 3 — `roster_crew_assignment` (one row per crew per leg)
+
+```
+assignment_id    str       UUID
+leg_id           str       FK → roster_leg
+crew_id          str       "C-001"
+crew_name        str       "Capt Arjun Mehta"
+role             enum      CAPTAIN / FIRST_OFFICER / SENIOR_PURSER / CABIN_CREW
+assignment_type  enum      OPERATING / DEADHEAD / RESERVE
+report_time      datetime  duty start (1.5hrs before departure)
+release_time     datetime  duty end (arrival + 30min debrief)
+```
+
+### UI response shape (one leg)
+
+```json
+{
+  "leg_id": "AI854-PNQ-DEL-20240205",
+  "flight_number": "AI854",
+  "origin": "PNQ",
+  "destination": "DEL",
+  "scheduled_dep": "2024-02-05T06:00:00+05:30",
+  "scheduled_arr": "2024-02-05T08:15:00+05:30",
+  "aircraft_type": "A320",
+  "aircraft_reg": "VT-ABC",
+  "status": "SCHEDULED",
+  "crew": [
+    { "crew_id": "C-001", "name": "Capt Arjun Mehta",  "role": "CAPTAIN",       "type": "OPERATING", "report": "04:30", "release": "09:45" },
+    { "crew_id": "C-006", "name": "FO Deepa Rao",       "role": "FIRST_OFFICER", "type": "OPERATING", "report": "04:30", "release": "09:45" },
+    { "crew_id": "C-011", "name": "SP Sunita Kapoor",   "role": "SENIOR_PURSER", "type": "OPERATING", "report": "04:30", "release": "09:45" },
+    { "crew_id": "C-012", "name": "CC Rahul Verma",     "role": "CABIN_CREW",    "type": "OPERATING", "report": "04:30", "release": "09:45" }
+  ]
+}
+```
+
+### What was deliberately excluded
+
+| Field | Reason excluded |
+|-------|-----------------|
+| `roster_flight` as a separate table | `flight_number` on `roster_leg` is enough — UI groups by it at query time |
+| `total_flights`, `total_legs`, `total_crew` | Computed at query time, not stored |
+| `is_fully_crewed`, `required_pilots`, `assigned_pilots` | Processing concern — belongs in planner, not roster view |
+| `leg_sequence` | UI sorts by `scheduled_dep` |
+| `home_base` on assignment | Not needed for organisational display |
+| `is_deadhead` | Redundant — `assignment_type = DEADHEAD` covers it |
+| FTL fields of any kind | FTL is a processing concern — lives in `crew_ftl_state` only |

@@ -187,6 +187,35 @@ For each crew_member:
 
 ---
 
+## Disruption Types
+
+Two categories of disruption feed into the same Disruption Handler pipeline.
+
+### Type 1 — Flight-Side
+- Trigger: delay, cancellation, diversion, aircraft swap
+- Detected by: Observer (live polling)
+- Event: `FlightDisrupted`
+
+### Type 2 — Crew-Side (Human in Loop)
+- Trigger: sick call, emergency leave, medical grounding, no-show, urgent training
+- Detected by: Ops Desk enters manually via `POST /v1/crew/{crew_id}/unavailable`
+- Event: `CrewDisrupted`
+- System finds all affected legs, computes severity per leg, routes to Disruption Handler
+
+---
+
+## Disruption Handler — Classify Step
+
+```
+FlightDisrupted → urgency from severity field
+PlanDisrupted   → urgency from days_until_departure
+CrewDisrupted   → find all affected legs, urgency from days_until_departure of earliest leg
+```
+
+All three event types flow through the same Steps 2–8 (FTL check → cascade → find candidates → rank → narrate → human decision → update roster).
+
+---
+
 ## 4. Conflict Resolution
 
 When `flag_gap()` is called (no legal crew for a leg):
