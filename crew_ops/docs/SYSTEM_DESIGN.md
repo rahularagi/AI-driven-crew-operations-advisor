@@ -1,0 +1,471 @@
+# CrewOps — System Design & Architecture
+
+> 4 loosely coupled services communicating only through events.
+> Nothing is tightly wired. Each service can be built, tested, and replaced independently.
+
+---
+
+## The 4 Services
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│  1. WEEKLY PLANNER                                                   │
+│                                                                      │
+│  Job A — PLAN (runs Sunday night, weekly)                            │
+│    Builds crew roster for next 6–7 weeks                             │
+│    Emits: RosterPublished                                            │
+│                                                                      │
+│  Job B — DAILY VALIDATOR (runs every morning 3AM)                    │
+│    Re-checks all future planned weeks against current reality        │
+│    Detects: leave added, license expired, FTL state drifted          │
+│    Emits: PlanDisrupted                                              │
+└──────────────┬───────────────────────────────────────────────────────┘
+               │ RosterPublished
+               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  2. OBSERVER                                                         │
+│    Watches TODAY's active legs only via live flight API              │
+│    Detects: delay, cancellation, diversion happening right now       │
+│    Emits: FlightDisrupted, LegCompleted                              │
+└──────────────┬───────────────────────────────────────────────────────┘
+               │ FlightDisrupted
+               │                    ┌─── PlanDisrupted (from Planner Job B)
+               ▼                    ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  3. DISRUPTION HANDLER                                               │
+│    Receives FlightDisrupted OR PlanDisrupted                         │
+│    Checks FTL impact → finds replacement → updates roster            │
+│    Emits: RosterModified, CrewNotified                               │
+└──────────────┬───────────────────────────────────────────────────────┘
+               │ RosterModified, LegCompleted
+               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  4. FTL SERVICE (background, always running)                         │
+│    Closes duty windows on landing                                    │
+│    Runs proactive alert scan every 15 min                            │
+│    Recalculates rolling counters every midnight                      │
+│    Emits: FTLAlert                                                   │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Service 1 — Weekly Planner
+
+### Job A — PLAN (weekly, Sunday night)
+
+Builds a crew roster for the next 6–7 weeks.
+
+**Why 6–7 weeks, not just 1:**
+- The 28-day block hour counter means what happens today affects legality 4 weeks from now
+- Weekly rest blocks (36hr continuous) must be guaranteed across the full horizon
+- Reserve slots must be pre-filled so the disruption handler always has a standby pool
+
+**Inputs:**
+
+| Input | Source | What it contains |
+|-------|--------|-----------------|
+| `legs[]` | Flight schedule API | All legs 6–7 weeks ahead |
+| `crew_profiles[]` | HRMS (nightly sync) | Name, role, base, licenses, seniority |
+| `crew_ftl_state[]` | FTL ledger | Carry-over: 28-day hours, 7-day hours, consecutive days |
+| `crew_leave[]` | AIMS / HR | Approved leave — these crew excluded |
+| `crew_reserve_schedule[]` | Scheduling system | Existing standby slots — planner fills gaps |
+| `fdp_rules` | Static config | Report time × sector count → max FDP |
+
+**Algorithm — 3 passes:**
+
+```
+Pass 1 — Assign operating crew to legs (earliest departure first)
+  For each leg:
+    find_candidates: role match, base match, not on leave, FTL available
+    legality_check: against simulated FTL state (future mode)
+    rank: seniority + fatigue + location + hours remaining
+    assign top N, advance their simulated FTL state forward
+
+Pass 2 — Fill reserve/standby slots
+  For each date × base airport:
+    fill gaps from crew not on operating duties that day
+
+Pass 3 — Full horizon validation
+  Replay every crew member's full 6–7 week plan through legality checker
+  Flag: FDP breach, rest violation, 7-day cap, 28-day cap, no weekly rest block
+  Return validation report — do not publish until clean
+```
+
+**Output:**
+- `RosterEntry` rows → `crew_roster` table (status = PLANNED)
+- `CrewReserveSchedule` rows → standby slots
+- On controller approval → emit `RosterPublished`
+
+---
+
+### Job B — DAILY VALIDATOR (every morning, 3AM)
+
+Re-checks all future planned weeks against current reality.
+Answers the question: **"Is everything I planned last week still valid today?"**
+
+**What can break a future plan that the Observer cannot see:**
+
+| What broke | How it's detected | Example |
+|-----------|------------------|---------|
+| Crew added sick leave | `crew_leave` table has new entry for a future date | Capt Ravi adds leave for Mar 04 — was assigned to AI305 that day |
+| License expired | `crew.license_expiry` date is before the planned leg date | FO Priya's A320 rating expires Mar 01, leg planned Mar 05 |
+| Medical expired | `crew.medical_expiry` before planned leg date | Capt Mehta's medical expires Mar 10, leg planned Mar 12 |
+| FTL state drifted | Actual duty hours higher than planner assumed | C-002 now at 94hrs by Week 3 — Week 4 assignment will breach 100hr cap |
+| Flight schedule changed | Leg rescheduled, aircraft swapped, route cancelled | AI305 moved from B737 to A320 — assigned crew not A320 rated |
+
+**How it runs:**
+
+```
+Every morning at 3AM:
+
+  For each future roster entry (status = PLANNED or CONFIRMED):
+    load current crew_ftl_state  (not simulated — actual live state)
+    load current crew_leave      (any new leave added since last plan?)
+    load current crew.license_expiry + medical_expiry
+    load current leg.aircraft_type (did aircraft change?)
+
+    re-run legality_check(crew_id, leg, current_ftl_state)
+
+    if FAIL:
+      emit PlanDisrupted {
+        leg_id, affected_crew_id, reason, days_until_departure, severity
+      }
+```
+
+**Severity based on days until departure:**
+
+| days_until_departure | Severity | What happens |
+|---------------------|----------|-------------|
+| > 14 days | LOW | Planner quietly re-assigns in next planning cycle |
+| 7 – 14 days | MEDIUM | Controller notified, re-plan this week |
+| 2 – 7 days | HIGH | Disruption Handler runs full replacement pipeline |
+| < 2 days | CRITICAL | Same urgency as a live FlightDisrupted event |
+
+---
+
+### PlanDisrupted event shape
+
+```json
+{
+  "event": "PlanDisrupted",
+  "source": "WEEKLY_PLANNER_VALIDATOR",
+  "leg_id": "AI305-BOM-CCU-20240304",
+  "flight_number": "AI305",
+  "origin": "BOM",
+  "destination": "CCU",
+  "disruption_type": "CREW_UNAVAILABLE",
+  "affected_crew_id": "C-003",
+  "reason": "SICK_LEAVE",
+  "leg_date": "2024-03-04",
+  "days_until_departure": 28,
+  "severity": "LOW",
+  "detected_at": "2024-02-05T03:00:00+05:30"
+}
+```
+
+**disruption_type values for PlanDisrupted:**
+
+| type | Cause |
+|------|-------|
+| `CREW_UNAVAILABLE` | Sick leave, annual leave, training leave added |
+| `LICENSE_EXPIRED` | Type rating expired before leg date |
+| `MEDICAL_EXPIRED` | Medical certificate expired before leg date |
+| `FTL_BREACH_PROJECTED` | Accumulated hours will breach cap by that week |
+| `AIRCRAFT_TYPE_CHANGED` | Leg now requires different type rating |
+
+---
+
+### Planner re-validates after RosterModified
+
+When Disruption Handler fixes a live disruption and emits `RosterModified`, the Planner re-checks future weeks for the affected crew:
+
+```
+RosterModified: Capt Mohan assigned to AI305 on Feb 05 (extra duty)
+
+Planner validator next morning:
+  Capt Mohan's flight_hours_28_day is now higher than planned
+  Re-run legality check for all Capt Mohan's future legs
+  If any future leg now breaches → emit PlanDisrupted for that leg
+```
+
+This closes the loop — today's fix cannot silently break a future week.
+
+---
+
+## Service 2 — Observer
+
+**Scope: today's active legs only.**
+
+Watches every leg that has crew assigned and is departing today. Polls the live flight status API. Detects when reality deviates from plan. Emits an event. Does nothing else.
+
+**What triggers it:** `RosterPublished` → extracts today's leg_ids → starts polling.
+
+**Polling frequency:**
+
+| Leg status | Frequency | Why |
+|-----------|-----------|-----|
+| SCHEDULED, departure > 2hrs away | every 15 min | nothing happening yet |
+| BOARDING / DELAYED_AT_GATE | every 5 min | departure imminent |
+| ACTIVE (airborne) | every 60 sec | `estimated_arrival` updating |
+| LANDED | stop polling | emit LegCompleted |
+| CANCELLED / DIVERTED | stop polling | emit FlightDisrupted CRITICAL |
+
+**Severity thresholds:**
+
+| delay_minutes | Severity | Event |
+|--------------|----------|-------|
+| 0 – 29 | — | none |
+| 30 – 119 | LOW | FlightDisrupted |
+| 120 – 239 | MEDIUM | FlightDisrupted |
+| 240+ | HIGH | FlightDisrupted |
+| status = cancelled | CRITICAL | FlightDisrupted |
+| status = diverted | CRITICAL | FlightDisrupted |
+| status = landed | — | LegCompleted |
+
+**What Observer does NOT know about:**
+- FTL rules
+- Crew availability
+- Whether the delay actually causes a problem
+- Future weeks
+
+---
+
+## Service 3 — Disruption Handler
+
+Receives `FlightDisrupted` (from Observer) OR `PlanDisrupted` (from Planner validator).
+Same pipeline handles both — it does not care where the event came from.
+
+**Processing pipeline:**
+
+```
+Step 1 — Classify
+  FlightDisrupted → live disruption, urgency based on severity field
+  PlanDisrupted   → future disruption, urgency based on days_until_departure
+
+Step 2 — FTL impact check
+  For each crew member on the affected leg:
+    Recalculate projected_fdp_end
+    Check if FDP will be breached
+    Check if rest before next duty will be sufficient
+  If no impact → log and close
+
+Step 3 — Cascade check
+  Find all other legs the affected crew member is assigned to
+  Flag ripple effects
+
+Step 4 — Find candidates (pure Python, no LLM)
+  Check crew_reserve_schedule: who is on standby at this airport?
+  Check crew_roster: who is AVAILABLE and not on another leg?
+  Filter: role match, ACTIVE status, not on leave
+  Run legality checker on each (hard gates only)
+
+Step 5 — Score and rank (pure Python, no LLM)
+  legal(40) + same_airport(30) + low_fatigue(20) + low_cost(10)
+  Always append "delay the flight" as final fallback
+
+Step 6 — LLM narration
+  Takes ranked list (structured facts) → writes human-readable explanation
+  Cannot change rankings or invent data
+
+Step 7 — Human decision point
+  CRITICAL / HIGH → present to controller immediately
+  MEDIUM          → present to controller, 4hr window to respond
+  LOW             → auto-resolve if clean replacement found, notify controller
+
+Step 8 — Closed loop (on approval)
+  Update crew_roster: old crew CANCELLED, new crew ASSIGNED
+  Update crew_ftl_state: for both removed and replacement crew
+  Emit RosterModified → Planner re-validates future weeks
+  Emit CrewNotified → notification service sends messages
+```
+
+---
+
+## Service 4 — FTL Service (Background)
+
+Always running. Never called directly — only reacts to events.
+
+```
+On LegCompleted:
+  for each crew on the leg:
+    flight_time_current_duty += leg.duration_hours
+    sectors_current_duty += 1
+    current_airport = leg.destination
+    at_home_base = (destination == crew.home_base)
+    rest_start_time = actual_arrival + 30min debrief
+    status = RESTING
+    min_rest = max(12, duty_hours) if at_home_base else 10
+    earliest_available = rest_start + min_rest
+    if not at_home_base → trigger hotel notification
+
+On RosterModified:
+  for removed crew: status = SICK / OFF_DUTY (duty counters unchanged)
+  for added crew:   duty_start_time set, projected_fdp_end calculated
+
+Every 15 min — proactive alert scan:
+  FDP approaching (< 2hrs remaining on active duty)
+  Rest violation risk (next duty too soon)
+  Weekly rest overdue (no 36hr block in 6 days)
+  Cumulative cap approaching (28-day hours > 90)
+  WOCL duty tomorrow (report time 0000–0600)
+  License expiring within 30 days
+  Medical expiring within 30 days
+
+Every midnight — rolling counter recalculation:
+  duty_hours_7_day    = sum of last 7 rolling days
+  flight_hours_28_day = sum of last 28 rolling days
+  consecutive_duty_days recalculated
+  emit FTLAlert for any crew crossing warning thresholds
+```
+
+---
+
+## Complete Event List
+
+| Event | Emitted by | Consumed by |
+|-------|-----------|-------------|
+| `RosterPublished` | Weekly Planner (Job A) | Observer (starts watching today's legs) |
+| `PlanDisrupted` | Weekly Planner (Job B) | Disruption Handler |
+| `FlightDisrupted` | Observer | Disruption Handler |
+| `LegCompleted` | Observer | FTL Service |
+| `RosterModified` | Disruption Handler | Weekly Planner (re-validate future), FTL Service |
+| `CrewNotified` | Disruption Handler | Notification Service |
+| `FTLAlert` | FTL Service | Disruption Handler (auto-creates PlanDisrupted if needed) |
+
+---
+
+## Full Timeline of a Flight
+
+```
+6–7 weeks before departure
+  Planner Job A runs
+  Assigns crew to leg
+  Writes crew_roster entry (PLANNED)
+  Emits RosterPublished
+        │
+        ▼
+Every morning (3AM) until departure
+  Planner Job B runs
+  Re-checks this leg against current reality
+  If crew leave added / license expired / FTL drifted:
+    Emits PlanDisrupted → Disruption Handler fixes it
+        │
+        ▼
+Day before departure
+  Planner Job B confirms: all crew still valid
+  crew_roster entry updated to CONFIRMED
+  Hotel bookings triggered for layover crew
+        │
+        ▼
+Day of departure — Observer takes over
+  Observer polls this leg (today only)
+  Departure > 2hrs: every 15 min
+  Boarding: every 5 min
+  Airborne: every 60 sec
+        │
+        ├── delay detected → FlightDisrupted → Disruption Handler
+        ├── cancelled → FlightDisrupted CRITICAL → Disruption Handler
+        │
+        ▼
+Flight lands
+  Observer detects status = landed
+  Emits LegCompleted
+  Stops polling this leg
+        │
+        ▼
+FTL Service receives LegCompleted
+  Closes duty window for all crew
+  Starts rest clock
+  Updates current_airport
+  Triggers hotel notification if away from base
+  Updates rolling counters
+```
+
+---
+
+## What Each Service Owns
+
+| | Planner Job A | Planner Job B | Observer | Disruption Handler | FTL Service |
+|--|:---:|:---:|:---:|:---:|:---:|
+| Reads flight schedule API | ✅ | ❌ | ✅ (today only) | ❌ | ❌ |
+| Reads crew FTL state | ✅ (simulated) | ✅ (live) | ❌ | ✅ (live) | ✅ (live) |
+| Runs legality checker | ✅ (future) | ✅ (future) | ❌ | ✅ (live) | ❌ |
+| Writes crew_roster | ✅ PLANNED | ❌ | ❌ | ✅ MODIFIED | ❌ |
+| Writes crew_ftl_state | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Notifies crew | ❌ | ❌ | ❌ | ✅ | ✅ (alerts) |
+| Needs LLM | ❌ | ❌ | ❌ | ✅ (narration only) | ❌ |
+
+---
+
+## Package Structure
+
+```
+crew_ops/
+├── docs/
+│   ├── SYSTEM_DESIGN.md              ← this file
+│   ├── DATA_SOURCES_AND_APIS.md
+│   ├── MOCK_API_RESPONSES.md
+│   ├── CREWOPS_ADVISOR.md
+│   ├── APPROACH_ANALYSIS.md
+│   └── CREW_HANDLING_IMPLEMENTATION.md
+│
+├── models/
+│   ├── leg.py                        Leg, Aircraft
+│   ├── crew.py                       CrewMember (static profile)
+│   ├── crew_ftl_state.py             CrewFTLState (live ledger)
+│   ├── roster_entry.py               RosterEntry
+│   ├── crew_leave.py                 CrewLeave
+│   ├── crew_reserve.py               CrewReserveSchedule
+│   ├── disruption.py                 DisruptionEvent
+│   └── events.py                     all event shapes
+│
+├── rules/
+│   ├── legality.py                   CrewLegalityChecker — hard gates, no LLM
+│   └── fdp_table.py                  FDP bracket table
+│
+├── data/
+│   ├── seed_crew.py                  25 crew members
+│   ├── seed_legs.py                  15 legs across DEL/BOM/BLR
+│   ├── seed_ftl.py                   initial FTL states with deliberate variety
+│   └── seed_roster.py                roster entries + leave + reserves
+│
+├── roster/                           ← Service 1: Weekly Planner
+│   ├── planner.py                    Job A — RosterPlanner (Pass 1, 2, 3)
+│   ├── validator.py                  Job B — DailyValidator (re-checks future weeks)
+│   └── roster_service.py             CRUD for crew_roster + change log
+│
+├── observer/                         ← Service 2: Observer
+│   ├── observer.py                   FlightObserver — polls today's legs
+│   └── flight_client.py              thin wrapper around flight status API
+│
+├── disruption/                       ← Service 3: Disruption Handler
+│   ├── handler.py                    main pipeline (handles both event types)
+│   ├── candidate_finder.py           find + filter candidates (pure Python)
+│   └── ranker.py                     score + rank candidates (pure Python)
+│
+├── ftl/                              ← Service 4: FTL Service
+│   └── ftl_service.py                duty events, proactive alerts, midnight recalc
+│
+├── agent/                            ← LangGraph wiring (inside Disruption Handler)
+│   ├── state.py
+│   ├── nodes.py
+│   └── graph.py
+│
+├── tools/
+│   └── crew_tools.py                 find_crew, check_legality, calc_cost, cascade_check
+│
+├── notifications/
+│   └── notifier.py
+│
+├── api/
+│   └── main.py
+│
+├── config/
+│   ├── fdp_table.json
+│   ├── cost_config.json
+│   └── planner_config.json
+│
+└── ui/
+    └── app.py
+```
