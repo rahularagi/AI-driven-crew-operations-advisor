@@ -462,6 +462,164 @@ POST /v1/crew/{crew_id}/unavailable
 
 ---
 
+## Service 5 — Conversation Layer (Human-in-Loop)
+
+The only entry point for human interaction. Translates free-text requests into structured intents, routes to the right service, and returns human-readable responses.
+
+All 4 services stay completely unaware of the human. The Conversation Layer is the only new component.
+
+```
+Human (chat / UI)
+      │
+      ▼
+┌─────────────────────────────────────────────────────────────┐
+│  CONVERSATION LAYER  (LangGraph agent)                      │
+│                                                             │
+│  Intent Classifier → Router → Tool Executor                 │
+│  Response Formatter ← Results ←──────────────────           │
+│                                                             │
+│  Holds: session context, pending confirmations              │
+└──────┬──────────┬──────────┬──────────┬────────────────────┘
+       │          │          │          │
+       ▼          ▼          ▼          ▼
+   Roster     Disruption  Planner    FTL
+   Service    Handler     Service    Service
+  (read only) (write)    (simulate)  (read only)
+```
+
+### 3 Interaction Modes
+
+**Mode 1 — QUERY (read only, no confirmation)**
+```
+"What is the status of AI305?"
+"Who is assigned to AI101 tomorrow?"
+"Show me Capt Mehta's schedule this week"
+"How many hours does FO Sharma have left this month?"
+
+Flow: Intent = QUERY → read-only tools → respond. No state change.
+```
+
+**Mode 2 — SIMULATE (what-if, no confirmation)**
+```
+"If Capt Ravi is not available tomorrow, who can replace him?"
+"What happens if AI305 gets cancelled?"
+"If I swap Capt Mehta and FO Sharma on AI202, is that legal?"
+"If I move FO Nair from AI410 to AI305, what breaks?"
+
+Flow: Intent = SIMULATE → run in memory → legality check → cascade check
+      → rank options → LLM narrates → respond with outcome
+      → "Want me to apply it?"   No state change yet.
+```
+
+**Mode 3 — ACTION (writes to system, requires confirmation)**
+```
+"Mark Capt Ravi as sick for today"
+"Assign FO Deepa to AI305 instead of FO Sharma"
+"Swap Capt Mehta and Capt Nisha on tomorrow's flights"
+"Activate reserve C-007 for the BOM-DEL leg"
+
+Flow: Intent = ACTION → legality check → cascade check
+      → build confirmation package → present to human
+      → human confirms → service call → event emitted → pipeline runs
+      → respond with what changed
+```
+
+### System-Initiated Decisions (push to human)
+
+Disruption Handler reaches Step 7 and pushes to human when severity is HIGH or CRITICAL:
+
+```
+"AI305 BOM→CCU departs in 90min. Capt Ravi called sick.
+ Best replacement: Capt Vikram (reserve at BOM, FTL legal).
+ Second option: FO Nair (deadhead from DEL, adds 45min to FDP).
+ Confirm Capt Vikram? [YES / NO / SHOW MORE OPTIONS]"
+```
+
+| Severity | Behaviour |
+|----------|----------|
+| CRITICAL | Push to human immediately. Auto-escalate after 15min if no response |
+| HIGH | Push to human immediately. 1hr window |
+| MEDIUM | Push to human. 4hr window to respond |
+| LOW | Auto-resolve if clean replacement found. Notify human only |
+
+### Confirmation Package Shape
+
+What the human sees before approving any action:
+
+```json
+{
+  "action": "ASSIGN_REPLACEMENT",
+  "summary": "Replace Capt Ravi Singh on AI305 BOM→CCU (10:00 departure)",
+  "proposed_change": {
+    "remove": { "crew_id": "C-003", "name": "Capt Ravi Singh", "reason": "SICK_CALL" },
+    "add":    { "crew_id": "C-007", "name": "Capt Vikram Joshi", "type": "RESERVE" }
+  },
+  "legality": "LEGAL",
+  "ftl_warnings": [],
+  "cascade_impact": ["Capt Vikram reserve slot at BOM released for today"],
+  "future_impact": "None — Capt Vikram has no future legs this week",
+  "confidence": "HIGH",
+  "expires_at": "2024-02-05T08:30:00+05:30",
+  "options": [
+    { "rank": 1, "crew": "Capt Vikram Joshi", "reason": "Reserve at BOM, FTL legal, low fatigue" },
+    { "rank": 2, "crew": "FO Anita Nair",      "reason": "Deadhead from DEL, adds 45min FDP" },
+    { "rank": 3, "crew": "Delay the flight",   "reason": "No other legal crew at BOM" }
+  ]
+}
+```
+
+### What Needs Confirmation vs What Doesn't
+
+| Action | Confirmation | Why |
+|--------|:---:|-----|
+| Query current status | ❌ | Read only |
+| Simulate what-if | ❌ | No state change |
+| Mark crew unavailable | ✅ | Triggers pipeline |
+| Assign replacement | ✅ | Modifies roster |
+| Swap two crew | ✅ | Modifies roster for both |
+| Approve weekly roster | ✅ | Publishes to all crew |
+| Cancel a flight | ✅ | Cascades to all assigned crew |
+| Activate reserve | ✅ | Changes crew assignment |
+| Auto-resolve LOW severity | ❌ | System handles, just notifies |
+
+### Edge Cases
+
+| Edge Case | How handled |
+|-----------|-------------|
+| Human doesn't respond to CRITICAL in time | Auto-escalate after 15min → activate best reserve, notify human |
+| Legality changes between ask and confirm | Re-run legality check at confirm time. If now illegal → reject, re-present |
+| Two controllers act on same disruption | Lock disruption record when opened. Second controller sees "being handled by [name]" |
+| Approved change breaks a future week | Show cascade impact before confirm. After apply → Planner Job B re-validates immediately |
+| Ambiguous request ("swap these two") | Ask clarifying question before routing |
+| Crew member not found | "I don't have a crew member by that name. Did you mean...?" |
+| Session timeout mid-confirmation | Pending confirmation saved to queue. Nothing applied until confirmed |
+| Option 1 auto-applied before human confirms option 2 | Detect conflict at confirm time → tell human what already happened |
+
+### Intent Classification
+
+```
+QUERY     → read tools only → respond
+SIMULATE  → simulate tools → show outcome → ask "apply?"
+ACTION    → legality check → confirmation package → wait → apply
+AMBIGUOUS → ask clarifying question → re-classify
+UNKNOWN   → "I can help with crew scheduling. Try asking..."
+```
+
+### What LLM Does vs Pure Python
+
+| Task | Who |
+|------|-----|
+| Classify intent from free text | LLM |
+| Legality check | Pure Python (hard gates) |
+| Cascade impact check | Pure Python |
+| Rank replacement options | Pure Python |
+| Write confirmation package narrative | LLM |
+| Detect ambiguity | LLM |
+| Format final response | LLM |
+| Apply the actual change | Pure Python (service call) |
+
+---
+
 ## Package Structure
 
 ```
@@ -513,19 +671,23 @@ crew_ops/
 ├── ftl/                              ← Service 4: FTL Service
 │   └── ftl_service.py                duty events, proactive alerts, midnight recalc
 │
-├── agent/                            ← LangGraph wiring (inside Disruption Handler)
-│   ├── state.py
-│   ├── nodes.py
-│   └── graph.py
+├── agent/                            ← Service 5: Conversation Layer (LangGraph)
+│   ├── state.py                      ConversationState — session, intent, pending confirmation
+│   ├── nodes.py                      classify_intent, route, simulate, confirm, apply, respond
+│   └── graph.py                      LangGraph graph wiring all nodes
 │
 ├── tools/
-│   └── crew_tools.py                 find_crew, check_legality, calc_cost, cascade_check
+│   ├── query_tools.py                get_roster, get_crew_status, get_leg_status (read only)
+│   ├── simulate_tools.py             simulate_replacement, simulate_swap, simulate_cancellation
+│   └── action_tools.py               mark_unavailable, assign_crew, swap_crew (write — gated by confirmation)
 │
 ├── notifications/
 │   └── notifier.py
 │
 ├── api/
-│   └── main.py
+│   ├── main.py
+│   ├── chat.py                       POST /v1/chat — main conversation endpoint
+│   └── decisions.py                  GET/POST /v1/decisions/pending — confirmation queue
 │
 ├── config/
 │   ├── fdp_table.json
