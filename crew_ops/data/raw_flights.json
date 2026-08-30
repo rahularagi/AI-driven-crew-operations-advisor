@@ -1,0 +1,5532 @@
+{
+  "pagination": {
+    "limit": 100,
+    "offset": 0,
+    "count": 100,
+    "total": 522
+  },
+  "data": [
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Dubai",
+        "timezone": "Asia/Dubai",
+        "iata": "DXB",
+        "icao": "OMDB",
+        "terminal": "1",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T00:30:00+00:00",
+        "estimated": "2026-08-31T00:30:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T06:00:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "4306",
+        "iata": "AI4306",
+        "icao": "AIC4306",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "80073F"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Seeb",
+        "timezone": "Asia/Muscat",
+        "iata": "MCT",
+        "icao": "OOMS",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T00:15:00+00:00",
+        "estimated": "2026-08-31T00:15:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Chhatrapati Shivaji International (Sahar International)",
+        "timezone": "Asia/Kolkata",
+        "iata": "BOM",
+        "icao": "VABB",
+        "terminal": "2",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T04:50:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "9142",
+        "iata": "AI9142",
+        "icao": "AIC9142",
+        "codeshared": {
+          "airline_name": "air india express",
+          "airline_iata": "ix",
+          "airline_icao": "axb",
+          "flight_number": "236",
+          "flight_iata": "ix236",
+          "flight_icao": "axb236"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "801642"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Madras International (Meenambakkam)",
+        "timezone": "Asia/Kolkata",
+        "iata": "MAA",
+        "icao": "VOMM",
+        "terminal": "2",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T01:55:00+00:00",
+        "estimated": "2026-08-31T01:55:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T01:55:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Frankfurt International Airport",
+        "timezone": "Europe/Berlin",
+        "iata": "FRA",
+        "icao": "EDDF",
+        "terminal": "1",
+        "gate": "B",
+        "baggage": null,
+        "scheduled": "2026-08-31T08:40:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "8759",
+        "iata": "AI8759",
+        "icao": "AIC8759",
+        "codeshared": {
+          "airline_name": "lufthansa",
+          "airline_iata": "lh",
+          "airline_icao": "dlh",
+          "flight_number": "759",
+          "flight_iata": "lh759",
+          "flight_icao": "dlh759"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "3C64C6"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": "26",
+        "delay": null,
+        "scheduled": "2026-08-31T02:30:00+00:00",
+        "estimated": "2026-08-31T02:30:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Bole International",
+        "timezone": "Africa/Addis_Ababa",
+        "iata": "ADD",
+        "icao": "HAAB",
+        "terminal": "2",
+        "gate": "B6",
+        "baggage": null,
+        "scheduled": "2026-08-31T06:30:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7553",
+        "iata": "AI7553",
+        "icao": "AIC7553",
+        "codeshared": {
+          "airline_name": "ethiopian airlines",
+          "airline_iata": "et",
+          "airline_icao": "eth",
+          "flight_number": "687",
+          "flight_iata": "et687",
+          "flight_icao": "eth687"
+        }
+      },
+      "aircraft": null,
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": "37A",
+        "delay": null,
+        "scheduled": "2026-08-31T02:30:00+00:00",
+        "estimated": "2026-08-31T02:30:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T02:30:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Netaji Subhas Chandra",
+        "timezone": "Asia/Kolkata",
+        "iata": "CCU",
+        "icao": "VECC",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T04:50:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "2702",
+        "iata": "AI2702",
+        "icao": "AIC2702",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "800C0C"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": "53",
+        "delay": null,
+        "scheduled": "2026-08-31T02:10:00+00:00",
+        "estimated": "2026-08-31T02:10:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T02:10:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Lohegaon",
+        "timezone": "Asia/Kolkata",
+        "iata": "PNQ",
+        "icao": "VAPO",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T04:15:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "2711",
+        "iata": "AI2711",
+        "icao": "AIC2711",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "8014D0"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": "58",
+        "delay": null,
+        "scheduled": "2026-08-31T02:00:00+00:00",
+        "estimated": "2026-08-31T02:00:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T02:00:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Hyderabad Airport",
+        "timezone": "Asia/Kolkata",
+        "iata": "HYD",
+        "icao": "VOHS",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T04:20:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "2577",
+        "iata": "AI2577",
+        "icao": "AIC2577",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "801424"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T01:45:00+00:00",
+        "estimated": "2026-08-31T01:45:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T01:55:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Lester B. Pearson International",
+        "timezone": "America/Toronto",
+        "iata": "YYZ",
+        "icao": "CYYZ",
+        "terminal": "1",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T09:30:00+00:00",
+        "delay": 10,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "187",
+        "iata": "AI187",
+        "icao": "AIC187",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "801859"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T01:40:00+00:00",
+        "estimated": "2026-08-31T01:40:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Netaji Subhas Chandra",
+        "timezone": "Asia/Kolkata",
+        "iata": "CCU",
+        "icao": "VECC",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T03:55:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "185",
+        "iata": "AI185",
+        "icao": "AIC185",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "800584"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Lohegaon",
+        "timezone": "Asia/Kolkata",
+        "iata": "PNQ",
+        "icao": "VAPO",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T01:35:00+00:00",
+        "estimated": "2026-08-31T01:35:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Cochin International",
+        "timezone": "Asia/Kolkata",
+        "iata": "COK",
+        "icao": "VOCI",
+        "terminal": "1",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T03:30:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "9911",
+        "iata": "AI9911",
+        "icao": "AIC9911",
+        "codeshared": {
+          "airline_name": "air india express",
+          "airline_iata": "ix",
+          "airline_icao": "axb",
+          "flight_number": "2739",
+          "flight_iata": "ix2739",
+          "flight_icao": "axb2739"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "801685"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Lohegaon",
+        "timezone": "Asia/Kolkata",
+        "iata": "PNQ",
+        "icao": "VAPO",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T01:20:00+00:00",
+        "estimated": "2026-08-31T01:20:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Raja Sansi International Airport",
+        "timezone": "Asia/Kolkata",
+        "iata": "ATQ",
+        "icao": "VIAR",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T03:55:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "9905",
+        "iata": "AI9905",
+        "icao": "AIC9905",
+        "codeshared": {
+          "airline_name": "air india express",
+          "airline_iata": "ix",
+          "airline_icao": "axb",
+          "flight_number": "1693",
+          "flight_iata": "ix1693",
+          "flight_icao": "axb1693"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "801698"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": "14A",
+        "delay": null,
+        "scheduled": "2026-08-31T01:25:00+00:00",
+        "estimated": "2026-08-31T01:25:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Dubai",
+        "timezone": "Asia/Dubai",
+        "iata": "DXB",
+        "icao": "OMDB",
+        "terminal": "1",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T04:00:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "4307",
+        "iata": "AI4307",
+        "icao": "AIC4307",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "8013CC"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": "14B",
+        "delay": null,
+        "scheduled": "2026-08-31T01:25:00+00:00",
+        "estimated": "2026-08-31T01:25:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Phuket International",
+        "timezone": "Asia/Bangkok",
+        "iata": "HKT",
+        "icao": "VTSP",
+        "terminal": "D",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T07:25:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "2378",
+        "iata": "AI2378",
+        "icao": "AIC2378",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "801409"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": "15A",
+        "delay": null,
+        "scheduled": "2026-08-31T01:20:00+00:00",
+        "estimated": "2026-08-31T01:20:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Noibai International",
+        "timezone": "Asia/Ho_Chi_Minh",
+        "iata": "HAN",
+        "icao": "VVNB",
+        "terminal": "2",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T07:20:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "2390",
+        "iata": "AI2390",
+        "icao": "AIC2390",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "800C88"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T00:55:00+00:00",
+        "estimated": "2026-08-31T00:55:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Heathrow",
+        "timezone": "Europe/London",
+        "iata": "LHR",
+        "icao": "EGLL",
+        "terminal": "2",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T07:30:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "161",
+        "iata": "AI161",
+        "icao": "AIC161",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "801600"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Melbourne - Tullamarine Airport",
+        "timezone": "Australia/Melbourne",
+        "iata": "MEL",
+        "icao": "YMML",
+        "terminal": "2",
+        "gate": "14",
+        "delay": null,
+        "scheduled": "2026-08-31T05:55:00+00:00",
+        "estimated": "2026-08-31T05:55:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Singapore Changi",
+        "timezone": "Asia/Singapore",
+        "iata": "SIN",
+        "icao": "WSSS",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T11:45:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "8209",
+        "iata": "AI8209",
+        "icao": "AIC8209",
+        "codeshared": {
+          "airline_name": "singapore airlines",
+          "airline_iata": "sq",
+          "airline_icao": "sia",
+          "flight_number": "248",
+          "flight_iata": "sq248",
+          "flight_icao": "sia248"
+        }
+      },
+      "aircraft": null,
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Chandigarh",
+        "timezone": "Asia/Kolkata",
+        "iata": "IXC",
+        "icao": "VICG",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T00:45:00+00:00",
+        "estimated": "2026-08-31T00:45:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Lohegaon",
+        "timezone": "Asia/Kolkata",
+        "iata": "PNQ",
+        "icao": "VAPO",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T03:10:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "9963",
+        "iata": "AI9963",
+        "icao": "AIC9963",
+        "codeshared": {
+          "airline_name": "air india express",
+          "airline_iata": "ix",
+          "airline_icao": "axb",
+          "flight_number": "1685",
+          "flight_iata": "ix1685",
+          "flight_icao": "axb1685"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "8016CA"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Bandaranaike International",
+        "timezone": "Asia/Colombo",
+        "iata": "CMB",
+        "icao": "VCBI",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T00:40:00+00:00",
+        "estimated": "2026-08-31T00:40:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": null,
+        "baggage": "12",
+        "scheduled": "2026-08-31T04:15:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "6209",
+        "iata": "AI6209",
+        "icao": "AIC6209",
+        "codeshared": {
+          "airline_name": "srilankan airlines",
+          "airline_iata": "ul",
+          "airline_icao": "alk",
+          "flight_number": "191",
+          "flight_iata": "ul191",
+          "flight_icao": "alk191"
+        }
+      },
+      "aircraft": null,
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Cochin International",
+        "timezone": "Asia/Kolkata",
+        "iata": "COK",
+        "icao": "VOCI",
+        "terminal": "3",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T00:55:00+00:00",
+        "estimated": "2026-08-31T00:55:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T00:55:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Singapore Changi",
+        "timezone": "Asia/Singapore",
+        "iata": "SIN",
+        "icao": "WSSS",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T08:15:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "8297",
+        "iata": "AI8297",
+        "icao": "AIC8297",
+        "codeshared": {
+          "airline_name": "singapore airlines",
+          "airline_iata": "sq",
+          "airline_icao": "sia",
+          "flight_number": "537",
+          "flight_iata": "sq537",
+          "flight_icao": "sia537"
+        }
+      },
+      "aircraft": null,
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Cochin International",
+        "timezone": "Asia/Kolkata",
+        "iata": "COK",
+        "icao": "VOCI",
+        "terminal": "3",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T00:40:00+00:00",
+        "estimated": "2026-08-31T00:40:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T00:40:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Abu Dhabi International",
+        "timezone": "Asia/Dubai",
+        "iata": "AUH",
+        "icao": "OMAA",
+        "terminal": "A",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T03:20:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "9079",
+        "iata": "AI9079",
+        "icao": "AIC9079",
+        "codeshared": {
+          "airline_name": "air india express",
+          "airline_iata": "ix",
+          "airline_icao": "axb",
+          "flight_number": "417",
+          "flight_iata": "ix417",
+          "flight_icao": "axb417"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "8015EE"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Chhatrapati Shivaji International (Sahar International)",
+        "timezone": "Asia/Kolkata",
+        "iata": "BOM",
+        "icao": "VABB",
+        "terminal": "2",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T00:40:00+00:00",
+        "estimated": "2026-08-31T00:40:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T00:40:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Zurich",
+        "timezone": "Europe/Zurich",
+        "iata": "ZRH",
+        "icao": "LSZH",
+        "terminal": "2",
+        "gate": "E27",
+        "baggage": null,
+        "scheduled": "2026-08-31T06:20:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7711",
+        "iata": "AI7711",
+        "icao": "AIC7711",
+        "codeshared": {
+          "airline_name": "swiss",
+          "airline_iata": "lx",
+          "airline_icao": "swr",
+          "flight_number": "155",
+          "flight_iata": "lx155",
+          "flight_icao": "swr155"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "4B1882"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Bangalore International Airport",
+        "timezone": "Asia/Kolkata",
+        "iata": "BLR",
+        "icao": "VOBL",
+        "terminal": "2",
+        "gate": "D8",
+        "delay": null,
+        "scheduled": "2026-08-31T00:45:00+00:00",
+        "estimated": "2026-08-31T00:45:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T00:45:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Chhatrapati Shivaji International (Sahar International)",
+        "timezone": "Asia/Kolkata",
+        "iata": "BOM",
+        "icao": "VABB",
+        "terminal": "2",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T02:50:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "2498",
+        "iata": "AI2498",
+        "icao": "AIC2498",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "800C8E"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Suvarnabhumi International",
+        "timezone": "Asia/Bangkok",
+        "iata": "BKK",
+        "icao": "VTBS",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T01:35:00+00:00",
+        "estimated": "2026-08-31T01:35:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T01:35:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Taiwan Taoyuan International (Chiang Kai Shek International)",
+        "timezone": "Asia/Taipei",
+        "iata": "TPE",
+        "icao": "RCTP",
+        "terminal": "2",
+        "gate": null,
+        "baggage": "8",
+        "scheduled": "2026-08-31T06:20:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7064",
+        "iata": "AI7064",
+        "icao": "AIC7064",
+        "codeshared": {
+          "airline_name": "eva air",
+          "airline_iata": "br",
+          "airline_icao": "eva",
+          "flight_number": "206",
+          "flight_iata": "br206",
+          "flight_icao": "eva206"
+        }
+      },
+      "aircraft": null,
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Civil",
+        "timezone": "Asia/Kolkata",
+        "iata": "TRZ",
+        "icao": "VOTR",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T00:05:00+00:00",
+        "estimated": "2026-08-31T00:05:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T03:25:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Sharjah",
+        "timezone": "Asia/Dubai",
+        "iata": "SHJ",
+        "icao": "OMSJ",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T02:50:00+00:00",
+        "delay": 200,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "9259",
+        "iata": "AI9259",
+        "icao": "AIC9259",
+        "codeshared": {
+          "airline_name": "air india express",
+          "airline_iata": "ix",
+          "airline_icao": "axb",
+          "flight_number": "669",
+          "flight_iata": "ix669",
+          "flight_icao": "axb669"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "8003F3"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Civil",
+        "timezone": "Asia/Kolkata",
+        "iata": "TRZ",
+        "icao": "VOTR",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T00:05:00+00:00",
+        "estimated": "2026-08-31T00:05:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T03:25:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Sharjah",
+        "timezone": "Asia/Dubai",
+        "iata": "SHJ",
+        "icao": "OMSJ",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T02:50:00+00:00",
+        "delay": 200,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "9223",
+        "iata": "AI9223",
+        "icao": "AIC9223",
+        "codeshared": {
+          "airline_name": "air india express",
+          "airline_iata": "ix",
+          "airline_icao": "axb",
+          "flight_number": "669",
+          "flight_iata": "ix669",
+          "flight_icao": "axb669"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "8003F3"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Lohegaon",
+        "timezone": "Asia/Kolkata",
+        "iata": "PNQ",
+        "icao": "VAPO",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T00:35:00+00:00",
+        "estimated": "2026-08-31T00:35:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": null,
+        "baggage": "01",
+        "scheduled": "2026-08-31T03:00:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "2608",
+        "iata": "AI2608",
+        "icao": "AIC2608",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "800C42"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Lohegaon",
+        "timezone": "Asia/Kolkata",
+        "iata": "PNQ",
+        "icao": "VAPO",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T00:15:00+00:00",
+        "estimated": "2026-08-31T00:15:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Madras International (Meenambakkam)",
+        "timezone": "Asia/Kolkata",
+        "iata": "MAA",
+        "icao": "VOMM",
+        "terminal": "4",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T02:10:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "9553",
+        "iata": "AI9553",
+        "icao": "AIC9553",
+        "codeshared": {
+          "airline_name": "air india express",
+          "airline_iata": "ix",
+          "airline_icao": "axb",
+          "flight_number": "2660",
+          "flight_iata": "ix2660",
+          "flight_icao": "axb2660"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "801686"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Lohegaon",
+        "timezone": "Asia/Kolkata",
+        "iata": "PNQ",
+        "icao": "VAPO",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T00:05:00+00:00",
+        "estimated": "2026-08-31T00:05:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Bangalore International Airport",
+        "timezone": "Asia/Kolkata",
+        "iata": "BLR",
+        "icao": "VOBL",
+        "terminal": "2",
+        "gate": "D12",
+        "baggage": "8A",
+        "scheduled": "2026-08-31T01:40:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "9811",
+        "iata": "AI9811",
+        "icao": "AIC9811",
+        "codeshared": {
+          "airline_name": "air india express",
+          "airline_iata": "ix",
+          "airline_icao": "axb",
+          "flight_number": "2681",
+          "flight_iata": "ix2681",
+          "flight_icao": "axb2681"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "801606"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": "4",
+        "delay": null,
+        "scheduled": "2026-08-31T00:30:00+00:00",
+        "estimated": "2026-08-31T00:30:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Suvarnabhumi International",
+        "timezone": "Asia/Bangkok",
+        "iata": "BKK",
+        "icao": "VTBS",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T06:30:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "2336",
+        "iata": "AI2336",
+        "icao": "AIC2336",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "801603"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": "18",
+        "delay": null,
+        "scheduled": "2026-08-31T00:25:00+00:00",
+        "estimated": "2026-08-31T00:25:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Bandaranaike International",
+        "timezone": "Asia/Colombo",
+        "iata": "CMB",
+        "icao": "VCBI",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T04:00:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "277",
+        "iata": "AI277",
+        "icao": "AIC277",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "800579"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": "58",
+        "delay": null,
+        "scheduled": "2026-08-31T00:15:00+00:00",
+        "estimated": "2026-08-31T00:15:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T00:15:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Bangalore International Airport",
+        "timezone": "Asia/Kolkata",
+        "iata": "BLR",
+        "icao": "VOBL",
+        "terminal": "2",
+        "gate": "D13",
+        "baggage": "8A",
+        "scheduled": "2026-08-31T03:10:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "2757",
+        "iata": "AI2757",
+        "icao": "AIC2757",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "801396"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": "22",
+        "delay": null,
+        "scheduled": "2026-08-31T00:05:00+00:00",
+        "estimated": "2026-08-31T00:05:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Netaji Subhas Chandra",
+        "timezone": "Asia/Kolkata",
+        "iata": "CCU",
+        "icao": "VECC",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T02:20:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "173",
+        "iata": "AI173",
+        "icao": "AIC173",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "800582"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Christchurch International",
+        "timezone": "Pacific/Auckland",
+        "iata": "CHC",
+        "icao": "NZCH",
+        "terminal": null,
+        "gate": "I30",
+        "delay": null,
+        "scheduled": "2026-08-31T06:10:00+00:00",
+        "estimated": "2026-08-31T06:10:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T06:10:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Melbourne - Tullamarine Airport",
+        "timezone": "Australia/Melbourne",
+        "iata": "MEL",
+        "icao": "YMML",
+        "terminal": "2",
+        "gate": "16B",
+        "baggage": null,
+        "scheduled": "2026-08-31T08:05:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "6283",
+        "iata": "AI6283",
+        "icao": "AIC6283",
+        "codeshared": {
+          "airline_name": "air new zealand",
+          "airline_iata": "nz",
+          "airline_icao": "anz",
+          "flight_number": "213",
+          "flight_iata": "nz213",
+          "flight_icao": "anz213"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "C827A3"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Kozhikode Airport",
+        "timezone": "Asia/Kolkata",
+        "iata": "CCJ",
+        "icao": "VOCL",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T00:30:00+00:00",
+        "estimated": "2026-08-31T00:30:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Dubai",
+        "timezone": "Asia/Dubai",
+        "iata": "DXB",
+        "icao": "OMDB",
+        "terminal": "2",
+        "gate": null,
+        "baggage": "6",
+        "scheduled": "2026-08-31T02:55:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "9095",
+        "iata": "AI9095",
+        "icao": "AIC9095",
+        "codeshared": {
+          "airline_name": "air india express",
+          "airline_iata": "ix",
+          "airline_icao": "axb",
+          "flight_number": "301",
+          "flight_iata": "ix301",
+          "flight_icao": "axb301"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "801673"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Bangalore International Airport",
+        "timezone": "Asia/Kolkata",
+        "iata": "BLR",
+        "icao": "VOBL",
+        "terminal": "2",
+        "gate": "D10",
+        "delay": null,
+        "scheduled": "2026-08-31T00:15:00+00:00",
+        "estimated": "2026-08-31T00:15:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T00:15:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": null,
+        "baggage": "01",
+        "scheduled": "2026-08-31T03:10:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "2758",
+        "iata": "AI2758",
+        "icao": "AIC2758",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "801439"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Perth International",
+        "timezone": "Australia/Perth",
+        "iata": "PER",
+        "icao": "YPPH",
+        "terminal": "1",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T01:10:00+00:00",
+        "estimated": "2026-08-31T01:10:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Singapore Changi",
+        "timezone": "Asia/Singapore",
+        "iata": "SIN",
+        "icao": "WSSS",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T06:35:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "8235",
+        "iata": "AI8235",
+        "icao": "AIC8235",
+        "codeshared": {
+          "airline_name": "singapore airlines",
+          "airline_iata": "sq",
+          "airline_icao": "sia",
+          "flight_number": "216",
+          "flight_iata": "sq216",
+          "flight_icao": "sia216"
+        }
+      },
+      "aircraft": null,
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Wellington International",
+        "timezone": "Pacific/Auckland",
+        "iata": "WLG",
+        "icao": "NZWN",
+        "terminal": null,
+        "gate": "47",
+        "delay": null,
+        "scheduled": "2026-08-31T06:00:00+00:00",
+        "estimated": "2026-08-31T06:00:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T06:00:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Melbourne - Tullamarine Airport",
+        "timezone": "Australia/Melbourne",
+        "iata": "MEL",
+        "icao": "YMML",
+        "terminal": "2",
+        "gate": "16A",
+        "baggage": null,
+        "scheduled": "2026-08-31T08:10:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "6285",
+        "iata": "AI6285",
+        "icao": "AIC6285",
+        "codeshared": {
+          "airline_name": "air new zealand",
+          "airline_iata": "nz",
+          "airline_icao": "anz",
+          "flight_number": "253",
+          "flight_iata": "nz253",
+          "flight_icao": "anz253"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "C82834"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Darwin",
+        "timezone": "Australia/Darwin",
+        "iata": "DRW",
+        "icao": "YPDN",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-31T01:55:00+00:00",
+        "estimated": "2026-08-31T01:55:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T02:15:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Singapore Changi",
+        "timezone": "Asia/Singapore",
+        "iata": "SIN",
+        "icao": "WSSS",
+        "terminal": "3",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T05:10:00+00:00",
+        "delay": 20,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "8231",
+        "iata": "AI8231",
+        "icao": "AIC8231",
+        "codeshared": {
+          "airline_name": "singapore airlines",
+          "airline_iata": "sq",
+          "airline_icao": "sia",
+          "flight_number": "252",
+          "flight_iata": "sq252",
+          "flight_icao": "sia252"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "76B453"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-31",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Melbourne - Tullamarine Airport",
+        "timezone": "Australia/Melbourne",
+        "iata": "MEL",
+        "icao": "YMML",
+        "terminal": "2",
+        "gate": "20",
+        "delay": null,
+        "scheduled": "2026-08-31T01:00:00+00:00",
+        "estimated": "2026-08-31T01:00:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T01:00:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": null,
+        "baggage": "12",
+        "scheduled": "2026-08-31T09:15:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "309",
+        "iata": "AI309",
+        "icao": "AIC309",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "8015A6"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Frankfurt International Airport",
+        "timezone": "Europe/Berlin",
+        "iata": "FRA",
+        "icao": "EDDF",
+        "terminal": "1",
+        "gate": "A21",
+        "delay": null,
+        "scheduled": "2026-08-30T22:15:00+00:00",
+        "estimated": "2026-08-30T22:15:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T22:32:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "N\u00fcrnberg",
+        "timezone": "Europe/Berlin",
+        "iata": "NUE",
+        "icao": "EDDN",
+        "terminal": null,
+        "gate": null,
+        "baggage": "01",
+        "scheduled": "2026-08-30T23:00:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "8842",
+        "iata": "AI8842",
+        "icao": "AIC8842",
+        "codeshared": {
+          "airline_name": "lufthansa",
+          "airline_iata": "lh",
+          "airline_icao": "dlh",
+          "flight_number": "148",
+          "flight_iata": "lh148",
+          "flight_icao": "dlh148"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "3C6488"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "King Abdulaziz International",
+        "timezone": "Asia/Riyadh",
+        "iata": "JED",
+        "icao": "OEJN",
+        "terminal": "1",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T23:55:00+00:00",
+        "estimated": "2026-08-30T23:55:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "King Khaled International",
+        "timezone": "Asia/Riyadh",
+        "iata": "RUH",
+        "icao": "OERK",
+        "terminal": "4",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T01:40:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "6453",
+        "iata": "AI6453",
+        "icao": "AIC6453",
+        "codeshared": {
+          "airline_name": "saudia",
+          "airline_iata": "sv",
+          "airline_icao": "sva",
+          "flight_number": "1054",
+          "flight_iata": "sv1054",
+          "flight_icao": "sva1054"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "7100B5"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Frankfurt International Airport",
+        "timezone": "Europe/Berlin",
+        "iata": "FRA",
+        "icao": "EDDF",
+        "terminal": "1",
+        "gate": "A18",
+        "delay": null,
+        "scheduled": "2026-08-30T21:15:00+00:00",
+        "estimated": "2026-08-30T21:15:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T21:32:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Hamburg Airport",
+        "timezone": "Europe/Berlin",
+        "iata": "HAM",
+        "icao": "EDDH",
+        "terminal": "2",
+        "gate": null,
+        "baggage": "7",
+        "scheduled": "2026-08-30T22:20:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "8824",
+        "iata": "AI8824",
+        "icao": "AIC8824",
+        "codeshared": {
+          "airline_name": "lufthansa",
+          "airline_iata": "lh",
+          "airline_icao": "dlh",
+          "flight_number": "34",
+          "flight_iata": "lh34",
+          "flight_icao": "dlh34"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "3C664C"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Frankfurt International Airport",
+        "timezone": "Europe/Berlin",
+        "iata": "FRA",
+        "icao": "EDDF",
+        "terminal": "1",
+        "gate": "A50",
+        "delay": null,
+        "scheduled": "2026-08-30T22:10:00+00:00",
+        "estimated": "2026-08-30T22:10:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T22:27:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Hanover Airport",
+        "timezone": "Europe/Berlin",
+        "iata": "HAJ",
+        "icao": "EDDV",
+        "terminal": null,
+        "gate": "A5",
+        "baggage": null,
+        "scheduled": "2026-08-30T23:00:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "8656",
+        "iata": "AI8656",
+        "icao": "AIC8656",
+        "codeshared": {
+          "airline_name": "lufthansa",
+          "airline_iata": "lh",
+          "airline_icao": "dlh",
+          "flight_number": "48",
+          "flight_iata": "lh48",
+          "flight_icao": "dlh48"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "3C6757"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Frankfurt International Airport",
+        "timezone": "Europe/Berlin",
+        "iata": "FRA",
+        "icao": "EDDF",
+        "terminal": "1",
+        "gate": "A1",
+        "delay": null,
+        "scheduled": "2026-08-30T22:00:00+00:00",
+        "estimated": "2026-08-30T22:00:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T22:12:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Dresden Airport",
+        "timezone": "Europe/Berlin",
+        "iata": "DRS",
+        "icao": "EDDC",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T23:00:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "8858",
+        "iata": "AI8858",
+        "icao": "AIC8858",
+        "codeshared": {
+          "airline_name": "lufthansa",
+          "airline_iata": "lh",
+          "airline_icao": "dlh",
+          "flight_number": "68",
+          "flight_iata": "lh68",
+          "flight_icao": "dlh68"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "3C6745"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Cairo International Airport",
+        "timezone": "Africa/Cairo",
+        "iata": "CAI",
+        "icao": "HECA",
+        "terminal": "3",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T23:20:00+00:00",
+        "estimated": "2026-08-30T23:20:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Aswan",
+        "timezone": "Africa/Cairo",
+        "iata": "ASW",
+        "icao": "HESN",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T00:40:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7673",
+        "iata": "AI7673",
+        "icao": "AIC7673",
+        "codeshared": {
+          "airline_name": "egyptair",
+          "airline_iata": "ms",
+          "airline_icao": "msr",
+          "flight_number": "80",
+          "flight_iata": "ms80",
+          "flight_icao": "msr80"
+        }
+      },
+      "aircraft": null,
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Dubai",
+        "timezone": "Asia/Dubai",
+        "iata": "DXB",
+        "icao": "OMDB",
+        "terminal": "2",
+        "gate": "F3",
+        "delay": null,
+        "scheduled": "2026-08-30T21:45:00+00:00",
+        "estimated": "2026-08-30T21:45:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T22:30:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Thiruvananthapuram International",
+        "timezone": "Asia/Kolkata",
+        "iata": "TRV",
+        "icao": "VOTV",
+        "terminal": "2",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T03:45:00+00:00",
+        "delay": 45,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "9208",
+        "iata": "AI9208",
+        "icao": "AIC9208",
+        "codeshared": {
+          "airline_name": "air india express",
+          "airline_iata": "ix",
+          "airline_icao": "axb",
+          "flight_number": "530",
+          "flight_iata": "ix530",
+          "flight_icao": "axb530"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "801848"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Bangalore International Airport",
+        "timezone": "Asia/Kolkata",
+        "iata": "BLR",
+        "icao": "VOBL",
+        "terminal": "2",
+        "gate": "C7",
+        "delay": null,
+        "scheduled": "2026-08-30T20:35:00+00:00",
+        "estimated": "2026-08-30T20:35:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T20:35:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Doha International",
+        "timezone": "Asia/Qatar",
+        "iata": "DOH",
+        "icao": "OTHH",
+        "terminal": null,
+        "gate": null,
+        "baggage": "4",
+        "scheduled": "2026-08-30T22:25:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "9243",
+        "iata": "AI9243",
+        "icao": "AIC9243",
+        "codeshared": {
+          "airline_name": "air india express",
+          "airline_iata": "ix",
+          "airline_icao": "axb",
+          "flight_number": "931",
+          "flight_iata": "ix931",
+          "flight_icao": "axb931"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "8003F2"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Sharjah",
+        "timezone": "Asia/Dubai",
+        "iata": "SHJ",
+        "icao": "OMSJ",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T23:45:00+00:00",
+        "estimated": "2026-08-30T23:45:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T23:45:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Kozhikode Airport",
+        "timezone": "Asia/Kolkata",
+        "iata": "CCJ",
+        "icao": "VOCL",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T05:25:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "9174",
+        "iata": "AI9174",
+        "icao": "AIC9174",
+        "codeshared": {
+          "airline_name": "air india express",
+          "airline_iata": "ix",
+          "airline_icao": "axb",
+          "flight_number": "352",
+          "flight_iata": "ix352",
+          "flight_icao": "axb352"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "801683"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Charles De Gaulle",
+        "timezone": "Europe/Paris",
+        "iata": "CDG",
+        "icao": "LFPG",
+        "terminal": "2B",
+        "gate": "D50",
+        "delay": null,
+        "scheduled": "2026-08-30T19:10:00+00:00",
+        "estimated": "2026-08-30T19:10:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T19:25:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Riga International",
+        "timezone": "Europe/Riga",
+        "iata": "RIX",
+        "icao": "EVRA",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T22:50:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7026",
+        "iata": "AI7026",
+        "icao": "AIC7026",
+        "codeshared": {
+          "airline_name": "airbaltic",
+          "airline_iata": "bt",
+          "airline_icao": "bti",
+          "flight_number": "694",
+          "flight_iata": "bt694",
+          "flight_icao": "bti694"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "502D9F"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Frankfurt International Airport",
+        "timezone": "Europe/Berlin",
+        "iata": "FRA",
+        "icao": "EDDF",
+        "terminal": "1",
+        "gate": "A22",
+        "delay": null,
+        "scheduled": "2026-08-30T19:20:00+00:00",
+        "estimated": "2026-08-30T19:20:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T19:37:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Riga International",
+        "timezone": "Europe/Riga",
+        "iata": "RIX",
+        "icao": "EVRA",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T22:30:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7030",
+        "iata": "AI7030",
+        "icao": "AIC7030",
+        "codeshared": {
+          "airline_name": "airbaltic",
+          "airline_iata": "bt",
+          "airline_icao": "bti",
+          "flight_number": "246",
+          "flight_iata": "bt246",
+          "flight_icao": "bti246"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "502D0F"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Heathrow",
+        "timezone": "Europe/London",
+        "iata": "LHR",
+        "icao": "EGLL",
+        "terminal": "2",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T21:05:00+00:00",
+        "estimated": "2026-08-30T21:05:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T21:05:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Chhatrapati Shivaji International (Sahar International)",
+        "timezone": "Asia/Kolkata",
+        "iata": "BOM",
+        "icao": "VABB",
+        "terminal": "2",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T11:35:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "130",
+        "iata": "AI130",
+        "icao": "AIC130",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "80158C"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Heathrow",
+        "timezone": "Europe/London",
+        "iata": "LHR",
+        "icao": "EGLL",
+        "terminal": "2",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T20:35:00+00:00",
+        "estimated": "2026-08-30T20:35:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T20:35:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T11:45:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "2018",
+        "iata": "AI2018",
+        "icao": "AIC2018",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "801406"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Bole International",
+        "timezone": "Africa/Addis_Ababa",
+        "iata": "ADD",
+        "icao": "HAAB",
+        "terminal": "2",
+        "gate": "C2",
+        "delay": null,
+        "scheduled": "2026-08-30T23:00:00+00:00",
+        "estimated": "2026-08-30T23:00:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Kilimanjaro",
+        "timezone": "Africa/Dar_es_Salaam",
+        "iata": "JRO",
+        "icao": "HTKJ",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T01:20:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7975",
+        "iata": "AI7975",
+        "icao": "AIC7975",
+        "codeshared": {
+          "airline_name": "ethiopian airlines",
+          "airline_iata": "et",
+          "airline_icao": "eth",
+          "flight_number": "855",
+          "flight_iata": "et855",
+          "flight_icao": "eth855"
+        }
+      },
+      "aircraft": null,
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Bole International",
+        "timezone": "Africa/Addis_Ababa",
+        "iata": "ADD",
+        "icao": "HAAB",
+        "terminal": "2",
+        "gate": "C4",
+        "delay": null,
+        "scheduled": "2026-08-30T22:45:00+00:00",
+        "estimated": "2026-08-30T22:45:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Entebbe",
+        "timezone": "Africa/Kampala",
+        "iata": "EBB",
+        "icao": "HUEN",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T00:55:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7583",
+        "iata": "AI7583",
+        "icao": "AIC7583",
+        "codeshared": {
+          "airline_name": "ethiopian airlines",
+          "airline_iata": "et",
+          "airline_icao": "eth",
+          "flight_number": "338",
+          "flight_iata": "et338",
+          "flight_icao": "eth338"
+        }
+      },
+      "aircraft": null,
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Schiphol",
+        "timezone": "Europe/Amsterdam",
+        "iata": "AMS",
+        "icao": "EHAM",
+        "terminal": "1",
+        "gate": "B31",
+        "delay": null,
+        "scheduled": "2026-08-30T20:05:00+00:00",
+        "estimated": "2026-08-30T20:05:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T20:05:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Zurich",
+        "timezone": "Europe/Zurich",
+        "iata": "ZRH",
+        "icao": "LSZH",
+        "terminal": "1",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T21:30:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7750",
+        "iata": "AI7750",
+        "icao": "AIC7750",
+        "codeshared": {
+          "airline_name": "helvetic airways",
+          "airline_iata": "lx",
+          "airline_icao": "swr",
+          "flight_number": "735",
+          "flight_iata": "lx735",
+          "flight_icao": "swr735"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "4B19F5"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Zurich",
+        "timezone": "Europe/Zurich",
+        "iata": "ZRH",
+        "icao": "LSZH",
+        "terminal": null,
+        "gate": "AB",
+        "delay": null,
+        "scheduled": "2026-08-30T22:00:00+00:00",
+        "estimated": "2026-08-30T22:00:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T22:00:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Prague Vaclav Havel Airport",
+        "timezone": "Europe/Prague",
+        "iata": "PRG",
+        "icao": "LKPR",
+        "terminal": "2",
+        "gate": null,
+        "baggage": "24",
+        "scheduled": "2026-08-30T23:15:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7747",
+        "iata": "AI7747",
+        "icao": "AIC7747",
+        "codeshared": {
+          "airline_name": "swiss",
+          "airline_iata": "lx",
+          "airline_icao": "swr",
+          "flight_number": "1482",
+          "flight_iata": "lx1482",
+          "flight_icao": "swr1482"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "4B17DE"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Zurich",
+        "timezone": "Europe/Zurich",
+        "iata": "ZRH",
+        "icao": "LSZH",
+        "terminal": null,
+        "gate": "AB",
+        "delay": null,
+        "scheduled": "2026-08-30T21:45:00+00:00",
+        "estimated": "2026-08-30T21:45:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T21:45:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Gardermoen",
+        "timezone": "Europe/Oslo",
+        "iata": "OSL",
+        "icao": "ENGM",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T00:10:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7729",
+        "iata": "AI7729",
+        "icao": "AIC7729",
+        "codeshared": {
+          "airline_name": "helvetic airways",
+          "airline_iata": "lx",
+          "airline_icao": "swr",
+          "flight_number": "1218",
+          "flight_iata": "lx1218",
+          "flight_icao": "swr1218"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "4B028D"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Zurich",
+        "timezone": "Europe/Zurich",
+        "iata": "ZRH",
+        "icao": "LSZH",
+        "terminal": null,
+        "gate": "AB",
+        "delay": null,
+        "scheduled": "2026-08-30T21:40:00+00:00",
+        "estimated": "2026-08-30T21:40:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T21:40:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Kastrup",
+        "timezone": "Europe/Copenhagen",
+        "iata": "CPH",
+        "icao": "EKCH",
+        "terminal": "2",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T23:30:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7727",
+        "iata": "AI7727",
+        "icao": "AIC7727",
+        "codeshared": {
+          "airline_name": "swiss",
+          "airline_iata": "lx",
+          "airline_icao": "swr",
+          "flight_number": "1278",
+          "flight_iata": "lx1278",
+          "flight_icao": "swr1278"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "4B1817"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Zurich",
+        "timezone": "Europe/Zurich",
+        "iata": "ZRH",
+        "icao": "LSZH",
+        "terminal": null,
+        "gate": "AB",
+        "delay": null,
+        "scheduled": "2026-08-30T21:30:00+00:00",
+        "estimated": "2026-08-30T21:30:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T21:30:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Arlanda",
+        "timezone": "Europe/Stockholm",
+        "iata": "ARN",
+        "icao": "ESSA",
+        "terminal": "5",
+        "gate": null,
+        "baggage": "3",
+        "scheduled": "2026-08-30T23:55:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7725",
+        "iata": "AI7725",
+        "icao": "AIC7725",
+        "codeshared": {
+          "airline_name": "swiss",
+          "airline_iata": "lx",
+          "airline_icao": "swr",
+          "flight_number": "1254",
+          "flight_iata": "lx1254",
+          "flight_icao": "swr1254"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "4B181A"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Zurich",
+        "timezone": "Europe/Zurich",
+        "iata": "ZRH",
+        "icao": "LSZH",
+        "terminal": null,
+        "gate": "AB",
+        "delay": null,
+        "scheduled": "2026-08-30T21:20:00+00:00",
+        "estimated": "2026-08-30T21:20:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T21:20:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Berlin Brandenburg Airport",
+        "timezone": "Europe/Berlin",
+        "iata": "BER",
+        "icao": "EDDB",
+        "terminal": "1",
+        "gate": "B17",
+        "baggage": "B4",
+        "scheduled": "2026-08-30T22:50:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7707",
+        "iata": "AI7707",
+        "icao": "AIC7707",
+        "codeshared": {
+          "airline_name": "swiss",
+          "airline_iata": "lx",
+          "airline_icao": "swr",
+          "flight_number": "962",
+          "flight_iata": "lx962",
+          "flight_icao": "swr962"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "4B1815"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Zurich",
+        "timezone": "Europe/Zurich",
+        "iata": "ZRH",
+        "icao": "LSZH",
+        "terminal": null,
+        "gate": "AB",
+        "delay": null,
+        "scheduled": "2026-08-30T21:15:00+00:00",
+        "estimated": "2026-08-30T21:15:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T21:15:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Franz Josef Strauss",
+        "timezone": "Europe/Berlin",
+        "iata": "MUC",
+        "icao": "EDDM",
+        "terminal": "2",
+        "gate": "K4",
+        "baggage": null,
+        "scheduled": "2026-08-30T22:10:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7705",
+        "iata": "AI7705",
+        "icao": "AIC7705",
+        "codeshared": {
+          "airline_name": "helvetic airways",
+          "airline_iata": "lx",
+          "airline_icao": "swr",
+          "flight_number": "1108",
+          "flight_iata": "lx1108",
+          "flight_icao": "swr1108"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "4B028F"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Zurich",
+        "timezone": "Europe/Zurich",
+        "iata": "ZRH",
+        "icao": "LSZH",
+        "terminal": null,
+        "gate": "AB",
+        "delay": null,
+        "scheduled": "2026-08-30T20:40:00+00:00",
+        "estimated": "2026-08-30T20:40:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T20:55:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Schiphol",
+        "timezone": "Europe/Amsterdam",
+        "iata": "AMS",
+        "icao": "EHAM",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T22:15:00+00:00",
+        "delay": 15,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7723",
+        "iata": "AI7723",
+        "icao": "AIC7723",
+        "codeshared": {
+          "airline_name": "swiss",
+          "airline_iata": "lx",
+          "airline_icao": "swr",
+          "flight_number": "736",
+          "flight_iata": "lx736",
+          "flight_icao": "swr736"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "4B180B"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Frankfurt International Airport",
+        "timezone": "Europe/Berlin",
+        "iata": "FRA",
+        "icao": "EDDF",
+        "terminal": "1",
+        "gate": "A2",
+        "delay": null,
+        "scheduled": "2026-08-30T20:45:00+00:00",
+        "estimated": "2026-08-30T20:45:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T20:57:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Franjo Tudman International Airport",
+        "timezone": "Europe/Zagreb",
+        "iata": "ZAG",
+        "icao": "LDZA",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T22:05:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7503",
+        "iata": "AI7503",
+        "icao": "AIC7503",
+        "codeshared": {
+          "airline_name": "croatia airlines",
+          "airline_iata": "ou",
+          "airline_icao": "ctn",
+          "flight_number": "415",
+          "flight_iata": "ou415",
+          "flight_icao": "ctn415"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "501C49"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Zurich",
+        "timezone": "Europe/Zurich",
+        "iata": "ZRH",
+        "icao": "LSZH",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T20:05:00+00:00",
+        "estimated": "2026-08-30T20:05:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T20:20:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Franjo Tudman International Airport",
+        "timezone": "Europe/Zagreb",
+        "iata": "ZAG",
+        "icao": "LDZA",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T21:25:00+00:00",
+        "delay": 15,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7537",
+        "iata": "AI7537",
+        "icao": "AIC7537",
+        "codeshared": {
+          "airline_name": "croatia airlines",
+          "airline_iata": "ou",
+          "airline_icao": "ctn",
+          "flight_number": "465",
+          "flight_iata": "ou465",
+          "flight_icao": "ctn465"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "501D18"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Zurich",
+        "timezone": "Europe/Zurich",
+        "iata": "ZRH",
+        "icao": "LSZH",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T19:55:00+00:00",
+        "estimated": "2026-08-30T19:55:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T19:55:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Frederic Chopin",
+        "timezone": "Europe/Warsaw",
+        "iata": "WAW",
+        "icao": "EPWA",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T21:50:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7920",
+        "iata": "AI7920",
+        "icao": "AIC7920",
+        "codeshared": {
+          "airline_name": "lot",
+          "airline_iata": "lo",
+          "airline_icao": "lot",
+          "flight_number": "410",
+          "flight_iata": "lo410",
+          "flight_icao": "lot410"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "48E95E"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Heathrow",
+        "timezone": "Europe/London",
+        "iata": "LHR",
+        "icao": "EGLL",
+        "terminal": "2",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T18:10:00+00:00",
+        "estimated": "2026-08-30T18:10:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T18:10:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Frederic Chopin",
+        "timezone": "Europe/Warsaw",
+        "iata": "WAW",
+        "icao": "EPWA",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T21:45:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7760",
+        "iata": "AI7760",
+        "icao": "AIC7760",
+        "codeshared": {
+          "airline_name": "lot",
+          "airline_iata": "lo",
+          "airline_icao": "lot",
+          "flight_number": "280",
+          "flight_iata": "lo280",
+          "flight_icao": "lot280"
+        }
+      },
+      "aircraft": null,
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Schiphol",
+        "timezone": "Europe/Amsterdam",
+        "iata": "AMS",
+        "icao": "EHAM",
+        "terminal": "1",
+        "gate": "B27",
+        "delay": null,
+        "scheduled": "2026-08-30T19:45:00+00:00",
+        "estimated": "2026-08-30T19:45:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T19:45:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Frederic Chopin",
+        "timezone": "Europe/Warsaw",
+        "iata": "WAW",
+        "icao": "EPWA",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T21:45:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7875",
+        "iata": "AI7875",
+        "icao": "AIC7875",
+        "codeshared": {
+          "airline_name": "lot",
+          "airline_iata": "lo",
+          "airline_icao": "lot",
+          "flight_number": "268",
+          "flight_iata": "lo268",
+          "flight_icao": "lot268"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "48ADAD"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Frankfurt International Airport",
+        "timezone": "Europe/Berlin",
+        "iata": "FRA",
+        "icao": "EDDF",
+        "terminal": "1",
+        "gate": "A34",
+        "delay": null,
+        "scheduled": "2026-08-30T19:50:00+00:00",
+        "estimated": "2026-08-30T19:50:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T20:07:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Frederic Chopin",
+        "timezone": "Europe/Warsaw",
+        "iata": "WAW",
+        "icao": "EPWA",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T21:35:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7764",
+        "iata": "AI7764",
+        "icao": "AIC7764",
+        "codeshared": {
+          "airline_name": "lot",
+          "airline_iata": "lo",
+          "airline_icao": "lot",
+          "flight_number": "380",
+          "flight_iata": "lo380",
+          "flight_icao": "lot380"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "48AE81"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Schiphol",
+        "timezone": "Europe/Amsterdam",
+        "iata": "AMS",
+        "icao": "EHAM",
+        "terminal": "1",
+        "gate": "B35",
+        "delay": null,
+        "scheduled": "2026-08-30T20:05:00+00:00",
+        "estimated": "2026-08-30T20:05:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T20:19:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Vienna International",
+        "timezone": "Europe/Vienna",
+        "iata": "VIE",
+        "icao": "LOWW",
+        "terminal": "3",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T21:55:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "8442",
+        "iata": "AI8442",
+        "icao": "AIC8442",
+        "codeshared": {
+          "airline_name": "airbaltic",
+          "airline_iata": "os",
+          "airline_icao": "aua",
+          "flight_number": "318",
+          "flight_iata": "os318",
+          "flight_icao": "aua318"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "502CE8"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Milano Malpensa",
+        "timezone": "Europe/Rome",
+        "iata": "MXP",
+        "icao": "LIMC",
+        "terminal": "1",
+        "gate": "19",
+        "delay": null,
+        "scheduled": "2026-08-30T21:15:00+00:00",
+        "estimated": "2026-08-30T21:15:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T21:15:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T10:25:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "138",
+        "iata": "AI138",
+        "icao": "AIC138",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "800732"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Seeb",
+        "timezone": "Asia/Muscat",
+        "iata": "MCT",
+        "icao": "OOMS",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T23:25:00+00:00",
+        "estimated": "2026-08-30T23:25:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Thiruvananthapuram International",
+        "timezone": "Asia/Kolkata",
+        "iata": "TRV",
+        "icao": "VOTV",
+        "terminal": "2",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T04:55:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "9212",
+        "iata": "AI9212",
+        "icao": "AIC9212",
+        "codeshared": {
+          "airline_name": "air india express",
+          "airline_iata": "ix",
+          "airline_icao": "axb",
+          "flight_number": "550",
+          "flight_iata": "ix550",
+          "flight_icao": "axb550"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "800B9A"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Seeb",
+        "timezone": "Asia/Muscat",
+        "iata": "MCT",
+        "icao": "OOMS",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T23:15:00+00:00",
+        "estimated": "2026-08-30T23:15:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Civil",
+        "timezone": "Asia/Kolkata",
+        "iata": "TRZ",
+        "icao": "VOTR",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T04:50:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "9222",
+        "iata": "AI9222",
+        "icao": "AIC9222",
+        "codeshared": {
+          "airline_name": "air india express",
+          "airline_iata": "ix",
+          "airline_icao": "axb",
+          "flight_number": "620",
+          "flight_iata": "ix620",
+          "flight_icao": "axb620"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "8003B1"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Zurich",
+        "timezone": "Europe/Zurich",
+        "iata": "ZRH",
+        "icao": "LSZH",
+        "terminal": null,
+        "gate": "AB",
+        "delay": null,
+        "scheduled": "2026-08-30T17:35:00+00:00",
+        "estimated": "2026-08-30T17:35:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T17:35:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Schiphol",
+        "timezone": "Europe/Amsterdam",
+        "iata": "AMS",
+        "icao": "EHAM",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T19:15:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7749",
+        "iata": "AI7749",
+        "icao": "AIC7749",
+        "codeshared": {
+          "airline_name": "helvetic airways",
+          "airline_iata": "lx",
+          "airline_icao": "swr",
+          "flight_number": "734",
+          "flight_iata": "lx734",
+          "flight_icao": "swr734"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "4B19F5"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Zurich",
+        "timezone": "Europe/Zurich",
+        "iata": "ZRH",
+        "icao": "LSZH",
+        "terminal": null,
+        "gate": "AB",
+        "delay": null,
+        "scheduled": "2026-08-30T17:20:00+00:00",
+        "estimated": "2026-08-30T17:20:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T17:40:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Kastrup",
+        "timezone": "Europe/Copenhagen",
+        "iata": "CPH",
+        "icao": "EKCH",
+        "terminal": "2",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T19:10:00+00:00",
+        "delay": 20,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7751",
+        "iata": "AI7751",
+        "icao": "AIC7751",
+        "codeshared": {
+          "airline_name": "helvetic airways",
+          "airline_iata": "lx",
+          "airline_icao": "swr",
+          "flight_number": "1276",
+          "flight_iata": "lx1276",
+          "flight_icao": "swr1276"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "4B19FC"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Gatwick",
+        "timezone": "Europe/London",
+        "iata": "LGW",
+        "icao": "EGKK",
+        "terminal": "S",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T20:35:00+00:00",
+        "estimated": "2026-08-30T20:35:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Raja Sansi International Airport",
+        "timezone": "Asia/Kolkata",
+        "iata": "ATQ",
+        "icao": "VIAR",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T11:40:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "170",
+        "iata": "AI170",
+        "icao": "AIC170",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "800463"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "King Abdulaziz International",
+        "timezone": "Asia/Riyadh",
+        "iata": "JED",
+        "icao": "OEJN",
+        "terminal": "N",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T22:40:00+00:00",
+        "estimated": "2026-08-30T22:40:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T22:40:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Chhatrapati Shivaji International (Sahar International)",
+        "timezone": "Asia/Kolkata",
+        "iata": "BOM",
+        "icao": "VABB",
+        "terminal": "2",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T06:30:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "2246",
+        "iata": "AI2246",
+        "icao": "AIC2246",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "80141D"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Zurich",
+        "timezone": "Europe/Zurich",
+        "iata": "ZRH",
+        "icao": "LSZH",
+        "terminal": null,
+        "gate": "AB",
+        "delay": null,
+        "scheduled": "2026-08-30T21:05:00+00:00",
+        "estimated": "2026-08-30T21:05:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T21:20:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Geneve-cointrin",
+        "timezone": "Europe/Zurich",
+        "iata": "GVA",
+        "icao": "LSGG",
+        "terminal": "1",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T21:55:00+00:00",
+        "delay": 15,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7701",
+        "iata": "AI7701",
+        "icao": "AIC7701",
+        "codeshared": {
+          "airline_name": "swiss",
+          "airline_iata": "lx",
+          "airline_icao": "swr",
+          "flight_number": "2816",
+          "flight_iata": "lx2816",
+          "flight_icao": "swr2816"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "4B1802"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Frankfurt International Airport",
+        "timezone": "Europe/Berlin",
+        "iata": "FRA",
+        "icao": "EDDF",
+        "terminal": "1",
+        "gate": "656",
+        "delay": null,
+        "scheduled": "2026-08-30T21:15:00+00:00",
+        "estimated": "2026-08-30T21:15:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T21:15:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T10:35:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "2030",
+        "iata": "AI2030",
+        "icao": "AIC2030",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "8013C2"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Gassim Regional Airport",
+        "timezone": "Asia/Riyadh",
+        "iata": "ELQ",
+        "icao": "OEGS",
+        "terminal": "T2",
+        "gate": "T2-1",
+        "delay": null,
+        "scheduled": "2026-08-30T22:20:00+00:00",
+        "estimated": "2026-08-30T22:20:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "King Khaled International",
+        "timezone": "Asia/Riyadh",
+        "iata": "RUH",
+        "icao": "OERK",
+        "terminal": "T4",
+        "gate": "408",
+        "baggage": null,
+        "scheduled": "2026-08-30T23:25:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "6442",
+        "iata": "AI6442",
+        "icao": "AIC6442",
+        "codeshared": {
+          "airline_name": "saudia",
+          "airline_iata": "sv",
+          "airline_icao": "sva",
+          "flight_number": "1268",
+          "flight_iata": "sv1268",
+          "flight_icao": "sva1268"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "7103DC"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Doha International",
+        "timezone": "Asia/Qatar",
+        "iata": "DOH",
+        "icao": "OTHH",
+        "terminal": null,
+        "gate": "9",
+        "delay": null,
+        "scheduled": "2026-08-30T22:20:00+00:00",
+        "estimated": "2026-08-30T22:20:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T22:20:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": null,
+        "baggage": "09",
+        "scheduled": "2026-08-31T04:45:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "2284",
+        "iata": "AI2284",
+        "icao": "AIC2284",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "800CFF"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Doha International",
+        "timezone": "Asia/Qatar",
+        "iata": "DOH",
+        "icao": "OTHH",
+        "terminal": null,
+        "gate": "9",
+        "delay": null,
+        "scheduled": "2026-08-30T22:15:00+00:00",
+        "estimated": "2026-08-30T22:15:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T22:15:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Chhatrapati Shivaji International (Sahar International)",
+        "timezone": "Asia/Kolkata",
+        "iata": "BOM",
+        "icao": "VABB",
+        "terminal": "2",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T04:30:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "2290",
+        "iata": "AI2290",
+        "icao": "AIC2290",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "800C85"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Kastrup",
+        "timezone": "Europe/Copenhagen",
+        "iata": "CPH",
+        "icao": "EKCH",
+        "terminal": "2",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T21:10:00+00:00",
+        "estimated": "2026-08-30T21:10:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T10:40:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "158",
+        "iata": "AI158",
+        "icao": "AIC158",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "800734"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Vienna International",
+        "timezone": "Europe/Vienna",
+        "iata": "VIE",
+        "icao": "LOWW",
+        "terminal": "3",
+        "gate": "F",
+        "delay": null,
+        "scheduled": "2026-08-30T17:30:00+00:00",
+        "estimated": "2026-08-30T17:30:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T17:52:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Kastrup",
+        "timezone": "Europe/Copenhagen",
+        "iata": "CPH",
+        "icao": "EKCH",
+        "terminal": "2",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T19:10:00+00:00",
+        "delay": 22,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "8443",
+        "iata": "AI8443",
+        "icao": "AIC8443",
+        "codeshared": {
+          "airline_name": "austrian airlines",
+          "airline_iata": "os",
+          "airline_icao": "aua",
+          "flight_number": "997",
+          "flight_iata": "os997",
+          "flight_icao": "aua997"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "440C8C"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Vienna International",
+        "timezone": "Europe/Vienna",
+        "iata": "VIE",
+        "icao": "LOWW",
+        "terminal": "3",
+        "gate": "F15",
+        "delay": null,
+        "scheduled": "2026-08-30T17:20:00+00:00",
+        "estimated": "2026-08-30T17:20:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T17:29:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Schiphol",
+        "timezone": "Europe/Amsterdam",
+        "iata": "AMS",
+        "icao": "EHAM",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T19:15:00+00:00",
+        "delay": 9,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "8441",
+        "iata": "AI8441",
+        "icao": "AIC8441",
+        "codeshared": {
+          "airline_name": "airbaltic",
+          "airline_iata": "os",
+          "airline_icao": "aua",
+          "flight_number": "317",
+          "flight_iata": "os317",
+          "flight_icao": "aua317"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "502CE8"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Cairo International Airport",
+        "timezone": "Africa/Cairo",
+        "iata": "CAI",
+        "icao": "HECA",
+        "terminal": "3",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T21:55:00+00:00",
+        "estimated": "2026-08-30T21:55:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Hurghada",
+        "timezone": "Africa/Cairo",
+        "iata": "HRG",
+        "icao": "HEGN",
+        "terminal": "2",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T22:55:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7665",
+        "iata": "AI7665",
+        "icao": "AIC7665",
+        "codeshared": {
+          "airline_name": "egyptair",
+          "airline_iata": "ms",
+          "airline_icao": "msr",
+          "flight_number": "48",
+          "flight_iata": "ms48",
+          "flight_icao": "msr48"
+        }
+      },
+      "aircraft": null,
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Frankfurt International Airport",
+        "timezone": "Europe/Berlin",
+        "iata": "FRA",
+        "icao": "EDDF",
+        "terminal": "1",
+        "gate": "A26",
+        "delay": null,
+        "scheduled": "2026-08-30T19:45:00+00:00",
+        "estimated": "2026-08-30T19:45:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T20:02:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Berlin Brandenburg Airport",
+        "timezone": "Europe/Berlin",
+        "iata": "BER",
+        "icao": "EDDB",
+        "terminal": "1",
+        "gate": "B20",
+        "baggage": "B4",
+        "scheduled": "2026-08-30T20:55:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "8867",
+        "iata": "AI8867",
+        "icao": "AIC8867",
+        "codeshared": {
+          "airline_name": "lufthansa",
+          "airline_iata": "lh",
+          "airline_icao": "dlh",
+          "flight_number": "202",
+          "flight_iata": "lh202",
+          "flight_icao": "dlh202"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "3C6657"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Zurich",
+        "timezone": "Europe/Zurich",
+        "iata": "ZRH",
+        "icao": "LSZH",
+        "terminal": null,
+        "gate": "2",
+        "delay": null,
+        "scheduled": "2026-08-30T20:45:00+00:00",
+        "estimated": "2026-08-30T20:45:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T20:45:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "3",
+        "gate": null,
+        "baggage": "10",
+        "scheduled": "2026-08-31T09:50:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "152",
+        "iata": "AI152",
+        "icao": "AIC152",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "800735"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Vancouver International",
+        "timezone": "America/Vancouver",
+        "iata": "YVR",
+        "icao": "CYVR",
+        "terminal": "M",
+        "gate": "C44",
+        "delay": null,
+        "scheduled": "2026-08-30T11:30:00+00:00",
+        "estimated": "2026-08-30T11:30:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T11:40:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Pierre Elliott Trudeau International",
+        "timezone": "America/Montreal",
+        "iata": "YUL",
+        "icao": "CYUL",
+        "terminal": null,
+        "gate": "11",
+        "baggage": null,
+        "scheduled": "2026-08-30T19:22:00+00:00",
+        "delay": 10,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "6306",
+        "iata": "AI6306",
+        "icao": "AIC6306",
+        "codeshared": {
+          "airline_name": "air canada",
+          "airline_iata": "ac",
+          "airline_icao": "aca",
+          "flight_number": "306",
+          "flight_iata": "ac306",
+          "flight_icao": "aca306"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "C06590"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Charles De Gaulle",
+        "timezone": "Europe/Paris",
+        "iata": "CDG",
+        "icao": "LFPG",
+        "terminal": "2D",
+        "gate": "D56",
+        "delay": null,
+        "scheduled": "2026-08-30T18:30:00+00:00",
+        "estimated": "2026-08-30T18:30:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T18:43:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Franjo Tudman International Airport",
+        "timezone": "Europe/Zagreb",
+        "iata": "ZAG",
+        "icao": "LDZA",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T20:25:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7515",
+        "iata": "AI7515",
+        "icao": "AIC7515",
+        "codeshared": {
+          "airline_name": "croatia airlines",
+          "airline_iata": "ou",
+          "airline_icao": "ctn",
+          "flight_number": "471",
+          "flight_iata": "ou471",
+          "flight_icao": "ctn471"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "501D1D"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Vancouver International",
+        "timezone": "America/Vancouver",
+        "iata": "YVR",
+        "icao": "CYVR",
+        "terminal": "M",
+        "gate": "C39",
+        "delay": null,
+        "scheduled": "2026-08-30T10:00:00+00:00",
+        "estimated": "2026-08-30T10:00:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T10:18:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Edmonton International Airport",
+        "timezone": "America/Edmonton",
+        "iata": "YEG",
+        "icao": "CYEG",
+        "terminal": null,
+        "gate": "72",
+        "baggage": "08",
+        "scheduled": "2026-08-30T12:33:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "6310",
+        "iata": "AI6310",
+        "icao": "AIC6310",
+        "codeshared": {
+          "airline_name": "air canada",
+          "airline_iata": "qk",
+          "airline_icao": "jza",
+          "flight_number": "8118",
+          "flight_iata": "qk8118",
+          "flight_icao": "jza8118"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "C02358"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Frederic Chopin",
+        "timezone": "Europe/Warsaw",
+        "iata": "WAW",
+        "icao": "EPWA",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T20:20:00+00:00",
+        "estimated": "2026-08-30T20:20:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T20:20:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Heathrow",
+        "timezone": "Europe/London",
+        "iata": "LHR",
+        "icao": "EGLL",
+        "terminal": "2",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T22:00:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7767",
+        "iata": "AI7767",
+        "icao": "AIC7767",
+        "codeshared": {
+          "airline_name": "lot",
+          "airline_iata": "lo",
+          "airline_icao": "lot",
+          "flight_number": "285",
+          "flight_iata": "lo285",
+          "flight_icao": "lot285"
+        }
+      },
+      "aircraft": null,
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Frederic Chopin",
+        "timezone": "Europe/Warsaw",
+        "iata": "WAW",
+        "icao": "EPWA",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T20:15:00+00:00",
+        "estimated": "2026-08-30T20:15:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T20:15:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Vilnius",
+        "timezone": "Europe/Vilnius",
+        "iata": "VNO",
+        "icao": "EYVI",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T22:20:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7873",
+        "iata": "AI7873",
+        "icao": "AIC7873",
+        "codeshared": {
+          "airline_name": "lot",
+          "airline_iata": "lo",
+          "airline_icao": "lot",
+          "flight_number": "779",
+          "flight_iata": "lo779",
+          "flight_icao": "lot779"
+        }
+      },
+      "aircraft": null,
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Vienna International",
+        "timezone": "Europe/Vienna",
+        "iata": "VIE",
+        "icao": "LOWW",
+        "terminal": "1",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T20:20:00+00:00",
+        "estimated": "2026-08-30T20:20:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T20:31:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Riga International",
+        "timezone": "Europe/Riga",
+        "iata": "RIX",
+        "icao": "EVRA",
+        "terminal": null,
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T23:15:00+00:00",
+        "delay": 11,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7034",
+        "iata": "AI7034",
+        "icao": "AIC7034",
+        "codeshared": {
+          "airline_name": "airbaltic",
+          "airline_iata": "bt",
+          "airline_icao": "bti",
+          "flight_number": "274",
+          "flight_iata": "bt274",
+          "flight_icao": "bti274"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "502CCE"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Sir Seewoosagur Ramgoolam International",
+        "timezone": "Indian/Mauritius",
+        "iata": "MRU",
+        "icao": "FIMP",
+        "terminal": null,
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T22:40:00+00:00",
+        "estimated": "2026-08-30T22:40:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T22:40:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Chhatrapati Shivaji International (Sahar International)",
+        "timezone": "Asia/Kolkata",
+        "iata": "BOM",
+        "icao": "VABB",
+        "terminal": "2",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T06:35:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "6748",
+        "iata": "AI6748",
+        "icao": "AIC6748",
+        "codeshared": {
+          "airline_name": "air mauritius",
+          "airline_iata": "mk",
+          "airline_icao": "mau",
+          "flight_number": "748",
+          "flight_iata": "mk748",
+          "flight_icao": "mau748"
+        }
+      },
+      "aircraft": null,
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Indira Gandhi International",
+        "timezone": "Asia/Kolkata",
+        "iata": "DEL",
+        "icao": "VIDP",
+        "terminal": "1",
+        "gate": "D15",
+        "delay": null,
+        "scheduled": "2026-08-30T23:25:00+00:00",
+        "estimated": "2026-08-30T23:25:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-31T02:40:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Amausi",
+        "timezone": "Asia/Kolkata",
+        "iata": "LKO",
+        "icao": "VILK",
+        "terminal": "3",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T00:35:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "9447",
+        "iata": "AI9447",
+        "icao": "AIC9447",
+        "codeshared": {
+          "airline_name": "air india express",
+          "airline_iata": "ix",
+          "airline_icao": "axb",
+          "flight_number": "1392",
+          "flight_iata": "ix1392",
+          "flight_icao": "axb1392"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "801444"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Almaty",
+        "timezone": "Asia/Almaty",
+        "iata": "ALA",
+        "icao": "UAAA",
+        "terminal": "2",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T23:35:00+00:00",
+        "estimated": "2026-08-30T23:35:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Chhatrapati Shivaji International (Sahar International)",
+        "timezone": "Asia/Kolkata",
+        "iata": "BOM",
+        "icao": "VABB",
+        "terminal": "2",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T04:50:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "6806",
+        "iata": "AI6806",
+        "icao": "AIC6806",
+        "codeshared": {
+          "airline_name": "air astana",
+          "airline_iata": "kc",
+          "airline_icao": "kzr",
+          "flight_number": "291",
+          "flight_iata": "kc291",
+          "flight_icao": "kzr291"
+        }
+      },
+      "aircraft": null,
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Bole International",
+        "timezone": "Africa/Addis_Ababa",
+        "iata": "ADD",
+        "icao": "HAAB",
+        "terminal": "2",
+        "gate": "B5",
+        "delay": null,
+        "scheduled": "2026-08-30T22:00:00+00:00",
+        "estimated": "2026-08-30T22:00:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Harare",
+        "timezone": "Africa/Harare",
+        "iata": "HRE",
+        "icao": "FVRG",
+        "terminal": "1",
+        "gate": "13",
+        "baggage": null,
+        "scheduled": "2026-08-31T01:30:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7973",
+        "iata": "AI7973",
+        "icao": "AIC7973",
+        "codeshared": {
+          "airline_name": "ethiopian airlines",
+          "airline_iata": "et",
+          "airline_icao": "eth",
+          "flight_number": "893",
+          "flight_iata": "et893",
+          "flight_icao": "eth893"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "040153"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "King Khaled International",
+        "timezone": "Asia/Riyadh",
+        "iata": "RUH",
+        "icao": "OERK",
+        "terminal": "2",
+        "gate": null,
+        "delay": null,
+        "scheduled": "2026-08-30T21:30:00+00:00",
+        "estimated": "2026-08-30T21:30:00+00:00",
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Chhatrapati Shivaji International (Sahar International)",
+        "timezone": "Asia/Kolkata",
+        "iata": "BOM",
+        "icao": "VABB",
+        "terminal": "2",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T04:15:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "6402",
+        "iata": "AI6402",
+        "icao": "AIC6402",
+        "codeshared": {
+          "airline_name": "saudia",
+          "airline_iata": "sv",
+          "airline_icao": "sva",
+          "flight_number": "740",
+          "flight_iata": "sv740",
+          "flight_icao": "sva740"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "7100BC"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Frankfurt International Airport",
+        "timezone": "Europe/Berlin",
+        "iata": "FRA",
+        "icao": "EDDF",
+        "terminal": "1",
+        "gate": "656",
+        "delay": null,
+        "scheduled": "2026-08-30T20:20:00+00:00",
+        "estimated": "2026-08-30T20:20:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T20:20:00+00:00",
+        "actual_runway": null
+      },
+      "arrival": {
+        "airport": "Chhatrapati Shivaji International (Sahar International)",
+        "timezone": "Asia/Kolkata",
+        "iata": "BOM",
+        "icao": "VABB",
+        "terminal": "2",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-31T08:55:00+00:00",
+        "delay": null,
+        "estimated": null,
+        "actual": null,
+        "estimated_runway": null,
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "2028",
+        "iata": "AI2028",
+        "icao": "AIC2028",
+        "codeshared": null
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "800736"
+      },
+      "live": null
+    },
+    {
+      "flight_date": "2026-08-30",
+      "flight_status": "scheduled",
+      "departure": {
+        "airport": "Frankfurt International Airport",
+        "timezone": "Europe/Berlin",
+        "iata": "FRA",
+        "icao": "EDDF",
+        "terminal": "1",
+        "gate": "A4",
+        "delay": 22,
+        "scheduled": "2026-08-30T13:30:00+00:00",
+        "estimated": "2026-08-30T13:30:00+00:00",
+        "actual": "2026-08-30T14:08:00+00:00",
+        "estimated_runway": "2026-08-30T14:08:00+00:00",
+        "actual_runway": "2026-08-30T14:08:00+00:00"
+      },
+      "arrival": {
+        "airport": "Lisbon Portela",
+        "timezone": "Europe/Lisbon",
+        "iata": "LIS",
+        "icao": "LPPT",
+        "terminal": "1",
+        "gate": null,
+        "baggage": null,
+        "scheduled": "2026-08-30T15:45:00+00:00",
+        "delay": 21,
+        "estimated": "2026-08-30T16:06:00+00:00",
+        "actual": null,
+        "estimated_runway": "2026-08-30T16:06:00+00:00",
+        "actual_runway": null
+      },
+      "airline": {
+        "name": "Air India",
+        "iata": "AI",
+        "icao": "AIC"
+      },
+      "flight": {
+        "number": "7883",
+        "iata": "AI7883",
+        "icao": "AIC7883",
+        "codeshared": {
+          "airline_name": "tap air portugal",
+          "airline_iata": "tp",
+          "airline_icao": "tap",
+          "flight_number": "571",
+          "flight_iata": "tp571",
+          "flight_icao": "tap571"
+        }
+      },
+      "aircraft": {
+        "registration": null,
+        "iata": null,
+        "icao": null,
+        "icao24": "4951CC"
+      },
+      "live": null
+    }
+  ]
+}

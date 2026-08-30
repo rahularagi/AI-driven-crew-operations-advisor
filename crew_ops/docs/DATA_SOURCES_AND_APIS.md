@@ -338,42 +338,23 @@ emit FlightDisrupted {
 | C-003 | `consecutive_duty_days: 5` | Must get weekly rest — cannot be assigned Day 6 |
 | C-004 | `duty_hours_7_day: 54` | Near 60hr weekly cap |
 | C-005 | `status: RESTING`, `at_home_base: false` | Away from base, in layover hotel |
-| C-006 | `status: SICK` | Sick — triggers disruption demo |
+| C-006 | `status: UNAVAILABLE` | Sick — triggers disruption demo |
 | C-007 | `flight_hours_28_day: 45`, fresh | Best candidate — low hours, available |
 | C-008 | `status: AVAILABLE`, `current_airport: VABB` | At different base — deadhead needed |
 
 ---
 
-## API 5 — Crew Leave (Mocked — AIMS / HR)
+## API 5 — Crew Leave (External — AIMS / HR, read only)
 
 **Used by:** Weekly Planner (exclude crew on leave), Disruption Handler (confirm not on leave)
 
+> Not a table we own or maintain. Read from AIMS/HR as an external input. Not stored in our database.
+
 ```json
 [
-  {
-    "leave_id": "LV-001",
-    "crew_id": "C-003",
-    "leave_type": "ANNUAL",
-    "start_date": "2024-02-05",
-    "end_date": "2024-02-07",
-    "status": "APPROVED"
-  },
-  {
-    "leave_id": "LV-002",
-    "crew_id": "C-014",
-    "leave_type": "SICK",
-    "start_date": "2024-02-05",
-    "end_date": "2024-02-11",
-    "status": "APPROVED"
-  },
-  {
-    "leave_id": "LV-003",
-    "crew_id": "C-009",
-    "leave_type": "TRAINING",
-    "start_date": "2024-02-06",
-    "end_date": "2024-02-06",
-    "status": "APPROVED"
-  }
+  { "crew_id": "C-003", "leave_type": "ANNUAL",   "start_date": "2024-02-05", "end_date": "2024-02-07" },
+  { "crew_id": "C-014", "leave_type": "SICK",     "start_date": "2024-02-05", "end_date": "2024-02-11" },
+  { "crew_id": "C-009", "leave_type": "TRAINING", "start_date": "2024-02-06", "end_date": "2024-02-06" }
 ]
 ```
 
@@ -517,46 +498,67 @@ The system handles two categories of disruption:
 **Detected by:** Observer (live polling, today only).
 **Event:** `FlightDisrupted`
 
-### Type 2 — Crew-Side Disruption (Human in Loop)
+### Type 2 — Crew-Side Disruption
 
-**Trigger:** Something happens to the crew member — sick call, emergency leave, medical grounding, no-show, urgent training.
-**Detected by:** Ops Desk enters it manually via API. System handles everything after that.
+**Trigger:** Something happens to a crew member — sick call, emergency leave, medical grounding, no-show, urgent training, or a future assignment becoming invalid (leave added, license expired, FTL drifted).
+**Detected by:** Ops Desk (today) or Planner Job B (future). Both emit the same event.
 **Event:** `CrewDisrupted`
+
+> `PlanDisrupted` is removed. Planner Job B now emits `CrewDisrupted` directly with `source: WEEKLY_PLANNER_VALIDATOR`.
 
 **CrewDisrupted event shape:**
 
 ```json
 {
   "event": "CrewDisrupted",
-  "source": "OPS_DESK",
   "crew_id": "C-003",
   "crew_name": "Capt Ravi Singh",
-  "disruption_type": "SICK_CALL",
-  "affected_from": "2024-02-05",
-  "affected_until": "2024-02-05",
-  "entered_by": "controller_id",
-  "entered_at": "2024-02-05T05:30:00+05:30"
+  "leg_id": "AI305-BOM-CCU-20240304",
+  "reason": "SICK_LEAVE",
+  "days_until_departure": 28,
+  "severity": "LOW",
+  "source": "WEEKLY_PLANNER_VALIDATOR",
+  "detected_at": "2024-02-05T03:00:00+05:30"
 }
 ```
 
-**disruption_type values:**
+```json
+{
+  "event": "CrewDisrupted",
+  "crew_id": "C-003",
+  "crew_name": "Capt Ravi Singh",
+  "leg_id": "AI305-BOM-CCU-20240205",
+  "reason": "SICK_CALL",
+  "days_until_departure": 0,
+  "severity": "CRITICAL",
+  "source": "OPS_DESK",
+  "detected_at": "2024-02-05T05:30:00+05:30"
+}
+```
 
-| type | Cause |
-|------|-------|
-| `SICK_CALL` | Crew calls in sick |
-| `EMERGENCY_LEAVE` | Family emergency, bereavement |
-| `MEDICAL_GROUNDING` | Doctor grounds crew immediately |
-| `NO_SHOW` | Crew did not report at check-in |
-| `URGENT_TRAINING` | Regulator mandates emergency simulator check |
+> One event per leg. If crew has 3 affected legs, 3 separate `CrewDisrupted` events are emitted.
+> `source` field is for audit only — Disruption Handler does not branch on it.
+
+**reason values:**
+
+| reason | Cause | Who emits |
+|--------|-------|-----------|
+| `SICK_CALL` | Crew calls in sick | OPS_DESK |
+| `EMERGENCY_LEAVE` | Family emergency, bereavement | OPS_DESK |
+| `MEDICAL_GROUNDING` | Doctor grounds crew immediately | OPS_DESK |
+| `NO_SHOW` | Crew did not report at check-in | OPS_DESK |
+| `URGENT_TRAINING` | Regulator mandates emergency simulator check | OPS_DESK |
+| `LEAVE_ADDED` | New leave entry covers a future assigned leg | WEEKLY_PLANNER_VALIDATOR |
+| `LICENSE_EXPIRED` | Type rating expired before leg date | WEEKLY_PLANNER_VALIDATOR |
+| `MEDICAL_EXPIRED` | Medical certificate expired before leg date | WEEKLY_PLANNER_VALIDATOR |
+| `FTL_BREACH_PROJECTED` | Accumulated hours will breach cap by that week | WEEKLY_PLANNER_VALIDATOR |
+| `AIRCRAFT_TYPE_CHANGED` | Leg now requires different type rating | WEEKLY_PLANNER_VALIDATOR |
 
 **Flow after CrewDisrupted is emitted:**
 
 ```
-System finds all roster_crew_assignment rows
-  for this crew between affected_from and affected_until
-        │
-        ▼
-For each affected leg → compute days_until_departure
+Disruption Handler receives CrewDisrupted for a specific leg
+  → urgency from days_until_departure + severity
   < 1 day  → CRITICAL — activate nearest reserve immediately
   1–2 days → HIGH — Disruption Handler runs now
   2–7 days → HIGH — full replacement pipeline
@@ -564,8 +566,7 @@ For each affected leg → compute days_until_departure
   > 14 days → LOW — Planner re-assigns in next cycle
         │
         ▼
-Disruption Handler runs replacement pipeline
-  (same pipeline as FlightDisrupted)
+Same 8-step pipeline as FlightDisrupted
         │
         ▼
 roster_crew_assignment updated
@@ -573,12 +574,12 @@ RosterModified emitted → Planner Job B re-validates future weeks
 CrewNotified sent to replacement crew
 ```
 
-**API endpoint:**
+**API endpoint (ops desk entry):**
 
 ```
 POST /v1/crew/{crew_id}/unavailable
-  body: { disruption_type, affected_from, affected_until }
-  → emits CrewDisrupted
+  body: { reason, affected_from, affected_until }
+  → finds all affected legs, emits one CrewDisrupted per leg
   → returns list of all affected legs so controller sees full impact immediately
 ```
 
@@ -586,12 +587,11 @@ POST /v1/crew/{crew_id}/unavailable
 
 ## Disruption Handler — Classify Step (updated)
 
-Handler now receives 3 event types, all routed through the same pipeline:
+Handler now receives 2 event types, both routed through the same pipeline:
 
 ```
 FlightDisrupted → urgency from severity field
-PlanDisrupted   → urgency from days_until_departure
-CrewDisrupted   → find all affected legs, urgency from days_until_departure of earliest leg
+CrewDisrupted   → urgency from days_until_departure + severity (already computed at emit time)
 ```
 
 ---
@@ -675,10 +675,20 @@ origin           str       "PNQ"
 destination      str       "DEL"
 scheduled_dep    datetime  2024-02-05T06:00:00+05:30
 scheduled_arr    datetime  2024-02-05T08:15:00+05:30
+estimated_arr    datetime | null     updated by Observer when delay detected
 aircraft_type    str       "A320"
 aircraft_reg     str       "VT-ABC"
-status           enum      SCHEDULED / CANCELLED
+status           enum      SCHEDULED / AIRBORNE / LANDED / CANCELLED / DIVERTED
+delay_status     enum      ON_TIME / DELAYED / UNKNOWN
+delay_minutes    int        0        updated by Observer on each poll
 ```
+
+> `status` = flight lifecycle (where is it right now)
+> `delay_status` = punctuality (is it running on time)
+> These are independent — a flight can be AIRBORNE + DELAYED, or LANDED + DELAYED.
+> `UNKNOWN` on delay_status covers the window before Observer gets first live data.
+> Observer is the only writer of `status`, `delay_status`, `delay_minutes`, `estimated_arr`.
+> Planner writes everything else at publish time and never touches these 4 fields.
 
 ### Table 3 — `roster_crew_assignment` (one row per crew per leg)
 
@@ -705,7 +715,10 @@ release_time     datetime  duty end (arrival + 30min debrief)
   "scheduled_arr": "2024-02-05T08:15:00+05:30",
   "aircraft_type": "A320",
   "aircraft_reg": "VT-ABC",
-  "status": "SCHEDULED",
+  "status": "AIRBORNE",
+  "delay_status": "DELAYED",
+  "delay_minutes": 150,
+  "estimated_arr": "2024-02-05T10:45:00+05:30",
   "crew": [
     { "crew_id": "C-001", "name": "Capt Arjun Mehta",  "role": "CAPTAIN",       "type": "OPERATING", "report": "04:30", "release": "09:45" },
     { "crew_id": "C-006", "name": "FO Deepa Rao",       "role": "FIRST_OFFICER", "type": "OPERATING", "report": "04:30", "release": "09:45" },
@@ -726,3 +739,4 @@ release_time     datetime  duty end (arrival + 30min debrief)
 | `home_base` on assignment | Not needed for organisational display |
 | `is_deadhead` | Redundant — `assignment_type = DEADHEAD` covers it |
 | FTL fields of any kind | FTL is a processing concern — lives in `crew_ftl_state` only |
+| `actual_departure`, `actual_arrival` | Not needed for roster display — Observer uses them internally to compute `delay_minutes` |

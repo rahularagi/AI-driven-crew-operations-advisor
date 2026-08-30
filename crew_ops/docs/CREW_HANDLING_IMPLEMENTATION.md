@@ -196,11 +196,11 @@ Two categories of disruption feed into the same Disruption Handler pipeline.
 - Detected by: Observer (live polling)
 - Event: `FlightDisrupted`
 
-### Type 2 — Crew-Side (Human in Loop)
-- Trigger: sick call, emergency leave, medical grounding, no-show, urgent training
-- Detected by: Ops Desk enters manually via `POST /v1/crew/{crew_id}/unavailable`
-- Event: `CrewDisrupted`
-- System finds all affected legs, computes severity per leg, routes to Disruption Handler
+### Type 2 — Crew-Side
+- Trigger: sick call, emergency leave, medical grounding, no-show, urgent training, or future assignment invalid (leave added, license expired, FTL drifted)
+- Detected by: Ops Desk (today) via `POST /v1/crew/{crew_id}/unavailable`, or Planner Job B (future) automatically
+- Event: `CrewDisrupted` (one per affected leg, `source` field distinguishes origin)
+- Disruption Handler receives it and runs the same replacement pipeline
 
 ---
 
@@ -208,11 +208,10 @@ Two categories of disruption feed into the same Disruption Handler pipeline.
 
 ```
 FlightDisrupted → urgency from severity field
-PlanDisrupted   → urgency from days_until_departure
-CrewDisrupted   → find all affected legs, urgency from days_until_departure of earliest leg
+CrewDisrupted   → urgency from days_until_departure + severity (already computed at emit time)
 ```
 
-All three event types flow through the same Steps 2–8 (FTL check → cascade → find candidates → rank → narrate → human decision → update roster).
+Both event types flow through the same Steps 2–8 (FTL check → cascade → find candidates → rank → narrate → human decision → update roster).
 
 ---
 
