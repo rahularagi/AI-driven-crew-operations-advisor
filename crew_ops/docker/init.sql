@@ -32,33 +32,33 @@ CREATE TABLE IF NOT EXISTS crew_licenses (
 
 -- ─── FTL State ────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS crew_ftl_states (
-    crew_id                     VARCHAR(10)     PRIMARY KEY REFERENCES crew_members(crew_id),
-    role                        VARCHAR(10)     NOT NULL,
-    status                      VARCHAR(15)     NOT NULL DEFAULT 'AVAILABLE',
-    duty_start_time             TIMESTAMPTZ,
-    duty_end_time               TIMESTAMPTZ,
-    projected_fdp_end           TIMESTAMPTZ,
-    flight_time_current_duty    FLOAT           NOT NULL DEFAULT 0.0,
-    sectors_current_duty        INTEGER         NOT NULL DEFAULT 0,
-    rest_start_time             TIMESTAMPTZ,
-    last_rest_end_time          TIMESTAMPTZ,
-    rest_hours_available        FLOAT           NOT NULL DEFAULT 0.0,
-    flight_hours_28_day         FLOAT           NOT NULL DEFAULT 0.0,
-    duty_hours_7_day            FLOAT           NOT NULL DEFAULT 0.0,
-    duty_hours_28_day           FLOAT           NOT NULL DEFAULT 0.0,
-    consecutive_duty_days       INTEGER         NOT NULL DEFAULT 0,
-    last_weekly_rest_end        TIMESTAMPTZ,
-    max_fdp_allowed             FLOAT           NOT NULL DEFAULT 13.0,
-    wocl_encroachment           BOOLEAN         NOT NULL DEFAULT FALSE,
-    fdp_reduction_applied       FLOAT           NOT NULL DEFAULT 0.0,
-    fdp_extension_used          BOOLEAN         NOT NULL DEFAULT FALSE,
-    extension_hours             FLOAT           NOT NULL DEFAULT 0.0,
-    home_base                   VARCHAR(4)      NOT NULL,
-    current_airport             VARCHAR(4)      NOT NULL,
-    at_home_base                BOOLEAN         NOT NULL DEFAULT TRUE,
-    rest_type                   VARCHAR(15),
-    earliest_checkout           TIMESTAMPTZ,
-    last_updated                TIMESTAMPTZ     NOT NULL DEFAULT NOW()
+    crew_id                             VARCHAR(10)     PRIMARY KEY REFERENCES crew_members(crew_id),
+    role                                VARCHAR(10)     NOT NULL,
+    status                              VARCHAR(15)     NOT NULL DEFAULT 'AVAILABLE',
+    duty_start_time                     TIMESTAMPTZ,
+    duty_end_time                       TIMESTAMPTZ,
+    projected_duty_period_end           TIMESTAMPTZ,
+    flight_hours_current_duty           FLOAT           NOT NULL DEFAULT 0.0,
+    sectors_current_duty                INTEGER         NOT NULL DEFAULT 0,
+    rest_start_time                     TIMESTAMPTZ,
+    last_rest_end_time                  TIMESTAMPTZ,
+    rest_hours_available                FLOAT           NOT NULL DEFAULT 0.0,
+    flight_hours_28_day                 FLOAT           NOT NULL DEFAULT 0.0,
+    duty_hours_7_day                    FLOAT           NOT NULL DEFAULT 0.0,
+    duty_hours_28_day                   FLOAT           NOT NULL DEFAULT 0.0,
+    consecutive_duty_days               INTEGER         NOT NULL DEFAULT 0,
+    last_weekly_rest_end                TIMESTAMPTZ,
+    max_duty_period_hours               FLOAT           NOT NULL DEFAULT 13.0,
+    circadian_low_window_encroachment   BOOLEAN         NOT NULL DEFAULT FALSE,
+    duty_period_reduction_hours         FLOAT           NOT NULL DEFAULT 0.0,
+    duty_period_extended                BOOLEAN         NOT NULL DEFAULT FALSE,
+    duty_period_extension_hours         FLOAT           NOT NULL DEFAULT 0.0,
+    home_base                           VARCHAR(4)      NOT NULL,
+    current_airport                     VARCHAR(4)      NOT NULL,
+    at_home_base                        BOOLEAN         NOT NULL DEFAULT TRUE,
+    rest_type                           VARCHAR(15),
+    earliest_checkout                   TIMESTAMPTZ,
+    last_updated                        TIMESTAMPTZ     NOT NULL DEFAULT NOW()
 );
 
 -- ─── Crew Leave ───────────────────────────────────────────────────────────────
@@ -124,4 +124,31 @@ CREATE TABLE IF NOT EXISTS crew_unavailability (
     from_datetime   TIMESTAMPTZ     NOT NULL,
     to_datetime     TIMESTAMPTZ     NOT NULL,
     created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW()
+);
+
+-- ─── Roster Leg ───────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS roster_leg (
+    id              SERIAL          PRIMARY KEY,
+    leg_id          VARCHAR(50)     NOT NULL REFERENCES flight_legs(leg_id),
+    plan_start      DATE            NOT NULL,
+    plan_end        DATE            NOT NULL,
+    status          VARCHAR(15)     NOT NULL DEFAULT 'DRAFT',
+    triggered_by    VARCHAR(50)     NOT NULL,
+    created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+    UNIQUE (leg_id, plan_start)
+);
+
+-- ─── Roster Crew Assignment ───────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS roster_crew_assignment (
+    id                      SERIAL          PRIMARY KEY,
+    leg_id                  VARCHAR(50)     NOT NULL REFERENCES flight_legs(leg_id),
+    crew_id                 VARCHAR(10)     NOT NULL REFERENCES crew_members(crew_id),
+    status                  VARCHAR(15)     NOT NULL DEFAULT 'DRAFT',
+    assigned_by             VARCHAR(50)     NOT NULL,
+    assigned_at             TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+    replaced_by             VARCHAR(10)     REFERENCES crew_members(crew_id),
+    replaced_at             TIMESTAMPTZ,
+    invalidation_reason     VARCHAR(50),
+    UNIQUE (leg_id, crew_id)
 );

@@ -10,7 +10,7 @@ Switch: set MOCK_FLIGHT_SCHEDULE=False in .env to use real API.
 from typing import Optional
 from crew_ops.config.settings import settings
 from crew_ops.db.database import SessionLocal
-from crew_ops.models.leg import FlightLeg
+from crew_ops.models.flight_leg import FlightLeg
 from crew_ops.db.repositories import leg_repository
 
 
@@ -18,6 +18,13 @@ def get_all_scheduled_legs() -> list[FlightLeg]:
     if settings.mock_flight_schedule:
         return _get_all_legs_from_database()
     return _get_all_legs_from_aviationstack_api()
+
+
+def get_legs_for_date_range(start: date, end: date) -> list[FlightLeg]:
+    if settings.mock_flight_schedule:
+        with SessionLocal() as session:
+            return leg_repository.get_flight_legs_for_date_range(session, start, end)
+    raise NotImplementedError("Real Aviationstack API not implemented yet.")
 
 
 def get_flight_leg(leg_id: str) -> Optional[FlightLeg]:

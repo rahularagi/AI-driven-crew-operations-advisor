@@ -15,8 +15,8 @@ from crew_ops.models.crew_member import CrewMember
 from crew_ops.models.crew_license import CrewLicense
 from crew_ops.models.crew_leave import CrewLeaveRecord
 from crew_ops.models.crew_reserve import CrewReserveSchedule
-from crew_ops.models.leg import FlightLeg
-from crew_ops.models.crew_ftl_state import CrewFTLState
+from crew_ops.models.flight_leg import FlightLeg
+from crew_ops.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
 from crew_ops.db.repositories import (
     crew_repository,
     license_repository,
@@ -45,7 +45,7 @@ def load_licenses(session) -> int:
 
 def load_ftl_states(session) -> int:
     for raw in FTL_STATES:
-        ftl_repository.upsert_ftl_state(session, CrewFTLState(**raw))
+        ftl_repository.upsert_ftl_state(session, CrewFlightTimeLimitsState(**raw))
     return len(FTL_STATES)
 
 

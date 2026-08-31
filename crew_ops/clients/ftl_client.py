@@ -1,26 +1,26 @@
 """
-FTL State Client — API 6 (internally managed)
+Crew Duty State Client (internally managed)
 
-FTL state is always read from the database.
-It is never fetched from an external API — your system owns and calculates it.
+Tracks each crew member's live duty/rest state — hours flown, rest clock, rolling counters.
+Always read from and written to the internal database. No external API.
 """
 
 from typing import Optional
 from crew_ops.db.database import SessionLocal
-from crew_ops.models.crew_ftl_state import CrewFTLState
+from crew_ops.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
 from crew_ops.db.repositories import ftl_repository
 
 
-def get_all_ftl_states() -> list[CrewFTLState]:
+def get_all_crew_duty_states() -> list[CrewFlightTimeLimitsState]:
     with SessionLocal() as session:
         return ftl_repository.get_all_ftl_states(session)
 
 
-def get_ftl_state(crew_id: str) -> Optional[CrewFTLState]:
+def get_crew_duty_state(crew_id: str) -> Optional[CrewFlightTimeLimitsState]:
     with SessionLocal() as session:
         return ftl_repository.get_ftl_state_by_crew_id(session, crew_id)
 
 
-def update_ftl_state(ftl_state: CrewFTLState) -> None:
+def update_crew_duty_state(state: CrewFlightTimeLimitsState) -> None:
     with SessionLocal() as session:
-        ftl_repository.upsert_ftl_state(session, ftl_state)
+        ftl_repository.upsert_ftl_state(session, state)

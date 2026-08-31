@@ -11,7 +11,7 @@ Registered at startup:
     event_bus.subscribe(RosterModifiedEvent, ftl_service.on_roster_modified)
 """
 
-from crew_ops.clients.ftl_client import get_ftl_state, update_ftl_state, get_all_ftl_states
+from crew_ops.clients.ftl_client import get_crew_duty_state, update_crew_duty_state, get_all_crew_duty_states
 from crew_ops.clients.crew_profile_client import get_crew_member
 from crew_ops.models.events import LegCompletedEvent, RosterModifiedEvent, FlightTimeLimitsAlertEvent
 from crew_ops.services.event_bus import event_bus
@@ -31,7 +31,7 @@ class FlightTimeLimitsService:
         Registered at startup: event_bus.subscribe(LegCompletedEvent, ftl_service.on_leg_completed)
         """
         for crew_id in event.crew:
-            ftl = get_ftl_state(crew_id)
+            ftl = get_crew_duty_state(crew_id)
             if not ftl:
                 continue
             crew = get_crew_member(crew_id)
@@ -47,7 +47,7 @@ class FlightTimeLimitsService:
                 ftl.earliest_checkout = ftl.rest_start_time + timedelta(hours=10)
             ftl.status = "RESTING"
             ftl.last_updated = datetime.now(timezone.utc)
-            update_ftl_state(ftl)
+            update_crew_duty_state(ftl)
 
     def on_roster_modified(self, event: RosterModifiedEvent) -> None:
         """
@@ -55,24 +55,24 @@ class FlightTimeLimitsService:
         Registered at startup: event_bus.subscribe(RosterModifiedEvent, ftl_service.on_roster_modified)
         """
         if event.removed_crew_id:
-            ftl = get_ftl_state(event.removed_crew_id)
+            ftl = get_crew_duty_state(event.removed_crew_id)
             if ftl:
                 ftl.status = "UNAVAILABLE"
                 ftl.last_updated = datetime.now(timezone.utc)
-                update_ftl_state(ftl)
+                update_crew_duty_state(ftl)
 
         if event.added_crew_id:
-            ftl = get_ftl_state(event.added_crew_id)
+            ftl = get_crew_duty_state(event.added_crew_id)
             if ftl:
                 ftl.duty_start_time = datetime.now(timezone.utc)
                 ftl.status = "AVAILABLE"
                 ftl.last_updated = datetime.now(timezone.utc)
-                update_ftl_state(ftl)
+                update_crew_duty_state(ftl)
 
     def run_proactive_alert_scan(self) -> None:
         """Scheduled every 15 min. Publishes FlightTimeLimitsAlertEvent for each breach found."""
         now = datetime.now(timezone.utc)
-        for ftl in get_all_ftl_states():
+        for ftl in get_all_crew_duty_states():
             if ftl.status == "AVAILABLE" and ftl.projected_duty_period_end:
                 remaining = (ftl.projected_duty_period_end - now).total_seconds() / 3600
                 if 0 < remaining < _FDP_ALERT_BUFFER_HOURS:

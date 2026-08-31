@@ -1,12 +1,26 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import Optional
-from crew_ops.models.leg import FlightLeg
+from crew_ops.models.flight_leg import FlightLeg
 
 
 def get_all_flight_legs(session: Session) -> list[FlightLeg]:
     rows = session.execute(
         text("SELECT * FROM flight_legs ORDER BY scheduled_departure")
+    ).mappings().all()
+    legs = []
+    for row in rows:
+        leg_data = dict(row)
+        leg_data["assigned_crew"] = _get_assigned_crew_for_leg(session, leg_data["leg_id"])
+        legs.append(FlightLeg(**leg_data))
+    return legs
+
+
+def get_flight_legs_for_date_range(session: Session, start: "date", end: "date") -> list[FlightLeg]:
+    from datetime import date
+    rows = session.execute(
+        text("SELECT * FROM flight_legs WHERE scheduled_departure::date BETWEEN :start AND :end ORDER BY scheduled_departure"),
+        {"start": start, "end": end}
     ).mappings().all()
     legs = []
     for row in rows:

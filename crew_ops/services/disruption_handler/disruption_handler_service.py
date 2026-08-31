@@ -11,7 +11,7 @@ Registered at startup:
 """
 
 from crew_ops.clients.crew_profile_client import get_all_crew_members
-from crew_ops.clients.ftl_client import get_all_ftl_states, get_ftl_state
+from crew_ops.clients.ftl_client import get_all_crew_duty_states, get_crew_duty_state
 from crew_ops.models.crew_member import CrewMember
 from crew_ops.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
 from crew_ops.models.events import FlightDisruptedEvent, CrewDisruptedEvent, RosterModifiedEvent
@@ -53,7 +53,7 @@ class DisruptionHandler:
 
     def _find_candidates(self, role: str, airport: str) -> list[CrewMember]:
         all_crew = get_all_crew_members()
-        ftl_states = {s.crew_id: s for s in get_all_ftl_states()}
+        ftl_states = {s.crew_id: s for s in get_all_crew_duty_states()}
         return [
             crew for crew in all_crew
             if crew.role == role
@@ -64,7 +64,7 @@ class DisruptionHandler:
         ]
 
     def _rank_candidates(self, candidates: list[CrewMember], airport: str) -> list[dict]:
-        ftl_states = {s.crew_id: s for s in get_all_ftl_states()}
+        ftl_states = {s.crew_id: s for s in get_all_crew_duty_states()}
         scored = []
         for crew in candidates:
             ftl = ftl_states.get(crew.crew_id)
@@ -85,9 +85,9 @@ class DisruptionHandler:
         return min(score, 100.0)
 
     def _get_crew_role(self, crew_id: str) -> str:
-        ftl = get_ftl_state(crew_id)
+        ftl = get_crew_duty_state(crew_id)
         return ftl.role if ftl else "PILOT"
 
     def _get_crew_airport(self, crew_id: str) -> str:
-        ftl = get_ftl_state(crew_id)
+        ftl = get_crew_duty_state(crew_id)
         return ftl.current_airport if ftl else ""

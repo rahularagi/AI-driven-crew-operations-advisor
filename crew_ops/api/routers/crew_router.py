@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Body
 from datetime import datetime, timezone
 from crew_ops.clients.crew_profile_client import get_crew_member
-from crew_ops.clients.ftl_client import get_ftl_state
+from crew_ops.clients.ftl_client import get_crew_duty_state
 from crew_ops.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
 from crew_ops.models.events import CrewDisruptedEvent
 from crew_ops.services.event_bus import event_bus
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/crew", tags=["Crew"])
 @router.get("/{crew_id}/ftl", response_model=CrewFlightTimeLimitsState)
 def get_crew_ftl_state(crew_id: str):
     """Current flight time limits state for a crew member."""
-    ftl = get_ftl_state(crew_id)
+    ftl = get_crew_duty_state(crew_id)
     if not ftl:
         raise HTTPException(status_code=404, detail=f"FTL state for {crew_id} not found")
     return ftl
