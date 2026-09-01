@@ -21,3 +21,13 @@ def check_database_connection() -> bool:
         return True
     except Exception:
         return False
+
+
+def get_db_session() -> Session:
+    """Plain session for use in tools (not a FastAPI dependency)."""
+    session = SessionLocal()
+    try:
+        return session
+    except Exception:
+        session.close()
+        raise

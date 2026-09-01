@@ -18,6 +18,8 @@ from crew_ops.api.routers import (
     planner_router, observer_router, crew_router, ftl_router
 )
 
+from crew_ops.api.routers.assistant_router import router as assistant_router
+
 # ─── Service instances ────────────────────────────────────────────────────────
 
 roster_planner     = RosterPlanner()
@@ -80,7 +82,7 @@ app.include_router(planner_router.router)
 app.include_router(observer_router.router)
 app.include_router(crew_router.router)
 app.include_router(ftl_router.router)
-
+app.include_router(assistant_router)
 
 @app.get("/health", tags=["Health"])
 def health_check():

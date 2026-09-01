@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     aviationstack_api_key: str = ""
     hrms_api_base_url: str = ""
     hrms_api_key: str = ""
+    google_api_key: str = ""
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
