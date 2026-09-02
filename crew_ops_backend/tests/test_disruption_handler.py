@@ -4,13 +4,13 @@ from unittest.mock import MagicMock, patch, call
 
 import pytest
 
-from crew_ops.services.disruption_handler.disruption_handler_service import DisruptionHandler
-from crew_ops.models.events import (
+from crew_ops_backend.services.disruption_handler.disruption_handler_service import DisruptionHandler
+from crew_ops_backend.models.events import (
     FlightDisruptedEvent, CrewDisruptedEvent, RosterModifiedEvent
 )
-from crew_ops.models.crew_member import CrewMember
-from crew_ops.models.flight_leg import FlightLeg
-from crew_ops.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
+from crew_ops_backend.models.crew_member import CrewMember
+from crew_ops_backend.models.flight_leg import FlightLeg
+from crew_ops_backend.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
 
 _MODULE = "crew_ops.services.disruption_handler.disruption_handler_service"
 

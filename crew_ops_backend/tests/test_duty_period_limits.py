@@ -1,6 +1,6 @@
 """Tests for rules/duty_period_limits.py — all 4 windows, sector capping, boundaries."""
 import pytest
-from crew_ops.rules.duty_period_limits import max_duty_hours, _duty_start_window
+from crew_ops_backend.rules.duty_period_limits import max_duty_hours, _duty_start_window
 
 
 # ─── Window classification ────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from crew_ops.models.crew_license import CrewLicense
+from crew_ops_backend.models.crew_license import CrewLicense
 
 
 def get_licenses_for_crew_member(session: Session, crew_id: str) -> list[CrewLicense]:

@@ -4,9 +4,9 @@ from unittest.mock import MagicMock, patch, call
 
 import pytest
 
-from crew_ops.services.observer.observer_service import FlightObserver
-from crew_ops.models.flight_leg import FlightLeg
-from crew_ops.models.events import FlightDisruptedEvent, LegCompletedEvent
+from crew_ops_backend.services.observer.observer_service import FlightObserver
+from crew_ops_backend.models.flight_leg import FlightLeg
+from crew_ops_backend.models.events import FlightDisruptedEvent, LegCompletedEvent
 
 
 _TODAY = date.today()

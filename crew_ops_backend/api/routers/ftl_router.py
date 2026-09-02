@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from crew_ops.services.flight_time_limits.flight_time_limits_service import FlightTimeLimitsService
+from crew_ops_backend.services.flight_time_limits.flight_time_limits_service import FlightTimeLimitsService
 
 router = APIRouter(prefix="/ftl", tags=["Flight Time Limits"])
 

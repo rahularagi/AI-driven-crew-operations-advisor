@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from crew_ops.conversation.tools import (
+from crew_ops_backend.conversation.tools import (
     _classify_severity,
     get_leg_status,
     get_crew_ftl,
@@ -217,7 +217,7 @@ def test_get_pending_proposals_delegates_to_repository():
 # ─── get_crew_schedule ────────────────────────────────────────────────────────
 
 def test_get_crew_schedule_delegates_to_repository():
-    from crew_ops.conversation.tools import get_crew_schedule
+    from crew_ops_backend.conversation.tools import get_crew_schedule
     expected = [{"leg_id": "L-001", "crew_id": "C-001"}]
     with patch("crew_ops.conversation.tools.SessionLocal") as mock_sl, \
          patch("crew_ops.conversation.tools.roster_repository") as mock_repo:
@@ -232,7 +232,7 @@ def test_get_crew_schedule_delegates_to_repository():
 # ─── get_roster ───────────────────────────────────────────────────────────────
 
 def test_get_roster_delegates_to_repository():
-    from crew_ops.conversation.tools import get_roster
+    from crew_ops_backend.conversation.tools import get_roster
     expected = [{"leg_id": "L-001"}]
     with patch("crew_ops.conversation.tools.SessionLocal") as mock_sl, \
          patch("crew_ops.conversation.tools.roster_repository") as mock_repo:
@@ -247,7 +247,7 @@ def test_get_roster_delegates_to_repository():
 # ─── action_reject_proposal ───────────────────────────────────────────────────
 
 def test_action_reject_proposal_delegates_to_disruption_handler():
-    from crew_ops.conversation.tools import action_reject_proposal
+    from crew_ops_backend.conversation.tools import action_reject_proposal
     expected = {"status": "rejected", "next_candidate": "C-002"}
     with patch("crew_ops.services.disruption_handler.disruption_handler_service.DisruptionHandler") as MockDH:
         MockDH.return_value.reject_and_repropose.return_value = expected

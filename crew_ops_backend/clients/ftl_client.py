@@ -6,9 +6,9 @@ Always read from and written to the internal database. No external API.
 """
 
 from typing import Optional
-from crew_ops.db.database import SessionLocal
-from crew_ops.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
-from crew_ops.db.repositories import ftl_repository
+from crew_ops_backend.db.database import SessionLocal
+from crew_ops_backend.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
+from crew_ops_backend.db.repositories import ftl_repository
 
 
 def get_all_crew_duty_states() -> list[CrewFlightTimeLimitsState]:

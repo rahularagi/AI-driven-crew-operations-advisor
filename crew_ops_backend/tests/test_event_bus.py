@@ -1,6 +1,6 @@
 """Tests for services/event_bus.py"""
-from crew_ops.services.event_bus import EventBus
-from crew_ops.models.events import (
+from crew_ops_backend.services.event_bus import EventBus
+from crew_ops_backend.models.events import (
     LegCompletedEvent, RosterModifiedEvent, CrewDisruptedEvent
 )
 from datetime import datetime, timezone

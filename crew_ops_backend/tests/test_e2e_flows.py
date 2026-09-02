@@ -5,18 +5,18 @@ Uses a real EventBus wired in-process. All clients and DB are mocked.
 from datetime import datetime, timezone, timedelta, date
 from unittest.mock import MagicMock, patch
 
-from crew_ops.services.event_bus import EventBus
-from crew_ops.services.observer.observer_service import FlightObserver
-from crew_ops.services.disruption_handler.disruption_handler_service import DisruptionHandler
-from crew_ops.services.weekly_planner.weekly_planner_service import DailyValidator
-from crew_ops.services.flight_time_limits.flight_time_limits_service import FlightTimeLimitsService
-from crew_ops.models.events import (
+from crew_ops_backend.services.event_bus import EventBus
+from crew_ops_backend.services.observer.observer_service import FlightObserver
+from crew_ops_backend.services.disruption_handler.disruption_handler_service import DisruptionHandler
+from crew_ops_backend.services.weekly_planner.weekly_planner_service import DailyValidator
+from crew_ops_backend.services.flight_time_limits.flight_time_limits_service import FlightTimeLimitsService
+from crew_ops_backend.models.events import (
     FlightDisruptedEvent, CrewDisruptedEvent,
     LegCompletedEvent, RosterModifiedEvent,
 )
-from crew_ops.models.crew_member import CrewMember
-from crew_ops.models.flight_leg import FlightLeg
-from crew_ops.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
+from crew_ops_backend.models.crew_member import CrewMember
+from crew_ops_backend.models.flight_leg import FlightLeg
+from crew_ops_backend.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
 
 _DH  = "crew_ops.services.disruption_handler.disruption_handler_service"
 _WP  = "crew_ops.services.weekly_planner.weekly_planner_service"

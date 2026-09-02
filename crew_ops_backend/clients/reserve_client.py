@@ -4,9 +4,9 @@ Reserve Schedule Client — API 7 (internally managed)
 Reserve schedule is always read from the database.
 """
 
-from crew_ops.db.database import SessionLocal
-from crew_ops.models.crew_reserve import CrewReserveSchedule
-from crew_ops.db.repositories import reserve_repository
+from crew_ops_backend.db.database import SessionLocal
+from crew_ops_backend.models.crew_reserve import CrewReserveSchedule
+from crew_ops_backend.db.repositories import reserve_repository
 
 
 def get_all_reserve_schedules() -> list[CrewReserveSchedule]:

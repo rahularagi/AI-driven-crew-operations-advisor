@@ -4,9 +4,9 @@ from unittest.mock import MagicMock, patch, call
 
 import pytest
 
-from crew_ops.services.flight_time_limits.flight_time_limits_service import FlightTimeLimitsService
-from crew_ops.models.events import LegCompletedEvent, RosterModifiedEvent
-from crew_ops.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
+from crew_ops_backend.services.flight_time_limits.flight_time_limits_service import FlightTimeLimitsService
+from crew_ops_backend.models.events import LegCompletedEvent, RosterModifiedEvent
+from crew_ops_backend.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
 
 
 def _now():

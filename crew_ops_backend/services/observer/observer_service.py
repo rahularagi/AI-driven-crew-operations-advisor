@@ -10,11 +10,11 @@ Publishes: FlightDisruptedEvent, LegCompletedEvent
 from datetime import date, datetime, timedelta, timezone
 from dateutil.parser import parse as parse_dt
 
-from crew_ops.clients.flight_status_client import get_next_live_status_poll, reset_poll_index_for_leg
-from crew_ops.clients.flight_schedule_client import get_all_scheduled_legs
-from crew_ops.models.events import FlightDisruptedEvent, LegCompletedEvent
-from crew_ops.models.flight_leg import FlightLeg
-from crew_ops.services.event_bus import event_bus
+from crew_ops_backend.clients.flight_status_client import get_next_live_status_poll, reset_poll_index_for_leg
+from crew_ops_backend.clients.flight_schedule_client import get_all_scheduled_legs
+from crew_ops_backend.models.events import FlightDisruptedEvent, LegCompletedEvent
+from crew_ops_backend.models.flight_leg import FlightLeg
+from crew_ops_backend.services.event_bus import event_bus
 
 
 # Thresholds in ascending order — first match wins

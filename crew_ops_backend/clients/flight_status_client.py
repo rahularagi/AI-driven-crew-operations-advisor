@@ -8,8 +8,8 @@ Switch: set MOCK_FLIGHT_STATUS=False in .env to use real API.
 """
 
 from typing import Optional
-from crew_ops.config.settings import settings
-from crew_ops.data.mock_observer import get_poll_sequence
+from crew_ops_backend.config.settings import settings
+from crew_ops_backend.data.mock_observer import get_poll_sequence
 
 # In-memory poll index tracker — tracks which poll we are on per leg
 _poll_index_tracker: dict[str, int] = {}

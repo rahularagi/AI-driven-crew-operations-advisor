@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException, Body
 from datetime import datetime, timezone
-from crew_ops.clients.crew_profile_client import get_crew_member
-from crew_ops.clients.ftl_client import get_crew_duty_state
-from crew_ops.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
-from crew_ops.models.events import CrewDisruptedEvent
-from crew_ops.services.event_bus import event_bus
+from crew_ops_backend.clients.crew_profile_client import get_crew_member
+from crew_ops_backend.clients.ftl_client import get_crew_duty_state
+from crew_ops_backend.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
+from crew_ops_backend.models.events import CrewDisruptedEvent
+from crew_ops_backend.services.event_bus import event_bus
 
 router = APIRouter(prefix="/crew", tags=["Crew"])
 

@@ -3,13 +3,13 @@ from typing import Any
 
 from langgraph.graph import StateGraph, END
 
-from crew_ops.clients.crew_profile_client import get_all_crew_members
-from crew_ops.conversation.formatter import build_confirmation_package, format_response
-from crew_ops.conversation.intent import Intent, classify_intent
-from crew_ops.conversation.session import (
+from crew_ops_backend.clients.crew_profile_client import get_all_crew_members
+from crew_ops_backend.conversation.formatter import build_confirmation_package, format_response
+from crew_ops_backend.conversation.intent import Intent, classify_intent
+from crew_ops_backend.conversation.session import (
     PendingConfirmation, PendingSimulation, SessionState, get_session, save_session
 )
-from crew_ops.conversation.tools import (
+from crew_ops_backend.conversation.tools import (
     action_accept_proposal,
     action_approve_roster_leg,
     action_mark_crew_unavailable,
@@ -342,12 +342,12 @@ def _pre_check_legality(intent: Intent, action_args: dict) -> dict:
     without a pre-check — the action tool itself will fail-fast if illegal.
     """
     if intent.action_type == "REASSIGN":
-        from crew_ops.clients.crew_profile_client import get_crew_member
-        from crew_ops.clients.flight_schedule_client import get_flight_leg
-        from crew_ops.clients.ftl_client import get_crew_duty_state
-        from crew_ops.clients.license_client import get_licenses_for_crew_member
-        from crew_ops.clients.leave_client import get_leave_records_for_crew
-        from crew_ops.rules.legality import check_legality
+        from crew_ops_backend.clients.crew_profile_client import get_crew_member
+        from crew_ops_backend.clients.flight_schedule_client import get_flight_leg
+        from crew_ops_backend.clients.ftl_client import get_crew_duty_state
+        from crew_ops_backend.clients.license_client import get_licenses_for_crew_member
+        from crew_ops_backend.clients.leave_client import get_leave_records_for_crew
+        from crew_ops_backend.rules.legality import check_legality
 
         leg_id      = action_args.get("leg_id", "")
         new_crew_id = action_args.get("new_crew_id", "")

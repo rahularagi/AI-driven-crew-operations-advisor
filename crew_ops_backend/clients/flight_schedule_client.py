@@ -9,10 +9,10 @@ Switch: set MOCK_FLIGHT_SCHEDULE=False in .env to use real API.
 
 from datetime import date
 from typing import Optional
-from crew_ops.config.settings import settings
-from crew_ops.db.database import SessionLocal
-from crew_ops.models.flight_leg import FlightLeg
-from crew_ops.db.repositories import leg_repository
+from crew_ops_backend.config.settings import settings
+from crew_ops_backend.db.database import SessionLocal
+from crew_ops_backend.models.flight_leg import FlightLeg
+from crew_ops_backend.db.repositories import leg_repository
 
 
 def get_all_scheduled_legs() -> list[FlightLeg]:

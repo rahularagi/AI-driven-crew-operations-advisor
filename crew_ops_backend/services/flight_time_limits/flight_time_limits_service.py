@@ -11,10 +11,10 @@ Registered at startup:
     event_bus.subscribe(RosterModifiedEvent, ftl_service.on_roster_modified)
 """
 
-from crew_ops.clients.ftl_client import get_crew_duty_state, update_crew_duty_state, get_all_crew_duty_states
-from crew_ops.clients.crew_profile_client import get_crew_member
-from crew_ops.models.events import LegCompletedEvent, RosterModifiedEvent, FlightTimeLimitsAlertEvent
-from crew_ops.services.event_bus import event_bus
+from crew_ops_backend.clients.ftl_client import get_crew_duty_state, update_crew_duty_state, get_all_crew_duty_states
+from crew_ops_backend.clients.crew_profile_client import get_crew_member
+from crew_ops_backend.models.events import LegCompletedEvent, RosterModifiedEvent, FlightTimeLimitsAlertEvent
+from crew_ops_backend.services.event_bus import event_bus
 from datetime import datetime, timezone, timedelta
 
 
@@ -30,7 +30,7 @@ class FlightTimeLimitsService:
         Subscribed to LegCompletedEvent via event bus.
         Updates FTL state for each crew member after a leg lands.
         """
-        from crew_ops.clients.flight_schedule_client import get_flight_leg
+        from crew_ops_backend.clients.flight_schedule_client import get_flight_leg
         leg = get_flight_leg(event.leg_id)
         leg_hours = 0.0
         if leg:

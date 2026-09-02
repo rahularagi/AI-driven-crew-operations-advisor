@@ -5,7 +5,7 @@ Simulates what Aviationstack would return when Observer polls a specific flight.
 Each entry is a sequence of poll responses showing how a flight evolves over time.
 
 Usage:
-    from crew_ops.data.mock_observer import get_poll_sequence
+    from crew_ops_backend.data.mock_observer import get_poll_sequence
     responses = get_poll_sequence("AI202-DEL-BOM-20240205")
     for poll in responses:
         print(poll)

@@ -1,9 +1,9 @@
 """Tests for rules/ftl_simulator.py"""
 from datetime import datetime, timezone, timedelta, date
 
-from crew_ops.models.flight_leg import FlightLeg
-from crew_ops.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
-from crew_ops.rules.ftl_simulator import simulate_leg_assigned, simulate_rest_after_leg
+from crew_ops_backend.models.flight_leg import FlightLeg
+from crew_ops_backend.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
+from crew_ops_backend.rules.ftl_simulator import simulate_leg_assigned, simulate_rest_after_leg
 
 
 _TODAY = date.today()

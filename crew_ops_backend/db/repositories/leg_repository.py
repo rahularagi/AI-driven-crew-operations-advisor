@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import Optional
-from crew_ops.models.flight_leg import FlightLeg
+from crew_ops_backend.models.flight_leg import FlightLeg
 
 
 def get_all_flight_legs(session: Session) -> list[FlightLeg]:

@@ -7,12 +7,12 @@ No external API involved.
 """
 
 from datetime import date, datetime, timezone
-from crew_ops.db.database import SessionLocal
-from crew_ops.models.crew_leave import CrewLeaveRecord
-from crew_ops.models.events import CrewDisruptedEvent
-from crew_ops.db.repositories import leave_repository, roster_repository
-from crew_ops.clients.crew_profile_client import get_crew_member
-from crew_ops.services.event_bus import event_bus
+from crew_ops_backend.db.database import SessionLocal
+from crew_ops_backend.models.crew_leave import CrewLeaveRecord
+from crew_ops_backend.models.events import CrewDisruptedEvent
+from crew_ops_backend.db.repositories import leave_repository, roster_repository
+from crew_ops_backend.clients.crew_profile_client import get_crew_member
+from crew_ops_backend.services.event_bus import event_bus
 
 
 def get_all_leave_records() -> list[CrewLeaveRecord]:

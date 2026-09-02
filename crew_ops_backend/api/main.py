@@ -1,28 +1,29 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
-from crew_ops.db.database import check_database_connection
-from crew_ops.config.settings import settings
+from crew_ops_backend.db.database import check_database_connection
+from crew_ops_backend.config.settings import settings
 
-from crew_ops.services.event_bus import event_bus
-from crew_ops.services.weekly_planner.weekly_planner_service import RosterPlanner, DailyValidator
-from crew_ops.services.disruption_handler.disruption_handler_service import DisruptionHandler
-from crew_ops.services.flight_time_limits.flight_time_limits_service import FlightTimeLimitsService
-from crew_ops.services.observer.observer_service import FlightObserver
+from crew_ops_backend.services.event_bus import event_bus
+from crew_ops_backend.services.weekly_planner.weekly_planner_service import RosterPlanner, DailyValidator
+from crew_ops_backend.services.disruption_handler.disruption_handler_service import DisruptionHandler
+from crew_ops_backend.services.flight_time_limits.flight_time_limits_service import FlightTimeLimitsService
+from crew_ops_backend.services.observer.observer_service import FlightObserver
 
-from crew_ops.models.events import (
+from crew_ops_backend.models.events import (
     LegCompletedEvent, RosterModifiedEvent, FlightDisruptedEvent, CrewDisruptedEvent
 )
 
-from crew_ops.api.routers import (
+from crew_ops_backend.api.routers import (
     planner_router, observer_router, crew_router, ftl_router, disruption_router
 )
 
 # ─── Push notification queue ────────────────────────────────────────────────────────────────────
 # Drained on each POST /chat response
-from crew_ops.conversation.push_queue import _push_queue
+from crew_ops_backend.conversation.push_queue import _push_queue
 
 # ─── Service instances ────────────────────────────────────────────────────────
 
@@ -96,11 +97,11 @@ scheduler.add_job(
 
 # Push notification polling — every 60 seconds
 def _push_pending_proposals() -> None:
-    from crew_ops.db.database import SessionLocal
-    from crew_ops.db.repositories import disruption_repository
-    from crew_ops.clients.flight_schedule_client import get_flight_leg
-    from crew_ops.clients.crew_profile_client import get_crew_member
-    from crew_ops.conversation.formatter import format_push_notification
+    from crew_ops_backend.db.database import SessionLocal
+    from crew_ops_backend.db.repositories import disruption_repository
+    from crew_ops_backend.clients.flight_schedule_client import get_flight_leg
+    from crew_ops_backend.clients.crew_profile_client import get_crew_member
+    from crew_ops_backend.conversation.formatter import format_push_notification
     with SessionLocal() as session:
         proposals = disruption_repository.get_unpushed_proposals(session)
         for p in proposals:
@@ -132,13 +133,20 @@ app = FastAPI(
     version="0.1.0",
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(planner_router.router)
 app.include_router(observer_router.router)
 app.include_router(crew_router.router)
 app.include_router(ftl_router.router)
 app.include_router(disruption_router.router)
 
-from crew_ops.conversation.router import router as conversation_router
+from crew_ops_backend.conversation.router import router as conversation_router
 app.include_router(conversation_router)
 
 

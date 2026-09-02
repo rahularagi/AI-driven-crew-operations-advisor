@@ -2,7 +2,7 @@
 from datetime import date, datetime, timezone, timedelta
 from unittest.mock import MagicMock, patch
 
-from crew_ops.services.simulation.simulation_service import SimulationService
+from crew_ops_backend.services.simulation.simulation_service import SimulationService
 
 
 def _make_leg(leg_id="L-001", aircraft_type="B737", assigned_crew=None):

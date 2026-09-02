@@ -8,10 +8,10 @@ Switch: set MOCK_CREW_PROFILE=False in .env to use real API.
 """
 
 from typing import Optional
-from crew_ops.config.settings import settings
-from crew_ops.db.database import SessionLocal
-from crew_ops.models.crew_member import CrewMember
-from crew_ops.db.repositories import crew_repository
+from crew_ops_backend.config.settings import settings
+from crew_ops_backend.db.database import SessionLocal
+from crew_ops_backend.models.crew_member import CrewMember
+from crew_ops_backend.db.repositories import crew_repository
 
 
 def get_all_crew_members() -> list[CrewMember]:

@@ -2,15 +2,15 @@ from collections import defaultdict
 from datetime import timedelta, timezone
 from typing import Optional
 
-from crew_ops.clients.crew_profile_client import get_all_crew_members, get_crew_member
-from crew_ops.clients.flight_schedule_client import get_flight_leg
-from crew_ops.clients.ftl_client import get_all_crew_duty_states
-from crew_ops.clients.license_client import get_all_licenses
-from crew_ops.clients.leave_client import get_all_leave_records
-from crew_ops.db.database import SessionLocal
-from crew_ops.db.repositories import roster_repository
-from crew_ops.rules.legality import check_legality
-from crew_ops.services.disruption_handler.disruption_handler_service import _score_candidate
+from crew_ops_backend.clients.crew_profile_client import get_all_crew_members, get_crew_member
+from crew_ops_backend.clients.flight_schedule_client import get_flight_leg
+from crew_ops_backend.clients.ftl_client import get_all_crew_duty_states
+from crew_ops_backend.clients.license_client import get_all_licenses
+from crew_ops_backend.clients.leave_client import get_all_leave_records
+from crew_ops_backend.db.database import SessionLocal
+from crew_ops_backend.db.repositories import roster_repository
+from crew_ops_backend.rules.legality import check_legality
+from crew_ops_backend.services.disruption_handler.disruption_handler_service import _score_candidate
 
 
 class SimulationService:

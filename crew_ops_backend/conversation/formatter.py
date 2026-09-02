@@ -1,4 +1,4 @@
-from crew_ops.config.settings import settings
+from crew_ops_backend.config.settings import settings
 
 
 def _get_llm():
@@ -12,6 +12,9 @@ def _get_llm():
         from langchain_aws import ChatBedrock
         return ChatBedrock(model_id=settings.bedrock_model_id, region_name=settings.aws_region,
                            model_kwargs={"max_tokens": 512})
+    if settings.llm_provider == "gemini":
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        return ChatGoogleGenerativeAI(model=settings.gemini_model, google_api_key=settings.gemini_api_key, max_output_tokens=512)
     raise ValueError(f"Unknown LLM provider: {settings.llm_provider!r}")
 
 

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from crew_ops.models.crew_leave import CrewLeaveRecord
+from crew_ops_backend.models.crew_leave import CrewLeaveRecord
 
 
 def get_all_leave_records(session: Session) -> list[CrewLeaveRecord]:

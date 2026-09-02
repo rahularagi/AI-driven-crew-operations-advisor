@@ -1,16 +1,16 @@
 from datetime import date, datetime, timezone
 
-from crew_ops.clients.crew_profile_client import get_crew_member
-from crew_ops.clients.flight_schedule_client import get_flight_leg
-from crew_ops.clients.ftl_client import get_crew_duty_state
-from crew_ops.clients.license_client import get_licenses_for_crew_member
-from crew_ops.clients.leave_client import get_leave_records_for_crew
-from crew_ops.db.database import SessionLocal
-from crew_ops.db.repositories import disruption_repository, roster_repository
-from crew_ops.models.events import CrewDisruptedEvent, RosterModifiedEvent
-from crew_ops.rules.legality import check_legality
-from crew_ops.services.event_bus import event_bus
-from crew_ops.services.simulation.simulation_service import SimulationService
+from crew_ops_backend.clients.crew_profile_client import get_crew_member
+from crew_ops_backend.clients.flight_schedule_client import get_flight_leg
+from crew_ops_backend.clients.ftl_client import get_crew_duty_state
+from crew_ops_backend.clients.license_client import get_licenses_for_crew_member
+from crew_ops_backend.clients.leave_client import get_leave_records_for_crew
+from crew_ops_backend.db.database import SessionLocal
+from crew_ops_backend.db.repositories import disruption_repository, roster_repository
+from crew_ops_backend.models.events import CrewDisruptedEvent, RosterModifiedEvent
+from crew_ops_backend.rules.legality import check_legality
+from crew_ops_backend.services.event_bus import event_bus
+from crew_ops_backend.services.simulation.simulation_service import SimulationService
 
 
 # ─── Read tools ───────────────────────────────────────────────────────────────
@@ -140,7 +140,7 @@ def action_accept_proposal(proposal_id: str, decided_by: str) -> dict:
 
 
 def action_reject_proposal(proposal_id: str, decided_by: str, rejection_reason: str) -> dict:
-    from crew_ops.services.disruption_handler.disruption_handler_service import DisruptionHandler
+    from crew_ops_backend.services.disruption_handler.disruption_handler_service import DisruptionHandler
     return DisruptionHandler().reject_and_repropose(proposal_id, decided_by, rejection_reason)
 
 

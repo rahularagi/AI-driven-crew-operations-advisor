@@ -5,9 +5,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from crew_ops.api.main import app
-from crew_ops.conversation.session import _sessions
-from crew_ops.conversation.push_queue import _push_queue
+from crew_ops_backend.api.main import app
+from crew_ops_backend.conversation.session import _sessions
+from crew_ops_backend.conversation.push_queue import _push_queue
 
 client = TestClient(app)
 
@@ -94,7 +94,7 @@ def test_chat_simulate_returns_candidates_and_prompt():
     assert data["requires_confirmation"] is False
 
     # Session should have pending_simulation stored
-    from crew_ops.conversation.session import get_session
+    from crew_ops_backend.conversation.session import get_session
     session = get_session("sess-s1")
     assert session.pending_simulation is not None
     assert session.pending_simulation.crew_id == "C-003"
@@ -123,7 +123,7 @@ def test_chat_action_requires_confirmation():
 
 
 def test_chat_action_yes_executes():
-    from crew_ops.conversation.session import get_session, save_session, SessionState, PendingConfirmation
+    from crew_ops_backend.conversation.session import get_session, save_session, SessionState, PendingConfirmation
 
     # Pre-seed session with pending confirmation
     session = get_session("sess-a2")
@@ -157,7 +157,7 @@ def test_chat_action_yes_executes():
 
 
 def test_chat_action_no_cancels():
-    from crew_ops.conversation.session import get_session, save_session, PendingConfirmation
+    from crew_ops_backend.conversation.session import get_session, save_session, PendingConfirmation
 
     session = get_session("sess-a3")
     session.pending_confirmation = PendingConfirmation(
@@ -186,7 +186,7 @@ def test_chat_action_no_cancels():
 # ─── SIMULATE → apply it flow ─────────────────────────────────────────────────
 
 def test_chat_simulate_then_apply():
-    from crew_ops.conversation.session import get_session, save_session, PendingSimulation
+    from crew_ops_backend.conversation.session import get_session, save_session, PendingSimulation
 
     # Step 1: simulate
     session = get_session("sess-sim1")

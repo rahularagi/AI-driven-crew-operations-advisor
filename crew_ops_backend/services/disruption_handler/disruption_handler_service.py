@@ -12,16 +12,16 @@ Registered at startup:
 
 from datetime import datetime, timezone
 from sqlalchemy import text
-from crew_ops.clients.crew_profile_client import get_all_crew_members, get_crew_member
-from crew_ops.clients.ftl_client import get_all_crew_duty_states, get_crew_duty_state
-from crew_ops.clients.flight_schedule_client import get_flight_leg
-from crew_ops.clients.license_client import get_licenses_for_crew_member
-from crew_ops.clients.leave_client import get_leave_records_for_crew
-from crew_ops.db.database import SessionLocal
-from crew_ops.db.repositories import roster_repository, disruption_repository
-from crew_ops.models.events import FlightDisruptedEvent, CrewDisruptedEvent, RosterModifiedEvent
-from crew_ops.rules.legality import check_legality
-from crew_ops.services.event_bus import event_bus
+from crew_ops_backend.clients.crew_profile_client import get_all_crew_members, get_crew_member
+from crew_ops_backend.clients.ftl_client import get_all_crew_duty_states, get_crew_duty_state
+from crew_ops_backend.clients.flight_schedule_client import get_flight_leg
+from crew_ops_backend.clients.license_client import get_licenses_for_crew_member
+from crew_ops_backend.clients.leave_client import get_leave_records_for_crew
+from crew_ops_backend.db.database import SessionLocal
+from crew_ops_backend.db.repositories import roster_repository, disruption_repository
+from crew_ops_backend.models.events import FlightDisruptedEvent, CrewDisruptedEvent, RosterModifiedEvent
+from crew_ops_backend.rules.legality import check_legality
+from crew_ops_backend.services.event_bus import event_bus
 
 
 class DisruptionHandler:
@@ -169,8 +169,8 @@ class DisruptionHandler:
 
     def auto_resolve_low_severity(self) -> list[str]:
         """Scheduled every 30 min. Auto-accepts LOW proposals if candidate is still legal."""
-        from crew_ops.clients.license_client import get_licenses_for_crew_member
-        from crew_ops.clients.leave_client import get_leave_records_for_crew
+        from crew_ops_backend.clients.license_client import get_licenses_for_crew_member
+        from crew_ops_backend.clients.leave_client import get_leave_records_for_crew
         resolved = []
         with SessionLocal() as session:
             rows = session.execute(
@@ -273,8 +273,8 @@ class DisruptionHandler:
 
     def _find_and_rank_candidates(self, role: str, leg) -> list[dict]:
         from collections import defaultdict
-        from crew_ops.clients.license_client import get_all_licenses
-        from crew_ops.clients.leave_client import get_all_leave_records
+        from crew_ops_backend.clients.license_client import get_all_licenses
+        from crew_ops_backend.clients.leave_client import get_all_leave_records
 
         all_crew   = get_all_crew_members()
         ftl_states = {s.crew_id: s for s in get_all_crew_duty_states()}

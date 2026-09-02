@@ -18,21 +18,21 @@ from collections import defaultdict
 from datetime import date, datetime, timedelta, time, timezone
 from typing import Optional
 
-from crew_ops.clients.crew_profile_client import get_all_crew_members
-from crew_ops.clients.flight_schedule_client import get_legs_for_date_range, get_flight_leg
-from crew_ops.clients.ftl_client import get_all_crew_duty_states
-from crew_ops.clients.license_client import get_all_licenses
-from crew_ops.clients.leave_client import get_all_leave_records
-from crew_ops.db.database import SessionLocal
-from crew_ops.db.repositories import roster_repository, reserve_repository
-from crew_ops.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
-from crew_ops.models.crew_reserve import CrewReserveSchedule
-from crew_ops.models.events import CrewDisruptedEvent, RosterModifiedEvent
-from crew_ops.rules.crew_requirements import required_pilots, required_cabin
-from crew_ops.rules.ftl_simulator import simulate_leg_assigned
-from crew_ops.rules.legality import check_legality
-from crew_ops.services.event_bus import event_bus
-from crew_ops.config.settings import settings
+from crew_ops_backend.clients.crew_profile_client import get_all_crew_members
+from crew_ops_backend.clients.flight_schedule_client import get_legs_for_date_range, get_flight_leg
+from crew_ops_backend.clients.ftl_client import get_all_crew_duty_states
+from crew_ops_backend.clients.license_client import get_all_licenses
+from crew_ops_backend.clients.leave_client import get_all_leave_records
+from crew_ops_backend.db.database import SessionLocal
+from crew_ops_backend.db.repositories import roster_repository, reserve_repository
+from crew_ops_backend.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
+from crew_ops_backend.models.crew_reserve import CrewReserveSchedule
+from crew_ops_backend.models.events import CrewDisruptedEvent, RosterModifiedEvent
+from crew_ops_backend.rules.crew_requirements import required_pilots, required_cabin
+from crew_ops_backend.rules.ftl_simulator import simulate_leg_assigned
+from crew_ops_backend.rules.legality import check_legality
+from crew_ops_backend.services.event_bus import event_bus
+from crew_ops_backend.config.settings import settings
 
 
 class RosterPlanner:

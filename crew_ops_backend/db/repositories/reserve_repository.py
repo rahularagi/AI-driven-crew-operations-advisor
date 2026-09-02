@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from crew_ops.models.crew_reserve import CrewReserveSchedule
+from crew_ops_backend.models.crew_reserve import CrewReserveSchedule
 
 
 def get_all_reserve_schedules(session: Session) -> list[CrewReserveSchedule]:

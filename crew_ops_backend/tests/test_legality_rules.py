@@ -3,12 +3,12 @@ from datetime import date, datetime, timezone, timedelta
 
 import pytest
 
-from crew_ops.models.crew_member import CrewMember
-from crew_ops.models.flight_leg import FlightLeg
-from crew_ops.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
-from crew_ops.models.crew_license import CrewLicense
-from crew_ops.models.crew_leave import CrewLeaveRecord
-from crew_ops.rules.legality import check_legality
+from crew_ops_backend.models.crew_member import CrewMember
+from crew_ops_backend.models.flight_leg import FlightLeg
+from crew_ops_backend.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
+from crew_ops_backend.models.crew_license import CrewLicense
+from crew_ops_backend.models.crew_leave import CrewLeaveRecord
+from crew_ops_backend.rules.legality import check_legality
 
 
 _TODAY = date.today()

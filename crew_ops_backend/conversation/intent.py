@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Literal, Optional
-from crew_ops.conversation.session import SessionState
+from crew_ops_backend.conversation.session import SessionState
 
 
 class Intent(BaseModel):
@@ -38,7 +38,7 @@ Return JSON matching the Intent schema exactly. Do not add extra fields.
 
 
 def classify_intent(message: str, session: SessionState, crew_list: list[dict]) -> Intent:
-    from crew_ops.conversation.formatter import _get_llm
+    from crew_ops_backend.conversation.formatter import _get_llm
     from langchain_core.messages import SystemMessage, HumanMessage
 
     llm = _get_llm().with_structured_output(Intent)

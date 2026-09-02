@@ -24,11 +24,13 @@ class Settings(BaseSettings):
     hrms_api_key: str = ""
 
     # ─── LLM provider ────────────────────────────────────────────────────────────────────
-    llm_provider:      str = "openai"   # openai / anthropic / bedrock
+    llm_provider:      str = "openai"   # openai / anthropic / bedrock / gemini
     openai_api_key:    str = ""
     anthropic_api_key: str = ""
     bedrock_model_id:  str = "anthropic.claude-3-5-sonnet-20241022-v2:0"
     aws_region:        str = "us-east-1"
+    gemini_api_key:    str = ""
+    gemini_model:      str = "gemini-2.5-flash"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 

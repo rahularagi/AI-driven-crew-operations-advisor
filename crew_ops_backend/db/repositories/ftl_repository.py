@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import Optional
-from crew_ops.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
+from crew_ops_backend.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
 
 
 def get_all_ftl_states(session: Session) -> list[CrewFlightTimeLimitsState]:

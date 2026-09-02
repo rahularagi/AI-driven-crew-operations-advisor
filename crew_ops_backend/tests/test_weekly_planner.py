@@ -4,14 +4,14 @@ from unittest.mock import MagicMock, patch, call
 
 import pytest
 
-from crew_ops.services.weekly_planner.weekly_planner_service import (
+from crew_ops_backend.services.weekly_planner.weekly_planner_service import (
     RosterPlanner, _pass1_assign_crew, _pass2_fill_reserve,
     _pass3_validate, _score_candidate, _fatigue_score,
 )
-from crew_ops.models.crew_member import CrewMember
-from crew_ops.models.flight_leg import FlightLeg
-from crew_ops.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
-from crew_ops.models.crew_license import CrewLicense
+from crew_ops_backend.models.crew_member import CrewMember
+from crew_ops_backend.models.flight_leg import FlightLeg
+from crew_ops_backend.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
+from crew_ops_backend.models.crew_license import CrewLicense
 
 _MODULE = "crew_ops.services.weekly_planner.weekly_planner_service"
 _TODAY  = date.today()
@@ -492,7 +492,7 @@ def test_fatigue_score_zero_for_fresh_crew():
 
 # ── _classify_severity ────────────────────────────────────────────────────────
 
-from crew_ops.services.weekly_planner.weekly_planner_service import _classify_severity
+from crew_ops_backend.services.weekly_planner.weekly_planner_service import _classify_severity
 
 
 def test_classify_severity_critical_today():

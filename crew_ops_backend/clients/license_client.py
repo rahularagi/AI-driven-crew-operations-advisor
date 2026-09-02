@@ -7,10 +7,10 @@ Real mode  : calls License Management API
 Switch: set MOCK_LICENSE=False in .env to use real API.
 """
 
-from crew_ops.config.settings import settings
-from crew_ops.db.database import SessionLocal
-from crew_ops.models.crew_license import CrewLicense
-from crew_ops.db.repositories import license_repository
+from crew_ops_backend.config.settings import settings
+from crew_ops_backend.db.database import SessionLocal
+from crew_ops_backend.models.crew_license import CrewLicense
+from crew_ops_backend.db.repositories import license_repository
 
 
 def get_licenses_for_crew_member(crew_id: str) -> list[CrewLicense]:

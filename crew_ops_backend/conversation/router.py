@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from crew_ops.conversation.agent import build_graph
-from crew_ops.conversation.push_queue import _push_queue
-from crew_ops.conversation.session import get_session, save_session
+from crew_ops_backend.conversation.agent import build_graph
+from crew_ops_backend.conversation.push_queue import _push_queue
+from crew_ops_backend.conversation.session import get_session, save_session
 
 router = APIRouter(prefix="/chat", tags=["Conversation"])
 

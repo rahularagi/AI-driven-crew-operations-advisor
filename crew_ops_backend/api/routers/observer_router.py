@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from datetime import date
-from crew_ops.services.observer.observer_service import FlightObserver
-from crew_ops.models.flight_leg import FlightLeg
+from crew_ops_backend.services.observer.observer_service import FlightObserver
+from crew_ops_backend.models.flight_leg import FlightLeg
 
 router = APIRouter(prefix="/observer", tags=["Observer"])
 

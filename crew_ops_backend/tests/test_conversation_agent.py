@@ -4,15 +4,15 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from crew_ops.conversation.agent import (
+from crew_ops_backend.conversation.agent import (
     route_decision, confirm_node, execute_node, format_node,
     _build_action_args, _pre_check_legality,
 )
-from crew_ops.conversation.tools import _classify_severity
-from crew_ops.conversation.session import (
+from crew_ops_backend.conversation.tools import _classify_severity
+from crew_ops_backend.conversation.session import (
     SessionState, PendingConfirmation, PendingSimulation, _sessions
 )
-from crew_ops.conversation.intent import Intent
+from crew_ops_backend.conversation.intent import Intent
 
 
 def setup_function():
@@ -313,7 +313,7 @@ def test_pre_check_legality_reassign_passes():
 
 def test_dispatch_query_insufficient_context_returns_error():
     """No leg_id, no crew_id, no keyword — must return error dict."""
-    from crew_ops.conversation.agent import _dispatch_query
+    from crew_ops_backend.conversation.agent import _dispatch_query
     intent = _make_intent(mode="QUERY", entities={}, raw="hello")
     result = _dispatch_query(intent)
     assert "error" in result
@@ -323,7 +323,7 @@ def test_dispatch_query_insufficient_context_returns_error():
 
 def test_dispatch_simulate_insufficient_entities_returns_error():
     """No crew_id or leg_id — must return error dict."""
-    from crew_ops.conversation.agent import _dispatch_simulate
+    from crew_ops_backend.conversation.agent import _dispatch_simulate
     intent = _make_intent(mode="SIMULATE", entities={}, raw="what if something happens")
     result = _dispatch_simulate(intent)
     assert "error" in result
@@ -333,7 +333,7 @@ def test_dispatch_simulate_insufficient_entities_returns_error():
 
 def test_dispatch_action_unknown_type_returns_error():
     """Unrecognised action_type must return error dict, not raise."""
-    from crew_ops.conversation.agent import _dispatch_action
+    from crew_ops_backend.conversation.agent import _dispatch_action
     result = _dispatch_action("UNKNOWN_ACTION", {}, "ops_01")
     assert "error" in result
     assert "unknown" in result["error"].lower()
@@ -344,7 +344,7 @@ def test_dispatch_action_unknown_type_returns_error():
 def test_format_node_pending_confirmation_no_tool_result_asks_yes_no():
     """When a confirmation is pending and no tool_result is set, format_node
     must ask the user to reply YES or NO (clarify branch)."""
-    from crew_ops.conversation.session import PendingConfirmation
+    from crew_ops_backend.conversation.session import PendingConfirmation
     from datetime import datetime, timezone, timedelta
     session = SessionState(session_id="s-fmt")
     session.pending_confirmation = PendingConfirmation(

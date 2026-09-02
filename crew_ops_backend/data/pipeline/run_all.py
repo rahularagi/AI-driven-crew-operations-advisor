@@ -6,18 +6,18 @@ Usage:
     python -m crew_ops.data.pipeline.run_all
 """
 
-from crew_ops.db.database import SessionLocal, check_database_connection
-from crew_ops.data.mock.crew import MOCK_CREW_MEMBERS
-from crew_ops.data.mock.licenses import MOCK_CREW_LICENSES
-from crew_ops.data.mock.leave_records import MOCK_CREW_LEAVE_RECORDS
-from crew_ops.data.mock.reserve_schedule import MOCK_RESERVE_SCHEDULE
-from crew_ops.models.crew_member import CrewMember
-from crew_ops.models.crew_license import CrewLicense
-from crew_ops.models.crew_leave import CrewLeaveRecord
-from crew_ops.models.crew_reserve import CrewReserveSchedule
-from crew_ops.models.flight_leg import FlightLeg
-from crew_ops.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
-from crew_ops.db.repositories import (
+from crew_ops_backend.db.database import SessionLocal, check_database_connection
+from crew_ops_backend.data.mock.crew import MOCK_CREW_MEMBERS
+from crew_ops_backend.data.mock.licenses import MOCK_CREW_LICENSES
+from crew_ops_backend.data.mock.leave_records import MOCK_CREW_LEAVE_RECORDS
+from crew_ops_backend.data.mock.reserve_schedule import MOCK_RESERVE_SCHEDULE
+from crew_ops_backend.models.crew_member import CrewMember
+from crew_ops_backend.models.crew_license import CrewLicense
+from crew_ops_backend.models.crew_leave import CrewLeaveRecord
+from crew_ops_backend.models.crew_reserve import CrewReserveSchedule
+from crew_ops_backend.models.flight_leg import FlightLeg
+from crew_ops_backend.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
+from crew_ops_backend.db.repositories import (
     crew_repository,
     license_repository,
     leave_repository,
@@ -27,8 +27,8 @@ from crew_ops.db.repositories import (
 )
 
 # Import seed data from existing seed files (reuse what is already written)
-from crew_ops.data.seed_legs import LEGS
-from crew_ops.data.seed_ftl import FTL_STATES
+from crew_ops_backend.data.seed_legs import LEGS
+from crew_ops_backend.data.seed_ftl import FTL_STATES
 
 
 def load_crew_members(session) -> int:

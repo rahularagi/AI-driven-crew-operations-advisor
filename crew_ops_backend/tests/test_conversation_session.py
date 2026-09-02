@@ -1,6 +1,6 @@
 """Tests for conversation/session.py"""
 from datetime import datetime, timezone, timedelta
-from crew_ops.conversation.session import (
+from crew_ops_backend.conversation.session import (
     SessionState, PendingConfirmation, PendingSimulation,
     get_session, save_session, _sessions,
 )
