@@ -1,182 +1,121 @@
 # roster_tools.py
 # These are the tools the LLM can call to fetch roster and assignment data from the DB.
-# Rosters define which crew member is assigned to which flight on which date.
-# These tools help OCC managers see the full picture of crew scheduling.
+# Each function is decorated with @tool so LangGraph can register it.
+# The docstring of each function is what the LLM reads to decide when to use it.
+#
+# Tables used:
+#   - roster_crew_assignment → which crew member is assigned to which leg and their status
+#   - roster_leg             → planning metadata for each leg (plan status, trigger)
+#   - flight_legs            → joined to get flight numbers, routes, and times
+#   - crew_members           → joined to get crew names and roles
+#
+# NOTE: crew_id and leg_id are VARCHAR in all tables — always pass as strings
 
 from langchain_core.tools import tool
 from sqlalchemy import text
-
-# get_db_session gives us a database session to run queries
 from crew_ops.db.database import get_db_session
 
 
-# ── Tool 1: Get Roster By Date ────────────────────────────────────────────────
-# Returns the full crew roster for a specific date.
-# Shows every crew member assigned to every flight on that day.
-# This is the most common tool an OCC manager will use first thing in the morning.
+# ── Tool 1: Get Crew Roster ───────────────────────────────────────────────────
+# Returns the last 20 assignments for a specific crew member.
+# Used when a manager asks "what is [name] flying this week?" or similar.
 
 @tool
-def get_roster_by_date(date: str) -> str:
-    """Get the full crew roster for a specific date. Pass date in YYYY-MM-DD format.
-    Shows all crew assignments across all flights for that day."""
-    with get_db_session() as db:
+def get_crew_roster(crew_id: str) -> str:
+    """Get the roster assignments for a specific crew member by their crew ID e.g. C001."""
+    db = get_db_session()
+    try:
         result = db.execute(text("""
             SELECT
-                r.flight_number,
-                f.origin,
-                f.destination,
-                f.scheduled_departure,
-                c.employee_id,
-                c.first_name,
-                c.last_name,
-                c.role
-            FROM roster_assignments r
-            JOIN flights f ON f.flight_number = r.flight_number
-            JOIN crew_members c ON c.employee_id = r.employee_id
-            WHERE DATE(r.duty_date) = :date
-            ORDER BY f.scheduled_departure, c.role
-        """), {"date": date})
+                fl.flight_number,
+                fl.origin_iata,
+                fl.destination_iata,
+                fl.scheduled_departure,
+                fl.scheduled_arrival,
+                rca.status,
+                rca.assigned_at
+            FROM roster_crew_assignment rca
+            JOIN flight_legs fl ON fl.leg_id = rca.leg_id
+            WHERE rca.crew_id = :crew_id
+            ORDER BY fl.scheduled_departure DESC
+            LIMIT 20
+        """), {"crew_id": crew_id})
         rows = result.fetchall()
+    finally:
+        db.close()
 
     if not rows:
-        return f"No roster assignments found for {date}"
-
-    # Group assignments by flight number for a cleaner output
-    flights = {}
-    for r in rows:
-        key = r.flight_number
-        if key not in flights:
-            # First time seeing this flight — create its entry
-            flights[key] = {
-                "header": f"{r.flight_number} | {r.origin} → {r.destination} | Dep: {r.scheduled_departure}",
-                "crew": []
-            }
-        # Add this crew member to the flight's crew list
-        flights[key]["crew"].append(f"  - {r.employee_id} | {r.first_name} {r.last_name} | {r.role}")
-
-    # Build the final output string flight by flight
-    lines = []
-    for flight in flights.values():
-        lines.append(flight["header"])
-        lines.extend(flight["crew"])
-        lines.append("")  # blank line between flights for readability
-
-    return f"Roster for {date}:\n" + "\n".join(lines)
-
-
-# ── Tool 2: Get Crew Roster ───────────────────────────────────────────────────
-# Returns the upcoming roster for a specific crew member.
-# Shows all flights they are assigned to in the next 7 days.
-# Useful when a manager asks "what is John Smith flying this week?"
-
-@tool
-def get_crew_roster(employee_id: str) -> str:
-    """Get the upcoming 7-day roster for a specific crew member by their employee ID.
-    Shows all flights they are assigned to in the next 7 days."""
-    with get_db_session() as db:
-        result = db.execute(text("""
-            SELECT
-                r.duty_date,
-                r.flight_number,
-                f.origin,
-                f.destination,
-                f.scheduled_departure,
-                f.scheduled_arrival,
-                f.aircraft_type
-            FROM roster_assignments r
-            JOIN flights f ON f.flight_number = r.flight_number
-            WHERE r.employee_id = :employee_id
-              AND r.duty_date >= CURRENT_DATE
-              AND r.duty_date <= CURRENT_DATE + INTERVAL '7 days'
-            ORDER BY r.duty_date, f.scheduled_departure
-        """), {"employee_id": employee_id})
-        rows = result.fetchall()
-
-    if not rows:
-        return f"No upcoming roster assignments found for employee {employee_id} in the next 7 days."
+        return f"No roster assignments found for crew ID {crew_id}"
 
     lines = [
-        f"{r.duty_date} | {r.flight_number} | {r.origin} → {r.destination} | "
-        f"Dep: {r.scheduled_departure} | Arr: {r.scheduled_arrival} | Aircraft: {r.aircraft_type}"
+        f"{r.flight_number} | {r.origin_iata}→{r.destination_iata} | "
+        f"Dep: {r.scheduled_departure} | Status: {r.status}"
         for r in rows
     ]
-    return f"Upcoming roster for {employee_id}:\n" + "\n".join(lines)
+    return f"Roster for crew {crew_id} (last 20):\n" + "\n".join(lines)
 
 
-# ── Tool 3: Get Open Positions ────────────────────────────────────────────────
-# Returns all flights that still have unfilled crew positions on a given date.
-# An open position means a required crew role (e.g. Captain) has no one assigned yet.
-# This is critical for OCC managers to identify and fill gaps before departure.
+# ── Tool 2: Get Unassigned Legs ───────────────────────────────────────────────
+# Returns upcoming flight legs with no crew assigned.
+# Used for gap detection — "which flights still need crew?".
 
 @tool
-def get_open_positions(date: str) -> str:
-    """Get all flights with unfilled crew positions on a specific date. Pass date in YYYY-MM-DD format.
-    Returns flights where a required crew role has no one assigned."""
-    with get_db_session() as db:
+def get_unassigned_legs() -> str:
+    """Get upcoming flight legs that have no crew assigned yet."""
+    db = get_db_session()
+    try:
         result = db.execute(text("""
             SELECT
-                op.flight_number,
-                f.origin,
-                f.destination,
-                f.scheduled_departure,
-                op.required_role,
-                op.positions_required,
-                op.positions_filled
-            FROM open_positions op
-            JOIN flights f ON f.flight_number = op.flight_number
-            WHERE DATE(f.scheduled_departure) = :date
-              AND op.positions_filled < op.positions_required
-            ORDER BY f.scheduled_departure, op.required_role
-        """), {"date": date})
+                fl.leg_id,
+                fl.flight_number,
+                fl.origin_iata,
+                fl.destination_iata,
+                fl.scheduled_departure,
+                fl.aircraft_type,
+                fl.status
+            FROM flight_legs fl
+            LEFT JOIN roster_crew_assignment rca ON rca.leg_id = fl.leg_id
+            WHERE rca.id IS NULL
+              AND fl.scheduled_departure >= NOW()
+            ORDER BY fl.scheduled_departure
+            LIMIT 50
+        """))
         rows = result.fetchall()
+    finally:
+        db.close()
 
     if not rows:
-        return f"No open positions found for {date}. All flights are fully crewed."
+        return "All upcoming flight legs have crew assigned."
 
     lines = [
-        f"⚠️ {r.flight_number} | {r.origin} → {r.destination} | Dep: {r.scheduled_departure} | "
-        f"Role needed: {r.required_role} | "
-        f"Filled: {r.positions_filled}/{r.positions_required}"
+        f"Leg {r.leg_id} | {r.flight_number} | {r.origin_iata}→{r.destination_iata} | "
+        f"Dep: {r.scheduled_departure} | Aircraft: {r.aircraft_type}"
         for r in rows
     ]
-    return f"Open positions on {date}:\n" + "\n".join(lines)
+    return f"Unassigned legs ({len(rows)}):\n" + "\n".join(lines)
 
 
-# ── Tool 4: Get Roster Conflicts ──────────────────────────────────────────────
-# Returns all scheduling conflicts in the roster for a given date.
-# A conflict means a crew member has been assigned to two overlapping duties,
-# or has been assigned a flight that violates their rest or FTL limits.
-# These must be resolved before the flights depart.
+# ── Tool 3: Get Roster Plan Status ───────────────────────────────────────────
+# Returns a count breakdown of roster_leg plan statuses.
+# Used for a quick health check: "how many legs are confirmed vs pending?".
 
 @tool
-def get_roster_conflicts(date: str) -> str:
-    """Get all roster conflicts on a specific date. Pass date in YYYY-MM-DD format.
-    A conflict means overlapping duties, FTL violations, or rest violations in the roster."""
-    with get_db_session() as db:
+def get_roster_plan_status() -> str:
+    """Get a summary of roster leg plan statuses — confirmed, pending, failed, etc."""
+    db = get_db_session()
+    try:
         result = db.execute(text("""
-            SELECT
-                rc.employee_id,
-                c.first_name,
-                c.last_name,
-                rc.conflict_type,
-                rc.flight_number_1,
-                rc.flight_number_2,
-                rc.conflict_description
-            FROM roster_conflicts rc
-            JOIN crew_members c ON c.employee_id = rc.employee_id
-            WHERE DATE(rc.conflict_date) = :date
-            ORDER BY rc.conflict_type, rc.employee_id
-        """), {"date": date})
+            SELECT status, COUNT(*) as count
+            FROM roster_leg
+            GROUP BY status
+            ORDER BY count DESC
+        """))
         rows = result.fetchall()
+    finally:
+        db.close()
 
     if not rows:
-        return f"No roster conflicts found for {date}. Roster is clean."
+        return "No roster leg plans found."
 
-    lines = [
-        f"🔴 {r.employee_id} | {r.first_name} {r.last_name} | "
-        f"Conflict: {r.conflict_type} | "
-        f"Flights: {r.flight_number_1} / {r.flight_number_2} | "
-        f"Detail: {r.conflict_description}"
-        for r in rows
-    ]
-    return f"Roster conflicts on {date}:\n" + "\n".join(lines)
+    lines = [f"{r.status}: {r.count}" for r in rows]
+    return "Roster plan status:\n" + "\n".join(lines)
