@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CrewOps — Operations Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0A0E1A;--surface:#111827;--raised:#1F2937;--overlay:#374151;
+  --border:#1F2937;--border2:#374151;
+  --blue:#3B82F6;--blue-dim:#1E3A5F;--blue-dark:#1D4ED8;
+  --green:#10B981;--amber:#F59E0B;--red:#EF4444;--orange:#F97316;
+  --red-dark:#7F1D1D;--amber-dark:#78350F;--orange-dark:#7C2D12;
+  --text:#F9FAFB;--muted:#6B7280;--muted2:#9CA3AF;
+  --r:8px;--rs:4px;
+}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;font-size:13px;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--overlay);border-radius:2px}
+.scroll{overflow-y:auto;flex:1;min-height:0}
+.hidden{display:none!important}
+/* topbar */
+.topbar{height:48px;background:var(--surface);border-bottom:1px solid var(--border2);display:flex;align-items:center;padding:0 14px;gap:12px;flex-shrink:0;z-index:50}
+.logo{font-weight:800;font-size:15px;letter-spacing:-0.3px;color:var(--text);display:flex;align-items:center;gap:7px}
+.logo-icon{width:26px;height:26px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.topbar-date{color:var(--muted);font-size:12px}
+.live-pill{display:flex;align-items:center;gap:5px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#10B981;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.live-dot{width:6px;height:6px;background:#10B981;border-radius:50%;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.sp{flex:1}
+.icon-btn{width:32px;height:32px;border-radius:var(--rs);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted2);position:relative;transition:.15s}
+.icon-btn:hover{background:var(--raised);color:var(--text)}
+.notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--surface)}
+.user-chip{display:flex;align-items:center;gap:7px;padding:4px 10px;border-radius:var(--rs);cursor:pointer;border:1px solid var(--border2);color:var(--muted2);font-size:12px}
+.user-chip:hover{background:var(--raised);color:var(--text)}
+.avatar{width:22px;height:22px;background:var(--blue-dim);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--blue)}
+/* layout */
+.body{display:flex;flex:1;overflow:hidden}
+/* left nav */
+.leftnav{width:52px;background:var(--surface);border-right:1px solid var(--border2);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:2px;flex-shrink:0}
+.nav-btn{width:38px;height:38px;border-radius:var(--rs);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:.15s;position:relative;font-size:16px}
+.nav-btn:hover{background:var(--raised);color:var(--text)}
+.nav-btn.active{background:var(--blue-dim);color:var(--blue)}
+.nav-btn .nb{position:absolute;top:4px;right:4px;background:var(--red);color:#fff;font-size:8px;font-weight:700;width:12px;height:12px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.nav-sep{width:28px;height:1px;background:var(--border2);margin:4px 0}
+/* content */
+.content{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+/* right panel */
+.rpanel{width:376px;flex-shrink:0;display:flex;flex-direction:column;border-left:1px solid var(--border2);overflow:hidden}
+/* panel header */
+.ph{display:flex;align-items:center;padding:9px 13px;border-bottom:1px solid var(--border2);gap:7px;flex-shrink:0;background:var(--surface)}
+.ph-title{font-weight:600;font-size:13px}
+.ph-sub{font-size:11px;color:var(--muted)}
+/* tabs */
+.tabs{display:flex;gap:1px;background:var(--raised);padding:2px;border-radius:var(--rs)}
+.tab{padding:3px 9px;border-radius:3px;cursor:pointer;font-size:11px;color:var(--muted);transition:.15s}
+.tab.on{background:var(--surface);color:var(--text);font-weight:600}
+.tab:hover:not(.on){color:var(--text)}
+/* badges */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap}
+.bg{background:rgba(16,185,129,.15);color:#10B981;border:1px solid rgba(16,185,129,.25)}
+.ba{background:rgba(245,158,11,.15);color:#F59E0B;border:1px solid rgba(245,158,11,.25)}
+.br{background:rgba(239,68,68,.15);color:#EF4444;border:1px solid rgba(239,68,68,.25)}
+.bb{background:rgba(59,130,246,.15);color:#3B82F6;border:1px solid rgba(59,130,246,.25)}
+.bm{background:rgba(107,114,128,.15);color:#9CA3AF;border:1px solid rgba(107,114,128,.25)}
+.bo{background:rgba(249,115,22,.15);color:#F97316;border:1px solid rgba(249,115,22,.25)}
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:var(--rs);font-size:11px;font-weight:600;cursor:pointer;border:none;transition:.15s;white-space:nowrap}
+.btn-p{background:var(--blue);color:#fff}.btn-p:hover{background:var(--blue-dark)}
+.btn-g{background:rgba(16,185,129,.18);color:#10B981;border:1px solid rgba(16,185,129,.3)}.btn-g:hover{background:rgba(16,185,129,.28)}
+.btn-r{background:rgba(239,68,68,.18);color:#EF4444;border:1px solid rgba(239,68,68,.3)}.btn-r:hover{background:rgba(239,68,68,.28)}
+.btn-a{background:rgba(245,158,11,.18);color:#F59E0B;border:1px solid rgba(245,158,11,.3)}.btn-a:hover{background:rgba(245,158,11,.28)}
+.btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--border2)}.btn-ghost:hover{background:var(--raised);color:var(--text)}
+.btn-sm{padding:3px 8px;font-size:10px}
+/* pulse ring */
+@keyframes pring{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.45)}50%{box-shadow:0 0 0 7px rgba(239,68,68,0)}}
+.pring{animation:pring 1.5s ease infinite}
+/* progress */
+.pbar-wrap{background:var(--raised);border-radius:20px;height:5px;overflow:hidden}
+.pbar{height:100%;border-radius:20px;transition:width .3s}
+.pbar-g{background:#10B981}.pbar-a{background:#F59E0B}.pbar-r{background:#EF4444}
+/* divider */
+.div{height:1px;background:var(--border2)}
+/* toasts */
+.toast-stack{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:999}
+.toast{background:var(--raised);border:1px solid var(--border2);border-radius:var(--r);padding:11px 13px;width:300px;display:flex;gap:9px;align-items:flex-start;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:tin .3s ease}
+@keyframes tin{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+.toast.tc{border-left:3px solid var(--red)}
+.toast.ts{border-left:3px solid #10B981}
+.toast.ti{border-left:3px solid var(--blue)}
+.toast-ico{font-size:15px;flex-shrink:0;margin-top:1px}
+.toast-bd{flex:1}
+.toast-ttl{font-weight:600;font-size:12px}
+.toast-msg{font-size:11px;color:var(--muted2);margin-top:2px}
+.toast-acts{display:flex;gap:5px;margin-top:7px}
+.toast-x{color:var(--muted);cursor:pointer;font-size:14px;flex-shrink:0;line-height:1}
+.toast-x:hover{color:var(--text)}
+/* modal */
+.moverlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:12px;width:460px;max-height:82vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.7)}
+.mh{padding:15px 18px;border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:9px}
+.mh-title{font-weight:700;font-size:14px;flex:1}
+.mb{padding:15px 18px}
+.mf{padding:11px 18px;border-top:1px solid var(--border2);display:flex;gap:7px;justify-content:flex-end}
+/* drawer */
+.doverlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:150;backdrop-filter:blur(1px)}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:350px;background:var(--surface);border-left:1px solid var(--border2);z-index:151;overflow-y:auto;box-shadow:-8px 0 32px rgba(0,0,0,.5);animation:din .25s ease}
+@keyframes din{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.dh{padding:14px 15px;border-bottom:1px solid var(--border2);display:flex;align-items:flex-start;gap:9px}
+.ds{padding:12px 15px;border-bottom:1px solid var(--border2)}
+.ds-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px}
+/* chip */
+.chip{display:inline-flex;align-items:center;gap:3px;padding:4px 9px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid var(--border2);color:var(--muted2);background:var(--raised);transition:.15s;white-space:nowrap}
+.chip:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
+/* status dot */
+.sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block}
+.sd-g{background:#10B981}.sd-a{background:#F59E0B}.sd-r{background:#EF4444}.sd-b{background:#3B82F6}.sd-m{background:var(--muted)}
+/* row hover */
+.hrow{transition:background .12s;cursor:pointer}
+.hrow:hover{background:rgba(255,255,255,.03)}
+/* expandable */
+.expand-body{background:rgba(59,130,246,.04);border-top:1px solid var(--border2);padding:12px 14px;animation:efade .2s ease}
+@keyframes efade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+/* chat */
+.chat-msg{display:flex;gap:8px;margin-bottom:10px}
+.chat-msg.user{flex-direction:row-reverse}
+.chat-bubble{max-width:82%;padding:9px 12px;border-radius:10px;font-size:12px;line-height:1.5}
+.chat-ai{background:var(--raised);border-left:3px solid var(--blue-dim)}
+.chat-ai.sim{border-left-color:var(--blue)}
+.chat-ai.act{border-left-color:var(--amber)}
+.chat-ai.conf{border-left-color:var(--red)}
+.chat-user{background:var(--blue-dim);color:var(--text)}
+.chat-mode{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;color:var(--muted)}
+.chat-mode.sim{color:var(--blue)}
+.chat-mode.act{color:var(--amber)}
+.chat-mode.conf{color:var(--red)}
+.chat-avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:2px}
+.ai-av{background:var(--blue-dim);color:var(--blue)}
+.user-av{background:var(--raised);color:var(--muted2)}
+/* confirm card inside chat */
+.confirm-card{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);border-radius:var(--r);padding:11px 13px;margin-top:8px}
+.confirm-card p{font-size:12px;color:var(--muted2);line-height:1.5;margin-bottom:10px}
+.confirm-btns{display:flex;gap:7px}
+/* timeline */
+.tl-row{display:flex;align-items:center;gap:0;height:32px;border-bottom:1px solid rgba(255,255,255,.04)}
+.tl-label{width:80px;flex-shrink:0;font-size:11px;color:var(--muted2);padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl-track{flex:1;position:relative;height:100%}
+.tl-block{position:absolute;top:5px;height:22px;border-radius:4px;display:flex;align-items:center;padding:0 7px;font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;cursor:pointer;transition:.15s}
+.tl-block:hover{filter:brightness(1.15)}
+.tl-pub{background:var(--blue);color:#fff}
+.tl-dis{background:var(--red);color:#fff}
+.tl-res{background:var(--overlay);color:var(--muted2);border:1px dashed var(--border2)}
+.tl-sick{background:rgba(239,68,68,.12);border-left:3px solid var(--red);color:var(--red)}
+/* proposal card */
+.prop-card{border-radius:var(--r);overflow:hidden;margin-bottom:8px;transition:.2s}
+.prop-card.crit{border:1px solid rgba(239,68,68,.5)}
+.prop-card.high{border:1px solid rgba(249,115,22,.4)}
+.prop-card.med{border:1px solid rgba(245,158,11,.35)}
+.prop-card.low{border:1px solid var(--border2)}
+.prop-head{padding:8px 11px;display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600}
+.prop-head.crit{background:rgba(127,29,29,.6)}
+.prop-head.high{background:rgba(124,45,18,.5)}
+.prop-head.med{background:rgba(120,53,15,.45)}
+.prop-head.low{background:var(--raised)}
+.prop-body{background:rgba(0,0,0,.25);padding:10px 11px}
+.prop-cand{display:flex;align-items:center;gap:6px;padding:5px 0;font-size:11px}
+.prop-cand+.prop-cand{border-top:1px solid rgba(255,255,255,.05)}
+.prop-score{margin-left:auto;font-weight:700;color:var(--blue);font-size:12px}
+.prop-foot{padding:8px 11px;display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.15)}
+.countdown{margin-left:auto;font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.countdown.urgent{color:var(--red);font-weight:700}
+/* flight monitor row */
+.fm-row{display:flex;align-items:center;padding:8px 13px;gap:0;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:.12s;position:relative}
+.fm-row:hover{background:rgba(255,255,255,.03)}
+.fm-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:0 2px 2px 0}
+.fm-row.airborne::before{background:var(--blue)}
+.fm-row.delayed::before{background:var(--amber)}
+.fm-row.disrupted::before{background:var(--red)}
+.fm-row.cancelled::before{background:var(--muted)}
+.fm-row.scheduled::before{background:transparent}
+.fm-col{flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fm-flight{width:60px;font-weight:700;font-size:12px}
+.fm-route{width:90px;font-size:11px;color:var(--muted2)}
+.fm-dep{width:55px;font-size:11px;color:var(--muted2)}
+.fm-status{width:110px}
+.fm-delay{width:60px;font-size:11px}
+.fm-crew{width:45px;font-size:11px;color:var(--muted2)}
+.fm-action{margin-left:auto}
+/* roster grid */
+.rg-table{width:100%;border-collapse:collapse}
+.rg-table th{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:6px 8px;text-align:left;border-bottom:1px solid var(--border2);white-space:nowrap}
+.rg-table td{padding:0;vertical-align:top;border-bottom:1px solid rgba(255,255,255,.04)}
+.rg-leg-cell{padding:8px 8px;min-width:90px}
+.rg-leg-block{background:var(--blue-dim);border:1px solid rgba(59,130,246,.3);border-radius:4px;padding:4px 7px;font-size:10px;cursor:pointer;transition:.15s}
+.rg-leg-block:hover{background:rgba(59,130,246,.25)}
+.rg-leg-block.draft{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3)}
+.rg-leg-block.disrupted{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.4)}
+.rg-leg-block.published{background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.3)}
+.rg-flight{font-weight:700;font-size:11px}
+.rg-route{font-size:10px;color:var(--muted2)}
+.rg-crew-cell{padding:6px 8px;font-size:10px;color:var(--muted2)}
+.rg-empty{color:var(--border2);font-size:18px;text-align:center;padding:8px}
+/* crew table */
+.ct-row{display:flex;align-items:center;padding:8px 13px;gap:0;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:.12s}
+.ct-row:hover{background:rgba(255,255,255,.03)}
+.ct-name{flex:1;font-size:12px;font-weight:500}
+.ct-role{width:50px;font-size:10px;color:var(--muted2)}
+.ct-base{width:45px;font-size:10px;color:var(--muted2)}
+.ct-status{width:110px}
+.ct-ftl{width:90px;font-size:10px;color:var(--muted2)}
+.ct-actions{width:80px;display:flex;gap:4px;justify-content:flex-end}
+/* admin */
+.admin-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:14px}
+.admin-card-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px}
+.admin-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px}
+.admin-row:last-child{border-bottom:none}
+.toggle{width:34px;height:18px;background:var(--green);border-radius:20px;position:relative;cursor:pointer;flex-shrink:0;transition:.2s}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:.2s}
+.toggle.off{background:var(--overlay)}
+.toggle.off::after{left:18px}
+.health-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.hd-g{background:#10B981}.hd-r{background:#EF4444}.hd-m{background:var(--muted)}
+/* page views */
+.page{display:none;flex:1;flex-direction:column;overflow:hidden}
+.page.active{display:flex}
+/* stat cards */
+.stat-row{display:flex;gap:10px;padding:10px 13px;flex-shrink:0}
+.stat-card{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:10px 12px}
+.stat-val{font-size:22px;font-weight:800;line-height:1}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:3px}
+.stat-sub{font-size:10px;margin-top:4px}
+</style>
+
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo"><div class="logo-icon">✈</div>CrewOps</div>
+  <div class="topbar-date">Mon 05 Feb 2024</div>
+  <div class="live-pill"><span class="live-dot"></span>LIVE</div>
+  <div class="sp"></div>
+  <div class="icon-btn" onclick="showToast('critical')" title="Alerts">
+    🔔<span class="notif-dot"></span>
+  </div>
+  <div class="user-chip">
+    <div class="avatar">OC</div>
+    ops_controller_01 ▾
+  </div>
+</div>
+
+<!-- MAIN BODY -->
+<div class="body">
+
+  <!-- LEFT NAV -->
+  <div class="leftnav">
+    <div class="nav-btn active" onclick="switchPage('dashboard')" title="Dashboard">📋</div>
+    <div class="nav-btn" onclick="switchPage('flights')" title="Flights">✈</div>
+    <div class="nav-btn" onclick="switchPage('crew')" title="Crew">👥</div>
+    <div class="nav-btn" onclick="switchPage('alerts')" title="Alerts" style="position:relative">
+      ⚡<span class="nb">3</span>
+    </div>
+    <div class="nav-sep"></div>
+    <div class="nav-btn" onclick="switchPage('admin')" title="Admin">⚙</div>
+  </div>
+
+  <!-- CONTENT AREA -->
+  <div class="content">
+
+    <!-- PAGE: DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <!-- stat row -->
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-val" style="color:#3B82F6">7</div>
+          <div class="stat-lbl">Flights Today</div>
+          <div class="stat-sub"><span class="badge bb">2 airborne</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:#EF4444">3</div>
+          <div class="stat-lbl">Disruptions</div>
+          <div class="stat-sub"><span class="badge br">1 critical</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:#10B981">22</div>
+          <div class="stat-lbl">Crew Available</div>
+          <div class="stat-sub"><span class="badge bg">4 on reserve</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:#F59E0B">3</div>
+          <div class="stat-lbl">Pending Proposals</div>
+          <div class="stat-sub"><span class="badge ba">action needed</span></div>
+        </div>
+      </div>
+
+      <!-- ROSTER PANEL -->
+      <div class="ph">
+        <span class="ph-title">ROSTER</span>
+        <div class="tabs">
+          <div class="tab on" onclick="switchRosterView('grid',this)">Week Grid</div>
+          <div class="tab" onclick="switchRosterView('timeline',this)">Timeline</div>
+          <div class="tab" onclick="switchRosterView('list',this)">List</div>
+        </div>
+        <div class="sp"></div>
+        <span style="font-size:11px;color:var(--muted)">Feb 05–11</span>
+        <button class="btn btn-ghost btn-sm">◀</button>
+        <button class="btn btn-ghost btn-sm">▶</button>
+      </div>
+
+      <!-- ROSTER VIEWS -->
+      <div class="scroll" id="roster-grid" style="flex:1">
+        <table class="rg-table" style="width:100%">
+          <thead>
+            <tr>
+              <th style="width:110px">FLIGHT</th>
+              <th>MON 05</th><th>TUE 06</th><th>WED 07</th><th>THU 08</th><th>FRI 09</th><th>SAT 10</th><th>SUN 11</th>
+            </tr>
+          </thead>
+          <tbody id="roster-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="scroll hidden" id="roster-timeline" style="flex:1;padding:10px 13px">
+        <div style="display:flex;gap:0;margin-bottom:6px;padding-left:80px">
+          <div id="tl-hours" style="flex:1;display:flex"></div>
+        </div>
+        <div id="tl-rows"></div>
+      </div>
+
+      <div class="scroll hidden" id="roster-list" style="flex:1">
+        <div id="list-rows"></div>
+      </div>
+
+      <!-- FLIGHT MONITOR -->
+      <div class="div"></div>
+      <div class="ph">
+        <span class="ph-title">FLIGHT MONITOR</span>
+        <span class="ph-sub">— TODAY</span>
+        <div class="live-pill" style="font-size:10px;padding:2px 7px"><span class="live-dot"></span>polls every 5 min</div>
+        <div class="sp"></div>
+        <span style="font-size:11px;color:var(--muted)">05 Feb 2024 · 09:42</span>
+      </div>
+      <div style="display:flex;padding:6px 13px;border-bottom:1px solid var(--border2);flex-shrink:0">
+        <span class="fm-col fm-flight" style="font-size:10px;color:var(--muted);font-weight:600">FLIGHT</span>
+        <span class="fm-col fm-route" style="font-size:10px;color:var(--muted);font-weight:600">ROUTE</span>
+        <span class="fm-col fm-dep" style="font-size:10px;color:var(--muted);font-weight:600">DEP</span>
+        <span class="fm-col fm-status" style="font-size:10px;color:var(--muted);font-weight:600">STATUS</span>
+        <span class="fm-col fm-delay" style="font-size:10px;color:var(--muted);font-weight:600">DELAY</span>
+        <span class="fm-col fm-crew" style="font-size:10px;color:var(--muted);font-weight:600">CREW</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--muted);font-weight:600">ACTION</span>
+      </div>
+      <div class="scroll" id="fm-rows" style="max-height:200px"></div>
+    </div>
+
+    <!-- PAGE: FLIGHTS -->
+    <div class="page" id="page-flights">
+      <div class="ph"><span class="ph-title">FLIGHT MONITOR</span><span class="ph-sub">— ALL FLIGHTS</span><div class="sp"></div><div class="live-pill"><span class="live-dot"></span>LIVE</div></div>
+      <div class="scroll" id="flights-full"></div>
+    </div>
+
+    <!-- PAGE: CREW -->
+    <div class="page" id="page-crew">
+      <div class="ph">
+        <span class="ph-title">CREW</span>
+        <div class="sp"></div>
+        <input id="crew-search" placeholder="Search crew..." style="background:var(--raised);border:1px solid var(--border2);border-radius:var(--rs);padding:4px 9px;color:var(--text);font-size:12px;width:180px" oninput="filterCrew(this.value)">
+        <select style="background:var(--raised);border:1px solid var(--border2);border-radius:var(--rs);padding:4px 8px;color:var(--muted2);font-size:11px" onchange="filterCrewRole(this.value)">
+          <option value="">All Roles</option>
+          <option value="PILOT">Pilots</option>
+          <option value="CABIN">Cabin</option>
+        </select>
+      </div>
+      <div style="display:flex;padding:6px 13px;border-bottom:1px solid var(--border2);flex-shrink:0">
+        <span style="flex:1;font-size:10px;color:var(--muted);font-weight:600">NAME</span>
+        <span class="ct-role" style="font-size:10px;color:var(--muted);font-weight:600">ROLE</span>
+        <span class="ct-base" style="font-size:10px;color:var(--muted);font-weight:600">BASE</span>
+        <span class="ct-status" style="font-size:10px;color:var(--muted);font-weight:600">STATUS</span>
+        <span class="ct-ftl" style="font-size:10px;color:var(--muted);font-weight:600">FTL TODAY</span>
+        <span class="ct-actions" style="font-size:10px;color:var(--muted);font-weight:600">ACTIONS</span>
+      </div>
+      <div class="scroll" id="crew-rows"></div>
+    </div>
+
+    <!-- PAGE: ALERTS -->
+    <div class="page" id="page-alerts">
+      <div class="ph"><span class="ph-title">FTL ALERTS</span><div class="sp"></div><span class="badge br">3 active</span></div>
+      <div class="scroll" id="alert-rows" style="padding:12px 13px"></div>
+    </div>
+
+    <!-- PAGE: ADMIN -->
+    <div class="page" id="page-admin">
+      <div class="ph"><span class="ph-title">ADMIN</span><div class="sp"></div><span style="font-size:11px;color:var(--muted)">ops_controller_01</span></div>
+      <div class="scroll" style="padding:14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
+          <!-- pipeline -->
+          <div class="admin-card">
+            <div class="admin-card-title">Data Pipeline</div>
+            <button class="btn btn-p" style="width:100%;margin-bottom:8px;justify-content:center" onclick="seedAll()">▶ Seed All Data</button>
+            <div class="admin-row"><span>Crew Members</span><button class="btn btn-ghost btn-sm" onclick="seedItem('Crew')">▶ Run</button></div>
+            <div class="admin-row"><span>Licenses</span><button class="btn btn-ghost btn-sm" onclick="seedItem('Licenses')">▶ Run</button></div>
+            <div class="admin-row"><span>FTL States</span><button class="btn btn-ghost btn-sm" onclick="seedItem('FTL')">▶ Run</button></div>
+            <div class="admin-row"><span>Flight Legs</span><button class="btn btn-ghost btn-sm" onclick="seedItem('Legs')">▶ Run</button></div>
+            <div class="admin-row"><span>Leave Records</span><button class="btn btn-ghost btn-sm" onclick="seedItem('Leave')">▶ Run</button></div>
+            <div class="admin-row"><span>Reserve Schedule</span><button class="btn btn-ghost btn-sm" onclick="seedItem('Reserve')">▶ Run</button></div>
+            <div style="margin-top:10px;font-size:11px;color:var(--muted)">Last run: Today 08:14 · <span style="color:#10B981">✓ 6/6 loaded</span></div>
+          </div>
+          <!-- mock flags -->
+          <div class="admin-card">
+            <div class="admin-card-title">Mock Flags</div>
+            <div class="admin-row"><span>Crew Profile</span><div class="toggle" onclick="toggleFlag(this)"></div></div>
+            <div class="admin-row"><span>License</span><div class="toggle" onclick="toggleFlag(this)"></div></div>
+            <div class="admin-row"><span>Flight Schedule</span><div class="toggle" onclick="toggleFlag(this)"></div></div>
+            <div class="admin-row"><span>Flight Status</span><div class="toggle" onclick="toggleFlag(this)"></div></div>
+            <div class="admin-row"><span>FTL State</span><div class="toggle" onclick="toggleFlag(this)"></div></div>
+            <div class="admin-row"><span>Reserve Schedule</span><div class="toggle" onclick="toggleFlag(this)"></div></div>
+            <div style="margin-top:10px;font-size:11px;color:var(--muted)">Toggle to switch mock ↔ real API</div>
+          </div>
+          <!-- scheduled jobs -->
+          <div class="admin-card">
+            <div class="admin-card-title">Scheduled Jobs</div>
+            <div id="jobs-list"></div>
+          </div>
+        </div>
+        <!-- api health -->
+        <div class="admin-card" style="margin-bottom:12px">
+          <div class="admin-card-title">API Health</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+            <div class="admin-row"><span style="display:flex;align-items:center;gap:7px"><span class="health-dot hd-g"></span>Database</span><span style="color:#10B981;font-size:11px">Connected</span></div>
+            <div class="admin-row"><span style="display:flex;align-items:center;gap:7px"><span class="health-dot hd-m"></span>Aviationstack</span><span style="color:var(--muted);font-size:11px">Mock</span></div>
+            <div class="admin-row"><span style="display:flex;align-items:center;gap:7px"><span class="health-dot hd-m"></span>HRMS / Workday</span><span style="color:var(--muted);font-size:11px">Mock</span></div>
+            <div class="admin-row"><span style="display:flex;align-items:center;gap:7px"><span class="health-dot hd-g"></span>Event Bus</span><span style="color:#10B981;font-size:11px">Running</span></div>
+            <div class="admin-row"><span style="display:flex;align-items:center;gap:7px"><span class="health-dot hd-g"></span>APScheduler</span><span style="color:#10B981;font-size:11px">Running · 9 jobs</span></div>
+            <div class="admin-row"><span style="display:flex;align-items:center;gap:7px"><span class="health-dot hd-g"></span>FastAPI</span><span style="color:#10B981;font-size:11px">:8000</span></div>
+          </div>
+        </div>
+        <!-- api explorer -->
+        <div class="admin-card">
+          <div class="admin-card-title">API Explorer</div>
+          <div id="api-explorer"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- RIGHT PANEL -->
+  <div class="rpanel">
+    <!-- DISRUPTION INBOX -->
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;border-bottom:1px solid var(--border2)">
+      <div class="ph">
+        <span class="ph-title">DISRUPTION INBOX</span>
+        <span class="badge br" id="inbox-count">3 pending</span>
+        <div class="sp"></div>
+        <button class="btn btn-ghost btn-sm">Mark all read</button>
+      </div>
+      <div class="scroll" id="inbox-cards" style="padding:10px"></div>
+    </div>
+    <!-- AI CHAT -->
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+      <div class="ph">
+        <span class="ph-title">AI ASSISTANT</span>
+        <div class="sp"></div>
+        <div class="tabs">
+          <div class="tab on">QUERY</div>
+          <div class="tab">SIMULATE</div>
+          <div class="tab">ACTION</div>
+        </div>
+      </div>
+      <div class="scroll" id="chat-messages" style="padding:10px 10px 4px"></div>
+      <div style="padding:6px 10px;flex-shrink:0">
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px" id="chat-chips"></div>
+        <div style="display:flex;gap:6px">
+          <input id="chat-input" placeholder="Type a message..." style="flex:1;background:var(--raised);border:1px solid var(--border2);border-radius:var(--rs);padding:7px 10px;color:var(--text);font-size:12px" onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="btn btn-p" onclick="sendChat()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /body -->
+
+<!-- TOAST STACK -->
+<div class="toast-stack" id="toast-stack"></div>
+
+<!-- CREW DRAWER -->
+<div class="doverlay hidden" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer hidden" id="crew-drawer"></div>
+
+<!-- LEG MODAL -->
+<div class="moverlay hidden" id="leg-modal-overlay" onclick="closeLegModal()">
+  <div class="modal" onclick="event.stopPropagation()" id="leg-modal"></div>
+</div>
+
+
+<script>
+const FLIGHTS = [
+  {id:'AI854',route:'PNQ→DEL',dep:'06:00',status:'airborne',delay:2,crew:4,crewReq:4,aircraft:'B737',reg:'VT-ANK'},
+  {id:'AI202',route:'DEL→BOM',dep:'09:00',status:'delayed',delay:150,crew:4,crewReq:4,aircraft:'A320',reg:'VT-PPM'},
+  {id:'AI305',route:'BOM→CCU',dep:'10:00',status:'disrupted',delay:0,crew:3,crewReq:5,aircraft:'B737',reg:'VT-SJL'},
+  {id:'AI101',route:'DEL→LHR',dep:'11:00',status:'cancelled',delay:0,crew:0,crewReq:4,aircraft:'B787',reg:'VT-ANL'},
+  {id:'AI410',route:'BOM→DEL',dep:'15:00',status:'delayed',delay:240,crew:4,crewReq:4,aircraft:'A320',reg:'VT-KPQ'},
+  {id:'AI501',route:'DEL→BLR',dep:'07:30',status:'scheduled',delay:0,crew:4,crewReq:4,aircraft:'B737',reg:'VT-MNO'},
+  {id:'AI602',route:'BLR→BOM',dep:'13:00',status:'scheduled',delay:0,crew:4,crewReq:4,aircraft:'A320',reg:'VT-RST'},
+];
+
+const CREW = [
+  {id:'C-001',name:'Capt Arjun Mehta',role:'PILOT',base:'VIDP',status:'AVAILABLE',duty:0,dutyMax:13,days28:45,hours28:100,days7:20,hours7:60,consec:1,consecMax:6},
+  {id:'C-002',name:'FO Priya Sharma',role:'PILOT',base:'VIDP',status:'AVAILABLE',duty:0,dutyMax:13,days28:38,hours28:100,days7:15,hours7:60,consec:2,consecMax:6},
+  {id:'C-003',name:'Capt Ravi Singh',role:'PILOT',base:'VABB',status:'SICK',duty:0,dutyMax:13,days28:52,hours28:100,days7:22,hours7:60,consec:3,consecMax:6},
+  {id:'C-004',name:'FO Anita Nair',role:'PILOT',base:'VABB',status:'AVAILABLE',duty:2.5,dutyMax:13,days28:41,hours28:100,days7:18,hours7:60,consec:1,consecMax:6},
+  {id:'C-005',name:'Capt Suresh Kumar',role:'PILOT',base:'VOBL',status:'RESTING',duty:0,dutyMax:13,days28:60,hours28:100,days7:25,hours7:60,consec:4,consecMax:6},
+  {id:'C-006',name:'FO Deepa Rao',role:'PILOT',base:'VIDP',status:'UNAVAILABLE',duty:0,dutyMax:13,days28:70,hours28:100,days7:28,hours7:60,consec:5,consecMax:6},
+  {id:'C-007',name:'Capt Vikram Joshi',role:'PILOT',base:'VIDP',status:'AVAILABLE',duty:0,dutyMax:13,days28:30,hours28:100,days7:12,hours7:60,consec:1,consecMax:6},
+  {id:'C-008',name:'FO Kavya Menon',role:'PILOT',base:'VABB',status:'AVAILABLE',duty:4.5,dutyMax:13,days28:55,hours28:100,days7:20,hours7:60,consec:2,consecMax:6},
+  {id:'C-009',name:'Capt Nisha Bose',role:'PILOT',base:'VIDP',status:'AVAILABLE',duty:0,dutyMax:13,days28:88,hours28:100,days7:35,hours7:60,consec:3,consecMax:6},
+  {id:'C-010',name:'SP Sunita Kapoor',role:'CABIN',base:'VIDP',status:'AVAILABLE',duty:0,dutyMax:12,days28:20,hours28:100,days7:8,hours7:60,consec:1,consecMax:6},
+  {id:'C-011',name:'CC Rahul Verma',role:'CABIN',base:'VIDP',status:'AVAILABLE',duty:0,dutyMax:12,days28:25,hours28:100,days7:10,hours7:60,consec:1,consecMax:6},
+  {id:'C-012',name:'CC Amit Shah',role:'CABIN',base:'VABB',status:'ON_LEAVE',duty:0,dutyMax:12,days28:15,hours28:100,days7:6,hours7:60,consec:0,consecMax:6},
+  {id:'C-013',name:'CC Pooja Gupta',role:'CABIN',base:'VABB',status:'AVAILABLE',duty:2.5,dutyMax:12,days28:30,hours28:100,days7:12,hours7:60,consec:2,consecMax:6},
+];
+
+const ROSTER = [
+  {legId:'AI854',route:'PNQ→DEL',day:0,status:'published',crew:['C-001','C-004'],time:'06:00–08:30'},
+  {legId:'AI101',route:'DEL→LHR',day:0,status:'draft',crew:['C-001','C-002'],time:'11:00–18:30'},
+  {legId:'AI305',route:'BOM→CCU',day:0,status:'disrupted',crew:['C-004','C-013'],time:'10:00–12:30'},
+  {legId:'AI501',route:'DEL→BLR',day:1,status:'published',crew:['C-007','C-008'],time:'07:30–10:00'},
+  {legId:'AI202',route:'DEL→BOM',day:1,status:'draft',crew:['C-002','C-009'],time:'09:00–11:30'},
+  {legId:'AI602',route:'BLR→BOM',day:2,status:'published',crew:['C-005','C-004'],time:'13:00–15:00'},
+  {legId:'AI410',route:'BOM→DEL',day:3,status:'draft',crew:['C-007','C-008'],time:'15:00–17:30'},
+];
+
+const PROPOSALS = [
+  {id:'PROP-001',sev:'crit',flight:'AI305',route:'BOM→CCU',departs:'47m',reason:'Capt Ravi Singh called sick.',
+   candidates:[{name:'Capt Vikram Joshi',id:'C-007',loc:'VABB',score:87},{name:'Capt Nisha Bose',id:'C-009',loc:'VIDP',score:74}],
+   expires:900},
+  {id:'PROP-002',sev:'high',flight:'AI410',route:'BOM→DEL',departs:'5h 18m',reason:'Delay +240 min. FO Kavya Menon (C-008) duty period breach projected.',
+   candidates:[{name:'FO Deepa Rao',id:'C-006',loc:'VABB',score:61}],expires:3600},
+  {id:'PROP-003',sev:'med',flight:'AI111',route:'DEL→LHR',departs:'24h',reason:'C-009 near 28-day cap. Replacement proposed.',
+   candidates:[{name:'Capt Nisha Bose',id:'C-009',loc:'VIDP',score:74}],
+   expires:14400},
+];
+
+const CHAT_INIT = [
+  {role:'ai',mode:'',text:'Hello. I\'m watching 7 active flights today. 3 disruptions need your attention.'},
+  {role:'user',text:'Who can replace Capt Ravi on AI305?'},
+  {role:'ai',mode:'sim',text:'<b>SIMULATE</b> — AI305 BOM→CCU, B737, 10:00\n\nTop replacements for Capt Ravi (PILOT):\n\n1. Capt Vikram Joshi (C-007) · Score: 87\n   ✓ At VABB  ✓ B737 rated  ✓ FTL legal\n   Duty after leg: 2.5h / 13h\n\n2. Capt Nisha Bose (C-009) · Score: 74\n   ✓ At VIDP  ✓ B737 rated  ✓ FTL legal\n   Duty after leg: 4.1h / 13h\n\nWant me to raise this as a disruption?'},
+];
+
+const JOBS = [
+  {id:'observer_poll',label:'Observer Poll',schedule:'Every 5 min'},
+  {id:'roster_build',label:'Roster Build',schedule:'Sun 23:00'},
+  {id:'daily_validation',label:'Daily Validation',schedule:'Daily 03:00'},
+  {id:'ftl_alert_scan',label:'FTL Alert Scan',schedule:'Every 15 min'},
+  {id:'ftl_midnight_recalc',label:'FTL Midnight Recalc',schedule:'Daily 00:00'},
+  {id:'expire_proposals',label:'Expire Proposals',schedule:'Daily 00:30'},
+  {id:'auto_resolve_low',label:'Auto-Resolve LOW',schedule:'Every 30 min'},
+  {id:'push_proposals',label:'Push Proposals',schedule:'Every 60s'},
+];
+
+const APIS = [
+  {method:'GET',path:'/health'},
+  {method:'GET',path:'/observer/legs/today'},
+  {method:'GET',path:'/observer/legs?target_date= or ?offset='},
+  {method:'POST',path:'/planner/build'},
+  {method:'POST',path:'/planner/validate'},
+  {method:'GET',path:'/planner/roster?start=&end='},
+  {method:'POST',path:'/planner/roster/{leg_id}/approve'},
+  {method:'POST',path:'/planner/roster/{leg_id}/reassign'},
+  {method:'GET',path:'/disruptions/proposals'},
+  {method:'POST',path:'/disruptions/proposals/{id}/accept'},
+  {method:'POST',path:'/disruptions/proposals/{id}/reject'},
+  {method:'POST',path:'/crew/{id}/unavailable'},
+  {method:'GET',path:'/crew/{id}/ftl'},
+  {method:'POST',path:'/ftl/scan'},
+  {method:'POST',path:'/ftl/recalculate'},
+  {method:'POST',path:'/chat'},
+];
+
+const ALERTS = [
+  {type:'DUTY_PERIOD_APPROACHING',crew:'Capt Nisha Bose (C-009)',msg:'Duty period limit in 1.8h',sev:'high'},
+  {type:'CUMULATIVE_HOURS_WARNING',crew:'Capt Nisha Bose (C-009)',msg:'88h of 100h 28-day cap used',sev:'med'},
+  {type:'WEEKLY_REST_OVERDUE',crew:'FO Deepa Rao (C-006)',msg:'No 36h rest block in 6 days',sev:'high'},
+];
+
+let expandedFlight = null;
+let expandedRoster = null;
+let countdownTimers = {};
+let chatConfirmPending = false;
+</script>
+
+<script>
+function statusBadge(s){
+  const m={airborne:['bb','✈ AIRBORNE'],delayed:['ba','⏱ DELAYED'],disrupted:['br','⚠ DISRUPTED'],cancelled:['bm','✗ CANCELLED'],scheduled:['bm','✓ SCHEDULED']};
+  const [cls,lbl]=m[s]||['bm',s];
+  return `<span class="badge ${cls}">${lbl}</span>`;
+}
+function crewStatusBadge(s){
+  const m={AVAILABLE:['bg','✓ AVAILABLE'],SICK:['br','🔴 SICK'],RESTING:['bb','💤 RESTING'],UNAVAILABLE:['bm','✗ UNAVAILABLE'],ON_LEAVE:['ba','📅 ON LEAVE']};
+  const [cls,lbl]=m[s]||['bm',s];
+  return `<span class="badge ${cls}">${lbl}</span>`;
+}
+function rosterBadge(s){
+  const m={published:['bg','✓ PUBLISHED'],draft:['ba','⚠ DRAFT'],disrupted:['br','🔴 DISRUPTED']};
+  const [cls,lbl]=m[s]||['bm',s];
+  return `<span class="badge ${cls}">${lbl}</span>`;
+}
+function pbarColor(pct){return pct>=85?'pbar-r':pct>=60?'pbar-a':'pbar-g';}
+
+function renderFlightMonitor(containerId){
+  const el=document.getElementById(containerId);
+  el.innerHTML=FLIGHTS.map((f,i)=>{
+    const delayTxt=f.delay>0?`<span style="color:${f.delay>=240?'#EF4444':'#F59E0B'}">+${f.delay}m</span>`:`<span style="color:var(--muted)">—</span>`;
+    const crewTxt=f.status==='disrupted'?`<span style="color:#EF4444">${f.crew}/${f.crewReq}</span>`:`${f.crew}`;
+    const action=f.status==='delayed'?`<button class="btn btn-a btn-sm" onclick="expandFlight(${i})">View</button>`:
+      f.status==='disrupted'?`<button class="btn btn-r btn-sm" onclick="expandFlight(${i})">Proposals</button>`:
+      f.status==='cancelled'?`<button class="btn btn-ghost btn-sm">Released</button>`:'';
+    const exp=expandedFlight===i?renderFlightExpand(f):'';
+    return `<div class="fm-row ${f.status}" onclick="expandFlight(${i})">
+      <span class="fm-col fm-flight" style="${f.status==='cancelled'?'text-decoration:line-through;color:var(--muted)':''}">${f.id}</span>
+      <span class="fm-col fm-route">${f.route}</span>
+      <span class="fm-col fm-dep">${f.dep}</span>
+      <span class="fm-col fm-status">${statusBadge(f.status)}</span>
+      <span class="fm-col fm-delay">${delayTxt}</span>
+      <span class="fm-col fm-crew">${crewTxt}</span>
+      <span style="margin-left:auto">${action}</span>
+    </div>${exp}`;
+  }).join('');
+}
+
+function renderFlightExpand(f){
+  const crewDetails=[
+    {id:'C-007',name:'Capt Vikram Joshi',role:'PILOT',ftl:'4.5h / 13h',ok:true},
+    {id:'C-008',name:'FO Kavya Menon',role:'PILOT',ftl:'4.5h / 13h',ok:true},
+    {id:'C-010',name:'SP Sunita Kapoor',role:'CABIN',ftl:'—',ok:true},
+    {id:'C-013',name:'CC Pooja Gupta',role:'CABIN',ftl:'—',ok:true},
+  ];
+  return `<div class="expand-body">
+    <div style="font-weight:600;font-size:12px;margin-bottom:8px">${f.id} · ${f.route} · ${f.aircraft} · ${f.reg}</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Scheduled: ${f.dep} · Delay: ${f.delay>0?'+'+f.delay+' min':'On time'}</div>
+    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Assigned Crew</div>
+    ${crewDetails.map(c=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">
+      <span style="color:var(--muted2);width:50px">${c.id}</span>
+      <span style="flex:1">${c.name}</span>
+      <span class="badge bm" style="font-size:9px">${c.role}</span>
+      <span style="color:#10B981;font-size:10px">✓ FTL OK (${c.ftl})</span>
+    </div>`).join('')}
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <button class="btn btn-ghost btn-sm">View Proposals</button>
+      <button class="btn btn-a btn-sm" onclick="showToast('info')">Re-check FTL</button>
+    </div>
+  </div>`;
+}
+
+function expandFlight(i){
+  expandedFlight=expandedFlight===i?null:i;
+  renderFlightMonitor('fm-rows');
+  renderFlightMonitor('flights-full');
+}
+
+function renderRosterGrid(){
+  const days=['MON 05','TUE 06','WED 07','THU 08','FRI 09','SAT 10','SUN 11'];
+  const tbody=document.getElementById('roster-tbody');
+  tbody.innerHTML=ROSTER.map((r,ri)=>{
+    const cells=days.map((_,di)=>{
+      if(di===r.day){
+        return `<td class="rg-leg-cell"><div class="rg-leg-block ${r.status}" onclick="openLegModal('${r.legId}')">
+          <div class="rg-flight">${r.legId}</div>
+          <div class="rg-route">${r.route}</div>
+          <div style="margin-top:3px">${rosterBadge(r.status)}</div>
+        </div></td>`;
+      }
+      return `<td class="rg-empty">·</td>`;
+    }).join('');
+    return `<tr>${`<td style="padding:8px;font-size:11px;color:var(--muted2);white-space:nowrap">${r.legId}<br><span style="color:var(--muted);font-size:10px">${r.route}</span></td>`}${cells}</tr>`;
+  }).join('');
+}
+
+function renderTimeline(){
+  const hours=['06','08','10','12','14','16','18','20'];
+  document.getElementById('tl-hours').innerHTML=hours.map(h=>`<div style="flex:1;font-size:10px;color:var(--muted);text-align:left">${h}:00</div>`).join('');
+  const rows=[
+    {label:'C-001',blocks:[{left:0,width:17,label:'AI854',cls:'tl-pub'},{left:35,width:50,label:'AI101',cls:'tl-pub'}]},
+    {label:'C-002',blocks:[{left:35,width:50,label:'AI101',cls:'tl-pub'}]},
+    {label:'C-003',blocks:[{left:0,width:100,label:'SICK',cls:'tl-sick'}]},
+    {label:'C-004',blocks:[{left:28,width:18,label:'AI305',cls:'tl-dis'}]},
+    {label:'C-007',blocks:[{left:0,width:100,label:'RESERVE',cls:'tl-res'}]},
+    {label:'C-008',blocks:[{left:0,width:100,label:'RESERVE',cls:'tl-res'}]},
+  ];
+  document.getElementById('tl-rows').innerHTML=rows.map(r=>`
+    <div class="tl-row">
+      <div class="tl-label">${r.label}</div>
+      <div class="tl-track">${r.blocks.map(b=>`<div class="tl-block ${b.cls}" style="left:${b.left}%;width:${b.width}%">${b.label}</div>`).join('')}</div>
+    </div>`).join('');
+}
+
+function renderListView(){
+  document.getElementById('list-rows').innerHTML=ROSTER.map(r=>`
+    <div style="padding:10px 13px;border-bottom:1px solid var(--border2)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="font-weight:700;font-size:13px">${r.legId}</span>
+        <span style="color:var(--muted);font-size:11px">${r.route}</span>
+        <span style="color:var(--muted);font-size:11px">${r.time}</span>
+        <div class="sp"></div>
+        ${rosterBadge(r.status)}
+        ${r.status==='draft'?`<button class="btn btn-g btn-sm" onclick="showToast('success')">Approve</button>`:''}
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${r.crew.map(cid=>{const c=CREW.find(x=>x.id===cid);return c?`<span class="chip">${c.name}</span>`:''}).join('')}
+      </div>
+    </div>`).join('');
+}
+</script>
+
+<script>
+function renderInbox(){
+  const el=document.getElementById('inbox-cards');
+  el.innerHTML=PROPOSALS.map(p=>`
+    <div class="prop-card ${p.sev}" id="prop-${p.id}">
+      <div class="prop-head ${p.sev}">
+        <span>${p.sev==='crit'?'🔴 CRITICAL':p.sev==='high'?'🟠 HIGH':'🟡 MEDIUM'}</span>
+        <span style="color:var(--muted2)">•</span>
+        <span>${p.flight} ${p.route}</span>
+        <span style="color:var(--muted2)">•</span>
+        <span style="color:var(--muted2)">departs ${p.departs}</span>
+      </div>
+      <div class="prop-body">
+        <div style="font-size:11px;color:var(--muted2);margin-bottom:8px">${p.reason}</div>
+        ${p.candidates.map((c,i)=>`
+          <div class="prop-cand">
+            <span class="sdot ${i===0?'sd-g':'sd-b'}"></span>
+            <span style="font-weight:${i===0?'600':'400'}">${c.name}</span>
+            <span class="badge bm" style="font-size:9px">${c.id}</span>
+            <span style="font-size:10px;color:#10B981">At ${c.loc} ✓</span>
+            <span class="prop-score">${c.score}</span>
+          </div>`).join('')}
+      </div>
+      <div class="prop-foot">
+        ${p.candidates.length>0?`<button class="btn btn-g btn-sm" onclick="acceptProposal('${p.id}')">✓ Confirm ${p.candidates[0].name.split(' ')[1]}</button>
+        <button class="btn btn-r btn-sm" onclick="rejectProposal('${p.id}')">✗ Reject</button>
+        ${p.candidates.length>1?`<button class="btn btn-ghost btn-sm">More ▾</button>`:''}`:
+        `<button class="btn btn-ghost btn-sm" onclick="dismissProposal('${p.id}')">Dismiss</button>`}
+        <span class="countdown ${p.expires<300?'urgent':''}" id="cd-${p.id}">${fmtTime(p.expires)}</span>
+      </div>
+    </div>`).join('');
+  startCountdowns();
+}
+
+function fmtTime(s){
+  if(s>=3600)return Math.floor(s/3600)+'h '+(Math.floor((s%3600)/60))+'m';
+  return Math.floor(s/60)+':'+(s%60).toString().padStart(2,'0');
+}
+
+function startCountdowns(){
+  clearInterval(window._cdInterval);
+  window._cdInterval=setInterval(()=>{
+    PROPOSALS.forEach(p=>{
+      if(p.expires>0){p.expires--;const el=document.getElementById('cd-'+p.id);if(el){el.textContent=fmtTime(p.expires);if(p.expires<300)el.classList.add('urgent');}}
+    });
+  },1000);
+}
+
+function acceptProposal(id){
+  const card=document.getElementById('prop-'+id);
+  if(card){card.style.opacity='0';card.style.transform='translateX(20px)';card.style.transition='.3s';setTimeout(()=>card.remove(),300);}
+  const idx=PROPOSALS.findIndex(p=>p.id===id);
+  if(idx>-1)PROPOSALS.splice(idx,1);
+  document.getElementById('inbox-count').textContent=PROPOSALS.length+' pending';
+  showToast('success');
+}
+function rejectProposal(id){showToast('info');}
+function dismissProposal(id){acceptProposal(id);}
+
+function renderCrew(filter='',roleFilter=''){
+  const rows=document.getElementById('crew-rows');
+  const list=CREW.filter(c=>{
+    const matchName=c.name.toLowerCase().includes(filter.toLowerCase())||c.id.toLowerCase().includes(filter.toLowerCase());
+    const matchRole=!roleFilter||c.role===roleFilter;
+    return matchName&&matchRole;
+  });
+  rows.innerHTML=list.map(c=>{
+    const pct=c.duty/c.dutyMax*100;
+    const ftlTxt=c.status==='AVAILABLE'||c.status==='SICK'?`${c.duty}h / ${c.dutyMax}h`:'—';
+    return `<div class="ct-row" onclick="openCrewDrawer('${c.id}')">
+      <span class="ct-name">${c.name}</span>
+      <span class="ct-role"><span class="badge ${c.role==='PILOT'?'bb':'bm'}" style="font-size:9px">${c.role}</span></span>
+      <span class="ct-base" style="font-size:11px;color:var(--muted2)">${c.base}</span>
+      <span class="ct-status">${crewStatusBadge(c.status)}</span>
+      <span class="ct-ftl">
+        ${c.status==='AVAILABLE'?`<div style="display:flex;align-items:center;gap:5px"><span>${ftlTxt}</span></div>
+        <div class="pbar-wrap" style="margin-top:3px;width:70px"><div class="pbar ${pbarColor(pct)}" style="width:${pct}%"></div></div>`:'—'}
+      </span>
+      <span class="ct-actions">
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openCrewDrawer('${c.id}')">View</button>
+        ${c.status==='AVAILABLE'?`<button class="btn btn-r btn-sm" onclick="event.stopPropagation();showToast('critical')">Mark</button>`:''}
+      </span>
+    </div>`;
+  }).join('');
+}
+function filterCrew(v){renderCrew(v,document.querySelector('#page-crew select').value);}
+function filterCrewRole(v){renderCrew(document.getElementById('crew-search').value,v);}
+
+function openCrewDrawer(id){
+  const c=CREW.find(x=>x.id===id);if(!c)return;
+  const d=document.getElementById('crew-drawer');
+  const p28=c.days28/c.hours28*100,p7=c.days7/c.hours7*100,pd=c.duty/c.dutyMax*100,pc=c.consec/c.consecMax*100;
+  d.innerHTML=`
+    <div class="dh">
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:14px">${c.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${c.id} · ${c.role} · ${c.base}</div>
+        <div style="margin-top:6px">${crewStatusBadge(c.status)}</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="closeDrawer()">✕ Close</button>
+    </div>
+    <div class="ds">
+      <div class="ds-title">FTL State</div>
+      ${[['Current duty',c.duty,c.dutyMax,'h'],['28-day hours',c.days28,c.hours28,'h'],['7-day hours',c.days7,c.hours7,'h'],['Consec. days',c.consec,c.consecMax,'d']].map(([lbl,v,mx,u])=>{
+        const pct=v/mx*100;
+        return `<div style="margin-bottom:9px">
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
+            <span style="color:var(--muted2)">${lbl}</span>
+            <span>${v}${u} / ${mx}${u} <span style="color:var(--muted)">(${Math.round(pct)}%)</span></span>
+          </div>
+          <div class="pbar-wrap"><div class="pbar ${pbarColor(pct)}" style="width:${pct}%"></div></div>
+        </div>`;
+      }).join('')}
+      <div style="font-size:11px;color:var(--muted2)">Location: <span style="color:var(--text)">${c.base} ${c.base===c.base?'(home base)':''}</span></div>
+    </div>
+    <div class="ds">
+      <div class="ds-title">Licenses</div>
+      <div style="font-size:11px;color:var(--muted2);margin-bottom:4px">A320 · expires 2025-10-31 · <span style="color:#10B981">✓ Medical OK</span></div>
+      <div style="font-size:11px;color:var(--muted2)">B737 · expires 2025-08-15 · <span style="color:#10B981">✓ Medical OK</span></div>
+    </div>
+    <div class="ds">
+      <div class="ds-title">This Week</div>
+      <div style="font-size:11px;color:var(--muted2);line-height:1.8">
+        Mon 05 · AI202 DEL→BOM 09:00 · <span class="badge bg" style="font-size:9px">CONFIRMED</span><br>
+        Tue 06 · AI703 DEL→BOM 08:00 · <span class="badge bg" style="font-size:9px">CONFIRMED</span><br>
+        Wed–Sun · <span style="color:var(--muted)">RESERVE ${c.base}</span>
+      </div>
+    </div>
+    <div style="padding:12px 15px;display:flex;gap:7px">
+      <button class="btn btn-r" onclick="showToast('critical')">Mark Unavailable</button>
+      <button class="btn btn-ghost" onclick="injectChat('FTL status for ${c.id}')">Ask AI</button>
+    </div>`;
+  document.getElementById('drawer-overlay').classList.remove('hidden');
+  d.classList.remove('hidden');
+}
+function closeDrawer(){
+  document.getElementById('drawer-overlay').classList.add('hidden');
+  document.getElementById('crew-drawer').classList.add('hidden');
+}
+
+function renderAlerts(){
+  document.getElementById('alert-rows').innerHTML=ALERTS.map(a=>`
+    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;border-left:3px solid ${a.sev==='high'?'#EF4444':'#F59E0B'}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <span class="badge ${a.sev==='high'?'br':'ba'}">${a.sev==='high'?'HIGH':'MEDIUM'}</span>
+        <span style="font-weight:600;font-size:12px">${a.type.replace(/_/g,' ')}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted2)">${a.crew}</div>
+      <div style="font-size:11px;color:var(--text);margin-top:3px">${a.msg}</div>
+      <div style="margin-top:8px;display:flex;gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="showToast('info')">Acknowledge</button>
+        <button class="btn btn-ghost btn-sm">View Crew</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderJobs(){
+  document.getElementById('jobs-list').innerHTML=JOBS.map(j=>`
+    <div class="admin-row">
+      <div><div style="font-size:12px">${j.label}</div><div style="font-size:10px;color:var(--muted)">${j.schedule}</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="runJob('${j.id}')">▶ Run</button>
+    </div>`).join('');
+}
+
+function renderApiExplorer(){
+  document.getElementById('api-explorer').innerHTML=APIS.map(a=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+      <span class="badge ${a.method==='GET'?'bb':'ba'}" style="font-size:9px;width:36px;justify-content:center">${a.method}</span>
+      <span style="font-size:11px;color:var(--muted2);flex:1;font-family:monospace">${a.path}</span>
+      <button class="btn btn-ghost btn-sm" onclick="showToast('info')">▶ Send</button>
+    </div>`).join('');
+}
+</script>
+
+<script>
+function renderChat(){
+  const el=document.getElementById('chat-messages');
+  el.innerHTML=CHAT_INIT.map(m=>{
+    if(m.role==='user') return `<div class="chat-msg user"><div class="chat-avatar user-av">👤</div><div class="chat-bubble chat-user">${m.text}</div></div>`;
+    const modeClass=m.mode==='sim'?'sim':m.mode==='act'?'act':m.mode==='conf'?'conf':'';
+    const modeLabel=m.mode==='sim'?'SIMULATE':m.mode==='act'?'ACTION':m.mode==='conf'?'CONFIRM':'';
+    return `<div class="chat-msg"><div class="chat-avatar ai-av">🤖</div>
+      <div class="chat-bubble chat-ai ${modeClass}">
+        ${modeLabel?`<div class="chat-mode ${modeClass}">${modeLabel}</div>`:''}
+        <div style="white-space:pre-line">${m.text}</div>
+        ${m.mode==='sim'?`<div style="margin-top:8px;display:flex;gap:6px"><button class="btn btn-g btn-sm" onclick="applySimulation()">Apply it</button><button class="btn btn-ghost btn-sm">No thanks</button></div>`:''}
+      </div></div>`;
+  }).join('');
+  el.scrollTop=el.scrollHeight;
+  document.getElementById('chat-chips').innerHTML=
+    ['Who\'s on AI305?','Show today\'s delays','FTL status C-007','Pending proposals'].map(c=>`<span class="chip" onclick="injectChat('${c}')">${c}</span>`).join('');
+}
+
+function applySimulation(){
+  addChatMsg('user','Yes, apply it');
+  setTimeout(()=>{
+    addChatMsg('ai','conf',`ACTION — confirmation required:\n\nCapt Ravi Singh (C-003) will be marked unavailable for AI305 BOM→CCU (10:00).\nDisruptionHandler will find the best replacement and create a PENDING proposal.\nApprove from your Disruption Inbox — no direct assignment happens yet.`,'confirm');
+    chatConfirmPending=true;
+  },600);
+}
+
+function addChatMsg(role,modeOrText,text,extra){
+  const el=document.getElementById('chat-messages');
+  let html='';
+  if(role==='user'){
+    html=`<div class="chat-msg user"><div class="chat-avatar user-av">👤</div><div class="chat-bubble chat-user">${modeOrText}</div></div>`;
+  } else {
+    const mode=modeOrText,txt=text;
+    const modeClass=mode==='sim'?'sim':mode==='act'?'act':mode==='conf'?'conf':'';
+    const modeLabel=mode==='sim'?'SIMULATE':mode==='act'?'ACTION':mode==='conf'?'CONFIRM':'';
+    const confirmBtns=extra==='confirm'?`<div class="confirm-card"><p>${txt}</p><div class="confirm-btns"><button class="btn btn-g" onclick="confirmAction()">✓ CONFIRM</button><button class="btn btn-r" onclick="cancelAction()">✗ CANCEL</button></div></div>`:'';
+    html=`<div class="chat-msg"><div class="chat-avatar ai-av">🤖</div>
+      <div class="chat-bubble chat-ai ${modeClass}">
+        ${modeLabel?`<div class="chat-mode ${modeClass}">${modeLabel}</div>`:''}
+        ${extra==='confirm'?confirmBtns:`<div style="white-space:pre-line">${txt}</div>`}
+      </div></div>`;
+  }
+  el.insertAdjacentHTML('beforeend',html);
+  el.scrollTop=el.scrollHeight;
+}
+
+function confirmAction(){
+  chatConfirmPending=false;
+  addChatMsg('user','YES');
+  setTimeout(()=>{
+    addChatMsg('ai','','Done. Disruption raised for AI305.\nProposal PROP-L305-20240205103042 is now PENDING in your Disruption Inbox.\nApprove from the inbox to confirm the replacement.');
+    showToast('success');
+  },500);
+}
+function cancelAction(){
+  chatConfirmPending=false;
+  addChatMsg('user','NO');
+  setTimeout(()=>addChatMsg('ai','','Action cancelled.'),400);
+}
+
+function sendChat(){
+  const inp=document.getElementById('chat-input');
+  const msg=inp.value.trim();if(!msg)return;
+  inp.value='';
+  addChatMsg('user',msg);
+  setTimeout(()=>{
+    if(msg.toLowerCase().includes('ftl')||msg.toLowerCase().includes('hours')){
+      addChatMsg('ai','','Capt Vikram Joshi (C-007) — AVAILABLE\nCurrent duty: 0h / 13h · 28-day: 30h / 100h\nAll FTL limits within safe range.');
+    } else if(msg.toLowerCase().includes('delay')){
+      addChatMsg('ai','','2 flights delayed today:\n• AI202 DEL→BOM +150 min (MEDIUM)\n• AI410 BOM→DEL +240 min (HIGH)\nFTL re-check complete — all crew remain legal.');
+    } else if(msg.toLowerCase().includes('proposal')||msg.toLowerCase().includes('inbox')){
+      addChatMsg('ai','','3 pending proposals:\n• PROP-001 AI305 CRITICAL — Capt Ravi sick\n• PROP-002 AI410 HIGH — delay FTL check\n• PROP-003 AI111 MEDIUM — 28-day cap');
+    } else {
+      addChatMsg('ai','','I\'m monitoring 7 flights today. 3 disruptions are pending your review in the Disruption Inbox.');
+    }
+  },700);
+}
+
+function injectChat(msg){
+  document.getElementById('chat-input').value=msg;
+  sendChat();
+}
+
+function openLegModal(legId){
+  const r=ROSTER.find(x=>x.legId===legId);if(!r)return;
+  const m=document.getElementById('leg-modal');
+  m.innerHTML=`
+    <div class="mh">
+      <span style="font-size:18px">✈</span>
+      <span class="mh-title">${r.legId} · ${r.route}</span>
+      ${rosterBadge(r.status)}
+      <button class="btn btn-ghost btn-sm" onclick="closeLegModal()" style="margin-left:auto">✕</button>
+    </div>
+    <div class="mb">
+      <div style="display:flex;gap:16px;margin-bottom:14px">
+        <div><div style="font-size:10px;color:var(--muted)">TIME</div><div style="font-weight:600">${r.time}</div></div>
+        <div><div style="font-size:10px;color:var(--muted)">AIRCRAFT</div><div style="font-weight:600">B737</div></div>
+        <div><div style="font-size:10px;color:var(--muted)">REG</div><div style="font-weight:600">VT-SJL</div></div>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Assigned Crew</div>
+      ${r.crew.map(cid=>{const c=CREW.find(x=>x.id===cid);return c?`
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <span class="badge ${c.role==='PILOT'?'bb':'bm'}" style="font-size:9px">${c.role}</span>
+          <span style="flex:1;font-size:12px">${c.name}</span>
+          <span style="font-size:10px;color:var(--muted2)">${c.id}</span>
+          ${crewStatusBadge(c.status)}
+        </div>`:''}).join('')}
+      ${r.status==='disrupted'?`<div style="margin-top:10px;padding:8px 10px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:var(--rs);font-size:11px;color:#EF4444">⚠ Capt Ravi Singh (C-003) — SICK · Replacement pending in Disruption Inbox</div>`:''}
+    </div>
+    <div class="mf">
+      ${r.status==='draft'?`<button class="btn btn-g" onclick="showToast('success');closeLegModal()">✓ Approve Leg</button>`:''}
+      <button class="btn btn-ghost" onclick="closeLegModal()">Close</button>
+    </div>`;
+  document.getElementById('leg-modal-overlay').classList.remove('hidden');
+}
+function closeLegModal(){document.getElementById('leg-modal-overlay').classList.add('hidden');}
+
+let toastId=0;
+function showToast(type){
+  const configs={
+    critical:{cls:'tc',icon:'🔴',title:'CRITICAL DISRUPTION',msg:'AI305 — Capt Ravi Singh sick. Proposal ready for review.',actions:`<button class="btn btn-r btn-sm" onclick="switchPage('dashboard')">View</button>`},
+    success:{cls:'ts',icon:'✅',title:'Proposal ACCEPTED',msg:'Capt Vikram Joshi assigned to AI305.',actions:''},
+    info:{cls:'ti',icon:'ℹ',title:'Job triggered',msg:'Request sent to API. Check panel for results.',actions:''},
+  };
+  const cfg=configs[type]||configs.info;
+  const id='toast-'+(++toastId);
+  const el=document.createElement('div');
+  el.className=`toast ${cfg.cls}`;el.id=id;
+  el.innerHTML=`<span class="toast-ico">${cfg.icon}</span>
+    <div class="toast-bd">
+      <div class="toast-ttl">${cfg.title}</div>
+      <div class="toast-msg">${cfg.msg}</div>
+      ${cfg.actions?`<div class="toast-acts">${cfg.actions}</div>`:''}
+    </div>
+    <span class="toast-x" onclick="document.getElementById('${id}').remove()">✕</span>`;
+  document.getElementById('toast-stack').appendChild(el);
+  if(type!=='critical')setTimeout(()=>{const t=document.getElementById(id);if(t)t.remove();},5000);
+}
+
+function switchPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const map={dashboard:0,flights:1,crew:2,alerts:3,admin:4};
+  const btns=document.querySelectorAll('.nav-btn');
+  if(map[name]!==undefined)btns[map[name]].classList.add('active');
+}
+
+function switchRosterView(view,tab){
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('on'));
+  tab.classList.add('on');
+  ['grid','timeline','list'].forEach(v=>{
+    const el=document.getElementById('roster-'+v);
+    if(el)el.classList.toggle('hidden',v!==view);
+  });
+}
+
+function toggleFlag(el){el.classList.toggle('off');}
+function seedAll(){showToast('success');}
+function seedItem(name){showToast('info');}
+function runJob(id){showToast('info');}
+
+function init(){
+  renderRosterGrid();
+  renderTimeline();
+  renderListView();
+  renderFlightMonitor('fm-rows');
+  renderFlightMonitor('flights-full');
+  renderInbox();
+  renderCrew();
+  renderAlerts();
+  renderChat();
+  renderJobs();
+  renderApiExplorer();
+  setTimeout(()=>showToast('critical'),1500);
+}
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>

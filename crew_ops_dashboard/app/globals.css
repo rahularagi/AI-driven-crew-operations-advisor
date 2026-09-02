@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+:root {
+  --bg:        #0A0E1A;
+  --surface:   #111827;
+  --raised:    #1F2937;
+  --overlay:   #374151;
+  --border:    #1F2937;
+  --border2:   #374151;
+  --brand:     #3B82F6;
+  --brand-dim: #1E3A5F;
+  --success:   #10B981;
+  --warning:   #F59E0B;
+  --danger:    #EF4444;
+  --critical:  #DC2626;
+  --text:      #F9FAFB;
+  --muted:     #6B7280;
+  --muted2:    #9CA3AF;
+}
+
+@theme inline {
+  --color-bg:        var(--bg);
+  --color-surface:   var(--surface);
+  --color-raised:    var(--raised);
+  --color-overlay:   var(--overlay);
+  --color-border:    var(--border);
+  --color-border2:   var(--border2);
+  --color-brand:     var(--brand);
+  --color-brand-dim: var(--brand-dim);
+  --color-success:   var(--success);
+  --color-warning:   var(--warning);
+  --color-danger:    var(--danger);
+  --color-critical:  var(--critical);
+  --color-text:      var(--text);
+  --color-muted:     var(--muted);
+  --color-muted2:    var(--muted2);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--overlay); border-radius: 2px; }
+
+@keyframes pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+  50%       { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes slide-out-right {
+  from { transform: translateX(0);    opacity: 1; }
+  to   { transform: translateX(100%); opacity: 0; }
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes green-flash {
+  0%   { background: rgba(16,185,129,0.3); }
+  100% { background: transparent; }
+}
+
+.pulse-ring  { animation: pulse-ring 1.5s cubic-bezier(0.4,0,0.6,1) infinite; }
+.blink       { animation: blink 2s ease infinite; }
+.fade-in     { animation: fade-in 0.2s ease; }
+.green-flash { animation: green-flash 0.6s ease forwards; }
+
+.drawer-enter { animation: slide-in-right 0.25s ease; }
+.drawer-exit  { animation: slide-out-right 0.25s ease; }
