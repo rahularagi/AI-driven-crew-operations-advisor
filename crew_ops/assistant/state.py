@@ -8,6 +8,12 @@ from typing_extensions import TypedDict
 from langgraph.graph.message import add_messages
 
 
+def _last_value(current, update):
+    # Reducer that always keeps the latest value — replaces instead of appending.
+    # Used for final_answer so synthesizer overwrites, not accumulates.
+    return update
+
+
 class AssistantState(TypedDict):
     # The conversation — add_messages handles append-only updates
     messages: Annotated[list, add_messages]
@@ -15,5 +21,6 @@ class AssistantState(TypedDict):
     # Raw structured data collected by tools — synthesizer reads this
     tool_results: dict[str, Any]
 
-    # Final plain-English answer written by synthesizer
-    final_answer: str
+    # Final plain-English answer written by synthesizer.
+    # Annotated with _last_value so it stays a string, never becomes a list.
+    final_answer: Annotated[str, _last_value]
