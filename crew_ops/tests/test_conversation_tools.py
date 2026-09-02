@@ -197,3 +197,62 @@ def test_action_approve_roster_leg():
     assert result["status"] == "published"
     assert result["leg_id"] == "L-001"
     assert result["approved_by"] == "ops_01"
+
+
+# ─── get_pending_proposals ────────────────────────────────────────────────────
+
+def test_get_pending_proposals_delegates_to_repository():
+    expected = [{"proposal_id": "PROP-001", "status": "PENDING"}]
+    with patch("crew_ops.conversation.tools.SessionLocal") as mock_sl, \
+         patch("crew_ops.conversation.tools.disruption_repository") as mock_repo:
+        ctx = MagicMock()
+        mock_sl.return_value.__enter__ = lambda s: ctx
+        mock_sl.return_value.__exit__ = MagicMock(return_value=False)
+        mock_repo.get_pending_proposals.return_value = expected
+        result = get_pending_proposals()
+    assert result == expected
+    mock_repo.get_pending_proposals.assert_called_once_with(ctx)
+
+
+# ─── get_crew_schedule ────────────────────────────────────────────────────────
+
+def test_get_crew_schedule_delegates_to_repository():
+    from crew_ops.conversation.tools import get_crew_schedule
+    expected = [{"leg_id": "L-001", "crew_id": "C-001"}]
+    with patch("crew_ops.conversation.tools.SessionLocal") as mock_sl, \
+         patch("crew_ops.conversation.tools.roster_repository") as mock_repo:
+        ctx = MagicMock()
+        mock_sl.return_value.__enter__ = lambda s: ctx
+        mock_sl.return_value.__exit__ = MagicMock(return_value=False)
+        mock_repo.get_future_assignments.return_value = expected
+        result = get_crew_schedule("C-001", date(2026, 1, 1), date(2026, 1, 7))
+    assert result == expected
+
+
+# ─── get_roster ───────────────────────────────────────────────────────────────
+
+def test_get_roster_delegates_to_repository():
+    from crew_ops.conversation.tools import get_roster
+    expected = [{"leg_id": "L-001"}]
+    with patch("crew_ops.conversation.tools.SessionLocal") as mock_sl, \
+         patch("crew_ops.conversation.tools.roster_repository") as mock_repo:
+        ctx = MagicMock()
+        mock_sl.return_value.__enter__ = lambda s: ctx
+        mock_sl.return_value.__exit__ = MagicMock(return_value=False)
+        mock_repo.get_roster_for_date_range.return_value = expected
+        result = get_roster(date(2026, 1, 1), date(2026, 1, 7))
+    assert result == expected
+
+
+# ─── action_reject_proposal ───────────────────────────────────────────────────
+
+def test_action_reject_proposal_delegates_to_disruption_handler():
+    from crew_ops.conversation.tools import action_reject_proposal
+    expected = {"status": "rejected", "next_candidate": "C-002"}
+    with patch("crew_ops.services.disruption_handler.disruption_handler_service.DisruptionHandler") as MockDH:
+        MockDH.return_value.reject_and_repropose.return_value = expected
+        result = action_reject_proposal("PROP-001", "ops_01", "wrong candidate")
+    assert result == expected
+    MockDH.return_value.reject_and_repropose.assert_called_once_with(
+        "PROP-001", "ops_01", "wrong candidate"
+    )

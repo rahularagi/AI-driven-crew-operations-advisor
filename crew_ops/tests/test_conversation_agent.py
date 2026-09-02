@@ -307,3 +307,55 @@ def test_pre_check_legality_reassign_passes():
          patch("crew_ops.rules.legality.check_legality", return_value=(True, None)):
         result = _pre_check_legality(intent, {"leg_id": "L-001", "new_crew_id": "C-002"})
     assert result["passed"] is True
+
+
+# ─── _dispatch_query — insufficient context ───────────────────────────────────
+
+def test_dispatch_query_insufficient_context_returns_error():
+    """No leg_id, no crew_id, no keyword — must return error dict."""
+    from crew_ops.conversation.agent import _dispatch_query
+    intent = _make_intent(mode="QUERY", entities={}, raw="hello")
+    result = _dispatch_query(intent)
+    assert "error" in result
+
+
+# ─── _dispatch_simulate — insufficient entities ───────────────────────────────
+
+def test_dispatch_simulate_insufficient_entities_returns_error():
+    """No crew_id or leg_id — must return error dict."""
+    from crew_ops.conversation.agent import _dispatch_simulate
+    intent = _make_intent(mode="SIMULATE", entities={}, raw="what if something happens")
+    result = _dispatch_simulate(intent)
+    assert "error" in result
+
+
+# ─── _dispatch_action — unknown action_type ───────────────────────────────────
+
+def test_dispatch_action_unknown_type_returns_error():
+    """Unrecognised action_type must return error dict, not raise."""
+    from crew_ops.conversation.agent import _dispatch_action
+    result = _dispatch_action("UNKNOWN_ACTION", {}, "ops_01")
+    assert "error" in result
+    assert "unknown" in result["error"].lower()
+
+
+# ─── format_node — pending confirmation + no tool_result → clarify ────────────
+
+def test_format_node_pending_confirmation_no_tool_result_asks_yes_no():
+    """When a confirmation is pending and no tool_result is set, format_node
+    must ask the user to reply YES or NO (clarify branch)."""
+    from crew_ops.conversation.session import PendingConfirmation
+    from datetime import datetime, timezone, timedelta
+    session = SessionState(session_id="s-fmt")
+    session.pending_confirmation = PendingConfirmation(
+        action_type="MARK_UNAVAILABLE",
+        action_args={},
+        summary="Confirm?",
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=5),
+    )
+    intent = _make_intent(mode="ACTION")
+    state  = _make_state(intent=intent, session=session)
+    # no tool_result set
+    result = format_node(state)
+    assert result["mode"] == "CLARIFY"
+    assert "YES" in result["response"] or "yes" in result["response"].lower()
