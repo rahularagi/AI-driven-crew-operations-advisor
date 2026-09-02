@@ -28,8 +28,14 @@ class FlightTimeLimitsService:
     def on_leg_completed(self, event: LegCompletedEvent) -> None:
         """
         Subscribed to LegCompletedEvent via event bus.
-        Registered at startup: event_bus.subscribe(LegCompletedEvent, ftl_service.on_leg_completed)
+        Updates FTL state for each crew member after a leg lands.
         """
+        from crew_ops.clients.flight_schedule_client import get_flight_leg
+        leg = get_flight_leg(event.leg_id)
+        leg_hours = 0.0
+        if leg:
+            leg_hours = (leg.scheduled_arrival - leg.scheduled_departure).total_seconds() / 3600
+
         for crew_id in event.crew:
             ftl = get_crew_duty_state(crew_id)
             if not ftl:
@@ -37,15 +43,20 @@ class FlightTimeLimitsService:
             crew = get_crew_member(crew_id)
             at_home = bool(crew and event.destination == crew.home_base)
 
-            ftl.flight_hours_current_duty += 0.0  # TODO: add actual leg duration
-            ftl.sectors_current_duty += 1
-            ftl.current_airport = event.destination
-            ftl.at_home_base = at_home
-            ftl.rest_start_time = datetime.now(timezone.utc) + timedelta(minutes=30)
-            ftl.rest_type = "HOME_REST" if at_home else "HOTEL_REST"
+            ftl.flight_hours_current_duty += leg_hours
+            ftl.flight_hours_28_day       += leg_hours
+            ftl.duty_hours_7_day          += leg_hours
+            ftl.duty_hours_28_day         += leg_hours
+            ftl.sectors_current_duty      += 1
+            ftl.current_airport            = event.destination
+            ftl.at_home_base               = at_home
+            ftl.rest_start_time            = datetime.now(timezone.utc) + timedelta(minutes=30)
+            ftl.rest_type                  = "HOME_REST" if at_home else "HOTEL_REST"
             if not at_home:
                 ftl.earliest_checkout = ftl.rest_start_time + timedelta(hours=10)
-            ftl.status = "RESTING"
+            else:
+                ftl.earliest_checkout = None
+            ftl.status       = "RESTING"
             ftl.last_updated = datetime.now(timezone.utc)
             update_crew_duty_state(ftl)
 
@@ -96,10 +107,21 @@ class FlightTimeLimitsService:
                     ))
 
     def run_midnight_recalculation(self) -> None:
-        """Scheduled every midnight. Recalculates rolling counters for all crew."""
-        # TODO: sum duty/flight hours from duty history over rolling 7 and 28 day windows
-        # update duty_hours_7_day, duty_hours_28_day, flight_hours_28_day, consecutive_duty_days
-        pass
+        """Scheduled every midnight. Resets per-duty counters for crew who completed rest."""
+        now = datetime.now(timezone.utc)
+        for ftl in get_all_crew_duty_states():
+            if ftl.status != "RESTING":
+                continue
+            # If earliest_checkout has passed, crew is now available
+            if ftl.earliest_checkout and now >= ftl.earliest_checkout:
+                ftl.status                    = "AVAILABLE"
+                ftl.last_rest_end_time        = ftl.earliest_checkout
+                ftl.flight_hours_current_duty = 0.0
+                ftl.sectors_current_duty      = 0
+                ftl.duty_start_time           = None
+                ftl.projected_duty_period_end = None
+                ftl.last_updated              = now
+                update_crew_duty_state(ftl)
 
     def _make_alert(self, crew_id: str, alert_type: str, message: str) -> FlightTimeLimitsAlertEvent:
         return FlightTimeLimitsAlertEvent(

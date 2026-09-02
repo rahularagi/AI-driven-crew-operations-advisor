@@ -1,742 +1,442 @@
-# Data Sources, APIs & Mock Data
-
-> What data we need, which API provides it, and exactly what the response looks like.
-> Every section has a real API shape + mock example so you know what to expect.
+# Data Sources & APIs
 
 ---
 
-## Overview — Where Each Data Type Comes From
+## Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  EXTERNAL APIs (we call these)                                  │
-│                                                                 │
-│  Aviationstack / AeroDataBox                                    │
-│    → flight schedule (legs, departure times, aircraft type)     │
-│    → live flight status (delay, estimated arrival, status)      │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+EXTERNAL APIs (called by clients when mock flags are False)
+  Aviationstack
+    → flight schedule (legs, departure times, aircraft type)
+    → live flight status (delay, cancellation, landed)
 
-┌─────────────────────────────────────────────────────────────────┐
-│  INTERNAL SYSTEMS (airline owns these — we mock them)           │
-│                                                                 │
-│  HRMS (SAP HR / Workday)                                        │
-│    → crew static profile (name, role, base, seniority)          │
-│                                                                 │
-│  AIMS (Jeppesen Crew / IBS CrewStar)                            │
-│    → crew licenses, medical expiry, duty history                │
-│    → current roster assignments, leave records                  │
-│    → FTL state (duty hours, rest state, cumulative counters)    │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+  SAP HR / Workday (HRMS)
+    → crew static profile (name, role, base, designation)
 
-┌─────────────────────────────────────────────────────────────────┐
-│  STATIC CONFIG (we define these, never changes)                 │
-│                                                                 │
-│  fdp_table.json       → FDP limits by report time + sectors     │
-│  cost_config.json     → deadhead cost, delay cost/min           │
-│  airport_ref.json     → ICAO codes, timezones, hub flags        │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+INTERNAL SYSTEMS (always internal — no mock/real split)
+  PostgreSQL database
+    → crew_members, crew_licenses, crew_ftl_states
+    → crew_leave_records, crew_reserve_schedule
+    → flight_legs, roster_leg, roster_crew_assignment
+    → disruption_proposals
+
+MOCK DATA (used when mock flags are True — default for local dev)
+  data/mock/crew.py              → 25 crew profiles
+  data/mock/licenses.py          → 21 license records
+  data/mock/leave_records.py     → 5 leave records
+  data/mock/reserve_schedule.py  → 10 reserve slots
+  data/mock_observer.py          → 5 flight poll sequences
+  data/legs.json                 → 15 flight legs
+  data/seed_ftl.py               → 25 FTL states
 ```
 
 ---
 
-## API 1 — Flight Schedule (Aviationstack)
+## Mock Flags
 
-**Used by:** Weekly Planner (on startup, fetch all legs for planning horizon)
+Each data source has its own flag in `.env`. All default to `True` for local development.
 
-**Call:**
+| Flag | Default | True | False |
+|------|---------|------|-------|
+| `MOCK_CREW_PROFILE` | True | reads from DB (seeded from `data/mock/crew.py`) | calls SAP HR / Workday API |
+| `MOCK_LICENSE` | True | reads from DB (seeded from `data/mock/licenses.py`) | calls AIMS license API |
+| `MOCK_FLIGHT_SCHEDULE` | True | reads from DB (seeded from `data/legs.json`) | calls Aviationstack schedule API |
+| `MOCK_FLIGHT_STATUS` | True | returns next poll from `data/mock_observer.py` sequences | calls Aviationstack live status API |
+| `MOCK_FTL_STATE` | True | reads/writes DB (seeded from `data/seed_ftl.py`) | always internal — flag has no effect |
+| `MOCK_RESERVE_SCHEDULE` | True | reads from DB (seeded from `data/mock/reserve_schedule.py`) | calls crew scheduling system API |
+
+---
+
+## Client Layer — Swap Points
+
+Each client is the only place in the codebase that knows whether to use mock or real data.
+Services never import from `data/` directly — they always go through a client.
+
+| Client | Mock source | Real source |
+|--------|------------|-------------|
+| `clients/crew_profile_client.py` | DB → `crew_members` table | SAP HR / Workday API |
+| `clients/license_client.py` | DB → `crew_licenses` table | AIMS license API |
+| `clients/flight_schedule_client.py` | DB → `flight_legs` table | Aviationstack schedule API |
+| `clients/flight_status_client.py` | `data/mock_observer.py` poll sequences | Aviationstack live status API |
+| `clients/ftl_client.py` | DB → `crew_ftl_states` table | always internal |
+| `clients/leave_client.py` | DB → `crew_leave_records` table | always internal |
+| `clients/reserve_client.py` | DB → `crew_reserve_schedule` table | crew scheduling system API |
+
+---
+
+## API 1 — Crew Profile (HRMS)
+
+**Client:** `clients/crew_profile_client.py`
+**Used by:** Weekly Planner, Disruption Handler, FTL Service, Leave Client
+
+**Real API:** SAP HR / Workday
+```
+GET {HRMS_API_BASE_URL}/crew
+GET {HRMS_API_BASE_URL}/crew/{crew_id}
+Headers: Authorization: Bearer {HRMS_API_KEY}
+```
+
+**Mock data:** `data/mock/crew.py` → seeded into `crew_members` table
+
+**25 crew members:**
+
+| crew_id | Name | Role | Designation | Base |
+|---------|------|------|-------------|------|
+| C-001 | Capt Arjun Mehta | PILOT | CAPTAIN | VIDP |
+| C-002 | FO Priya Sharma | PILOT | FIRST_OFFICER | VIDP |
+| C-003 | Capt Ravi Singh | PILOT | CAPTAIN | VABB |
+| C-004 | FO Anita Nair | PILOT | FIRST_OFFICER | VABB |
+| C-005 | Capt Suresh Kumar | PILOT | CAPTAIN | VOBL |
+| C-006 | FO Deepa Rao | PILOT | FIRST_OFFICER | VIDP |
+| C-007 | Capt Vikram Joshi | PILOT | CAPTAIN | VIDP |
+| C-008 | FO Neha Patel | PILOT | FIRST_OFFICER | VABB |
+| C-009 | Capt Arun Iyer | PILOT | CAPTAIN | VOBL |
+| C-010 | FO Kavya Menon | PILOT | FIRST_OFFICER | VIDP |
+| C-011 | SP Sunita Kapoor | CABIN | SENIOR_PURSER | VIDP |
+| C-012 | CC Rahul Verma | CABIN | CABIN_CREW | VIDP |
+| C-013 | CC Pooja Gupta | CABIN | CABIN_CREW | VABB |
+| C-014 | CC Amit Shah | CABIN | CABIN_CREW | VABB |
+| C-015 | SP Divya Krishnan | CABIN | SENIOR_PURSER | VOBL |
+| C-016 | CC Rohit Malhotra | CABIN | CABIN_CREW | VIDP |
+| C-017 | CC Sneha Desai | CABIN | CABIN_CREW | VIDP |
+| C-018 | CC Kiran Reddy | CABIN | CABIN_CREW | VABB |
+| C-019 | SP Meera Pillai | CABIN | SENIOR_PURSER | VIDP |
+| C-020 | CC Ajay Tiwari | CABIN | CABIN_CREW | VOBL |
+| C-021 | Capt Nisha Bose | PILOT | CAPTAIN | VIDP |
+| C-022 | FO Sanjay Kulkarni | PILOT | FIRST_OFFICER | VABB |
+| C-023 | CC Lakshmi Nair | CABIN | CABIN_CREW | VIDP |
+| C-024 | Capt Mohan Das | PILOT | CAPTAIN | VABB |
+| C-025 | FO Tanya Mishra | PILOT | FIRST_OFFICER | VOBL |
+
+**Model:** `models/crew_member.py` → `CrewMember`
+
+---
+
+## API 2 — Licenses (AIMS)
+
+**Client:** `clients/license_client.py`
+**Used by:** Weekly Planner (legality Gate 3/4/5), Disruption Handler (candidate check)
+
+**Mock data:** `data/mock/licenses.py` → seeded into `crew_licenses` table — 21 records
+
+Pilots only. Cabin crew have no aircraft type licenses.
+
+| crew_id | Aircraft types | Notes |
+|---------|---------------|-------|
+| C-001 | A320, B787 | |
+| C-002 | A320 | |
+| C-003 | B737, A320 | |
+| C-004 | A320 | |
+| C-005 | A320, B737 | |
+| C-006 | A320 | |
+| C-007 | A320, B737 | Best reserve candidate |
+| C-008 | A320 | |
+| C-009 | A320, B787 | Near 28-day cap in seed FTL |
+| C-010 | A320 | |
+| C-021 | A320, B737 | |
+| C-022 | B737 | B737 only |
+| C-024 | A320, B737 | |
+| C-025 | A320 | |
+
+Each license record has: `crew_id`, `aircraft_type`, `expiry_date`, `medical_expiry`, `simulator_check_due`
+
+**Model:** `models/crew_license.py` → `CrewLicense`
+
+---
+
+## API 3 — Flight Schedule (Aviationstack)
+
+**Client:** `clients/flight_schedule_client.py`
+**Used by:** Weekly Planner (Job A build), Observer (get today's legs), Disruption Handler (leg lookup)
+
+**Real API:**
 ```
 GET https://api.aviationstack.com/v1/flights
-  ?access_key=YOUR_KEY
+  ?access_key={AVIATIONSTACK_API_KEY}
   &airline_iata=AI
   &flight_status=scheduled
-  &limit=100
 ```
 
-**Real response shape:**
-```json
-{
-  "data": [
-    {
-      "flight_date": "2024-02-05",
-      "flight_status": "scheduled",
-      "departure": {
-        "airport": "Pune Airport",
-        "iata": "PNQ",
-        "icao": "VAPU",
-        "scheduled": "2024-02-05T06:00:00+05:30",
-        "estimated": "2024-02-05T06:00:00+05:30",
-        "actual": null,
-        "delay": null
-      },
-      "arrival": {
-        "airport": "Indira Gandhi International Airport",
-        "iata": "DEL",
-        "icao": "VIDP",
-        "scheduled": "2024-02-05T08:15:00+05:30",
-        "estimated": "2024-02-05T08:15:00+05:30",
-        "actual": null,
-        "delay": null
-      },
-      "airline": {
-        "name": "Air India",
-        "iata": "AI",
-        "icao": "AIC"
-      },
-      "flight": {
-        "number": "854",
-        "iata": "AI854",
-        "icao": "AIC854"
-      },
-      "aircraft": {
-        "registration": "VT-ABC",
-        "iata": "A320",
-        "icao": "A320"
-      }
-    }
-  ]
-}
-```
+**Mock data:** `data/legs.json` → seeded into `flight_legs` table — 15 legs
 
-**What we extract and store as a Leg:**
-```json
-{
-  "leg_id": "AI854-PNQ-DEL-20240205",
-  "flight_number": "AI854",
-  "flight_id": "AI854",
-  "origin_iata": "PNQ",
-  "origin_icao": "VAPU",
-  "destination_iata": "DEL",
-  "destination_icao": "VIDP",
-  "scheduled_departure": "2024-02-05T06:00:00+05:30",
-  "scheduled_arrival": "2024-02-05T08:15:00+05:30",
-  "estimated_arrival": "2024-02-05T08:15:00+05:30",
-  "actual_departure": null,
-  "actual_arrival": null,
-  "duration_hours": 2.25,
-  "aircraft_type": "A320",
-  "aircraft_registration": "VT-ABC",
-  "status": "SCHEDULED",
-  "delay_minutes": 0,
-  "assigned_crew": []
-}
-```
+**15 flight legs (demo week Feb 05–11 2024):**
 
-**Note on multi-leg flights:**
-Aviationstack returns each leg as a separate record. AI-101 PNQ→DEL→LHR comes back as two separate rows — one for PNQ→DEL and one for DEL→LHR. We group them under the same `flight_id` and assign a `sequence` number.
+| leg_id | Route | Day | Aircraft | Scenario |
+|--------|-------|-----|----------|---------|
+| AI854-PNQ-DEL-20240205 | PNQ→DEL | D1 | A320 | Normal — clean flight |
+| AI101-DEL-LHR-20240205 | DEL→LHR | D1 | B787 | Cancellation → CRITICAL |
+| AI202-DEL-BOM-20240205 | DEL→BOM | D1 | A320 | Delay 0→150 min → MEDIUM |
+| AI305-BOM-CCU-20240205 | BOM→CCU | D1 | B737 | Crew sick call (C-003) |
+| AI410-BOM-DEL-20240205 | BOM→DEL | D1 | A320 | Delay 240 min → HIGH |
+| AI501-DEL-BLR-20240206 | DEL→BLR | D2 | A320 | Normal |
+| AI602-BLR-BOM-20240206 | BLR→BOM | D2 | A320 | Normal |
+| AI703-DEL-BOM-20240206 | DEL→BOM | D2 | B737 | No legal crew at origin |
+| AI804-BOM-DEL-20240207 | BOM→DEL | D3 | A320 | Normal |
+| AI905-DEL-PNQ-20240207 | DEL→PNQ | D3 | A320 | Normal |
+| AI111-DEL-LHR-20240208 | DEL→LHR | D4 | B787 | C-009 near 28-day cap |
+| AI222-BOM-BLR-20240208 | BOM→BLR | D4 | A320 | Normal |
+| AI333-BLR-DEL-20240209 | BLR→DEL | D5 | B737 | Normal |
+| AI444-DEL-BOM-20240210 | DEL→BOM | D6 | A320 | Normal |
+| AI555-BOM-PNQ-20240211 | BOM→PNQ | D7 | A320 | Normal — end of week |
+
+**Model:** `models/flight_leg.py` → `FlightLeg`
 
 ---
 
-## API 2 — Live Flight Status (Aviationstack / AeroDataBox)
+## API 4 — Live Flight Status (Aviationstack)
 
-**Used by:** Observer (polls active legs every 60 sec while airborne)
+**Client:** `clients/flight_status_client.py`
+**Used by:** Observer (polls every 5 min via scheduler)
 
-**Call:**
+**Real API:**
 ```
 GET https://api.aviationstack.com/v1/flights
-  ?access_key=YOUR_KEY
-  &flight_iata=AI854
-  &flight_date=2024-02-05
+  ?access_key={AVIATIONSTACK_API_KEY}
+  &flight_iata={flight_iata}
+  &flight_date={YYYY-MM-DD}
 ```
 
-**Real response shape (flight airborne, delayed):**
+**Mock data:** `data/mock_observer.py` — sequential poll responses per leg
+
+Each leg has a list of poll responses. The client tracks a per-leg index and returns the next response on each call. Index resets when a leg lands (`reset_poll_index_for_leg`).
+
+**5 mocked sequences:**
+
+| leg_id | Poll sequence | Event triggered |
+|--------|--------------|----------------|
+| AI854-PNQ-DEL-20240205 | scheduled → active → landed | `LegCompletedEvent` |
+| AI305-BOM-CCU-20240205 | scheduled → active → landed | `LegCompletedEvent` (disruption is crew-side) |
+| AI202-DEL-BOM-20240205 | scheduled → delay(45) → active(150) → landed | `FlightDisruptedEvent(DELAY, MEDIUM)` at poll 3 |
+| AI410-BOM-DEL-20240205 | scheduled → delay(240) → active(245) → landed | `FlightDisruptedEvent(DELAY, HIGH)` at poll 2 |
+| AI101-DEL-LHR-20240205 | scheduled → cancelled | `FlightDisruptedEvent(CANCELLATION, CRITICAL)` at poll 2 |
+
+**Poll response shape (Aviationstack format):**
 ```json
 {
-  "data": [
-    {
-      "flight_date": "2024-02-05",
-      "flight_status": "active",
-      "departure": {
-        "iata": "PNQ",
-        "scheduled": "2024-02-05T06:00:00+05:30",
-        "actual": "2024-02-05T08:30:00+05:30",
-        "delay": 150
-      },
-      "arrival": {
-        "iata": "DEL",
-        "scheduled": "2024-02-05T08:15:00+05:30",
-        "estimated": "2024-02-05T10:45:00+05:30",
-        "actual": null,
-        "delay": 150
-      },
-      "flight": {
-        "iata": "AI854"
-      },
-      "aircraft": {
-        "registration": "VT-ABC"
-      }
-    }
-  ]
-}
-```
-
-**What Observer extracts and compares against stored leg:**
-```json
-{
-  "leg_id": "AI854-PNQ-DEL-20240205",
-  "status": "active",
-  "actual_departure": "2024-02-05T08:30:00+05:30",
-  "estimated_arrival": "2024-02-05T10:45:00+05:30",
-  "delay_minutes": 150
-}
-```
-
-**Observer decision after this update:**
-```
-stored leg.estimated_arrival  = 08:15
-new    leg.estimated_arrival  = 10:45
-delta                         = 150 min
-
-150 > 30  → severity LOW
-150 > 120 → severity MEDIUM
-
-emit FlightDisrupted {
-  leg_id: "AI854-PNQ-DEL-20240205",
-  disruption_type: "DELAY",
-  severity: "MEDIUM",
-  delay_minutes: 150,
-  assigned_crew: ["C-001", "C-004", "C-011", "C-012", "C-013", "C-014"]
-}
-```
-
----
-
-## API 3 — HRMS (Mocked — Internal Airline System)
-
-**Used by:** Weekly Planner, Disruption Handler (candidate finding)
-
-**In production:** nightly batch sync from SAP HR / Workday
-**For us:** `data/seed_crew.py` — 25 crew members seeded on startup
-
-**Mock data shape (one crew member):**
-```json
-{
-  "crew_id": "C-001",
-  "employee_id": "EMP-4421",
-  "name": "Captain Arjun Mehta",
-  "designation": "CAPTAIN",
-  "role": "PILOT",
-  "home_base": "VIDP",
-  "date_of_joining": "2008-03-15",
-  "seniority_number": 12,
-  "employment_status": "ACTIVE",
-  "phone": "+91-9800000001",
-  "email": "a.mehta@airline.in"
-}
-```
-
-**25 crew seed — variety required:**
-
-| crew_id | Name | Role | Base | Seniority |
-|---------|------|------|------|-----------|
-| C-001 | Capt Arjun Mehta | PILOT / CAPTAIN | VIDP | 12 |
-| C-002 | FO Priya Sharma | PILOT / FIRST_OFFICER | VIDP | 34 |
-| C-003 | Capt Ravi Singh | PILOT / CAPTAIN | VABB | 8 |
-| C-004 | FO Anita Nair | PILOT / FIRST_OFFICER | VABB | 41 |
-| C-005 | Capt Suresh Kumar | PILOT / CAPTAIN | VOBL | 19 |
-| C-006 | FO Deepa Rao | PILOT / FIRST_OFFICER | VIDP | 27 |
-| C-007 | Capt Vikram Joshi | PILOT / CAPTAIN | VIDP | 5 |
-| C-008 | FO Neha Patel | PILOT / FIRST_OFFICER | VABB | 52 |
-| C-009 | Capt Arun Iyer | PILOT / CAPTAIN | VOBL | 23 |
-| C-010 | FO Kavya Menon | PILOT / FIRST_OFFICER | VIDP | 38 |
-| C-011 | SP Sunita Kapoor | CABIN / SENIOR_PURSER | VIDP | 15 |
-| C-012 | CC Rahul Verma | CABIN / CABIN_CREW | VIDP | 44 |
-| C-013 | CC Pooja Gupta | CABIN / CABIN_CREW | VABB | 31 |
-| C-014 | CC Amit Shah | CABIN / CABIN_CREW | VABB | 58 |
-| C-015 | SP Divya Krishnan | CABIN / SENIOR_PURSER | VOBL | 22 |
-| C-016 | CC Rohit Malhotra | CABIN / CABIN_CREW | VIDP | 47 |
-| C-017 | CC Sneha Desai | CABIN / CABIN_CREW | VIDP | 36 |
-| C-018 | CC Kiran Reddy | CABIN / CABIN_CREW | VABB | 29 |
-| C-019 | SP Meera Pillai | CABIN / SENIOR_PURSER | VIDP | 18 |
-| C-020 | CC Ajay Tiwari | CABIN / CABIN_CREW | VOBL | 53 |
-| C-021 | Capt Nisha Bose | PILOT / CAPTAIN | VIDP | 11 |
-| C-022 | FO Sanjay Kulkarni | PILOT / FIRST_OFFICER | VABB | 45 |
-| C-023 | CC Lakshmi Nair | CABIN / CABIN_CREW | VIDP | 33 |
-| C-024 | Capt Mohan Das | PILOT / CAPTAIN | VABB | 16 |
-| C-025 | FO Tanya Mishra | PILOT / FIRST_OFFICER | VOBL | 60 |
-
----
-
-## API 4 — AIMS (Mocked — Internal Airline System)
-
-**Used by:** Weekly Planner (licenses, leave), FTL Service (duty history), Disruption Handler (legality check)
-
-**In production:** webhook on every duty event
-**For us:** `data/seed_ftl.py` — initial FTL states seeded on startup
-
-### 4a — Licenses & Medical (from AIMS)
-
-```json
-{
-  "crew_id": "C-001",
-  "licenses": ["A320", "B737"],
-  "license_expiry": {
-    "A320": "2025-06-30",
-    "B737": "2024-09-15"
+  "flight_date": "2024-02-05",
+  "flight_status": "active",
+  "departure": {
+    "iata": "DEL",
+    "scheduled": "2024-02-05T09:00:00+05:30",
+    "actual": "2024-02-05T11:30:00+05:30",
+    "delay": 150
   },
-  "medical_expiry": "2024-08-15",
-  "simulator_check_due": "2024-04-01"
-}
-```
-
-### 4b — FTL State (live ledger, one row per crew)
-
-```json
-{
-  "crew_id": "C-001",
-  "role": "PILOT",
-  "status": "AVAILABLE",
-
-  "duty_start_time": null,
-  "duty_end_time": null,
-  "projected_fdp_end": null,
-  "flight_time_current_duty": 0.0,
-  "sectors_current_duty": 0,
-
-  "rest_start_time": "2024-02-04T21:30:00+05:30",
-  "last_rest_end_time": "2024-02-04T07:00:00+05:30",
-  "rest_hours_available": 10.5,
-
-  "flight_hours_28_day": 72.0,
-  "flight_hours_calendar_year": 180.0,
-  "duty_hours_7_day": 38.5,
-  "duty_hours_28_day": 145.0,
-  "consecutive_duty_days": 3,
-  "last_weekly_rest_end": "2024-02-01T08:00:00+05:30",
-
-  "max_fdp_allowed": 13.0,
-  "wocl_encroachment": false,
-  "fdp_reduction_applied": 0.0,
-
-  "fdp_extension_used": false,
-  "extension_hours": 0.0,
-  "safety_report_required": false,
-  "compensatory_rest_required": 0.0,
-
-  "home_base": "VIDP",
-  "current_airport": "VIDP",
-  "at_home_base": true,
-  "rest_type": "HOME_REST",
-  "hotel_location": null,
-  "hotel_checkin": null,
-  "earliest_checkout": null,
-  "next_positioning_flight": null,
-  "return_to_base_eta": null,
-
-  "last_updated": "2024-02-04T21:30:00+05:30"
-}
-```
-
-**Seed variety for FTL states — what we need to demo all scenarios:**
-
-| crew_id | Scenario seeded | Why |
-|---------|----------------|-----|
-| C-001 | `flight_hours_28_day: 72`, fresh | Normal available pilot |
-| C-002 | `flight_hours_28_day: 91` | Near 100hr cap — planner limits assignments |
-| C-003 | `consecutive_duty_days: 5` | Must get weekly rest — cannot be assigned Day 6 |
-| C-004 | `duty_hours_7_day: 54` | Near 60hr weekly cap |
-| C-005 | `status: RESTING`, `at_home_base: false` | Away from base, in layover hotel |
-| C-006 | `status: UNAVAILABLE` | Sick — triggers disruption demo |
-| C-007 | `flight_hours_28_day: 45`, fresh | Best candidate — low hours, available |
-| C-008 | `status: AVAILABLE`, `current_airport: VABB` | At different base — deadhead needed |
-
----
-
-## API 5 — Crew Leave (External — AIMS / HR, read only)
-
-**Used by:** Weekly Planner (exclude crew on leave), Disruption Handler (confirm not on leave)
-
-> Not a table we own or maintain. Read from AIMS/HR as an external input. Not stored in our database.
-
-```json
-[
-  { "crew_id": "C-003", "leave_type": "ANNUAL",   "start_date": "2024-02-05", "end_date": "2024-02-07" },
-  { "crew_id": "C-014", "leave_type": "SICK",     "start_date": "2024-02-05", "end_date": "2024-02-11" },
-  { "crew_id": "C-009", "leave_type": "TRAINING", "start_date": "2024-02-06", "end_date": "2024-02-06" }
-]
-```
-
----
-
-## API 6 — Reserve Schedule (Mocked — Crew Scheduling System)
-
-**Used by:** Disruption Handler (first place to look for replacements — already at the right airport)
-
-```json
-[
-  {
-    "reserve_id": "RSV-001",
-    "crew_id": "C-007",
-    "date": "2024-02-05",
-    "standby_start": "2024-02-05T06:00:00+05:30",
-    "standby_end": "2024-02-05T18:00:00+05:30",
-    "base_airport": "VIDP",
-    "callable_within": 120,
-    "status": "SCHEDULED",
-    "activated_for": null
+  "arrival": {
+    "iata": "BOM",
+    "scheduled": "2024-02-05T11:00:00+05:30",
+    "estimated": "2024-02-05T13:30:00+05:30",
+    "actual": null,
+    "delay": 150
   },
-  {
-    "reserve_id": "RSV-002",
-    "crew_id": "C-010",
-    "date": "2024-02-05",
-    "standby_start": "2024-02-05T06:00:00+05:30",
-    "standby_end": "2024-02-05T18:00:00+05:30",
-    "base_airport": "VIDP",
-    "callable_within": 120,
-    "status": "SCHEDULED",
-    "activated_for": null
-  },
-  {
-    "reserve_id": "RSV-003",
-    "crew_id": "C-019",
-    "date": "2024-02-05",
-    "standby_start": "2024-02-05T06:00:00+05:30",
-    "standby_end": "2024-02-05T18:00:00+05:30",
-    "base_airport": "VABB",
-    "callable_within": 120,
-    "status": "SCHEDULED",
-    "activated_for": null
-  }
-]
-```
-
----
-
-## Static Config Files
-
-### config/fdp_table.json
-
-```json
-{
-  "brackets": [
-    { "from": "0600", "to": "0659", "sectors_1_2": 13.0, "sectors_3": 12.0, "sectors_4_plus": 11.0 },
-    { "from": "0700", "to": "1259", "sectors_1_2": 13.0, "sectors_3": 12.0, "sectors_4_plus": 11.0 },
-    { "from": "1300", "to": "1759", "sectors_1_2": 12.0, "sectors_3": 11.0, "sectors_4_plus": 10.0 },
-    { "from": "1800", "to": "2159", "sectors_1_2": 11.0, "sectors_3": 10.0, "sectors_4_plus": 9.0 },
-    { "from": "2200", "to": "2259", "sectors_1_2": 10.0, "sectors_3": 9.0,  "sectors_4_plus": 8.0 },
-    { "from": "2300", "to": "0459", "sectors_1_2": 9.0,  "sectors_3": 8.0,  "sectors_4_plus": 7.5 },
-    { "from": "0500", "to": "0559", "sectors_1_2": 10.0, "sectors_3": 9.0,  "sectors_4_plus": 8.0 }
-  ],
-  "wocl_reduction_hours": 1.0,
-  "wocl_window": { "start": "0200", "end": "0600" },
-  "wocl_threshold_minutes": 120,
-  "min_rest_home_base_hours": 12,
-  "min_rest_away_hours": 10,
-  "weekly_rest_hours": 36,
-  "max_flight_hours_28_day": 100,
-  "max_duty_hours_7_day": 60,
-  "max_fdp_extension_discretion": 2.0
+  "flight": {"iata": "AI202"},
+  "aircraft": {"registration": "VT-PPM"}
 }
 ```
 
-### config/cost_config.json
+**Observer severity mapping:**
 
-```json
-{
-  "deadhead_ticket_cost_usd": 220,
-  "delay_cost_per_minute_usd": 45,
-  "passenger_impact_per_hour_usd": 12,
-  "crew_preference_weight": 0.1,
-  "ranking_weights": {
-    "legal": 0.40,
-    "same_airport": 0.30,
-    "low_fatigue": 0.20,
-    "low_cost": 0.10
-  }
-}
+| delay_minutes | Severity | Action |
+|--------------|----------|--------|
+| > 0, any | LOW (floor) | Always published — Disruption Handler re-checks legality |
+| ≥ 30 | LOW | |
+| ≥ 120 | MEDIUM | |
+| ≥ 240 | HIGH | |
+| cancelled | CRITICAL | Invalidate roster_leg + all assignments, publish RosterModifiedEvent per crew |
+| landed | — | Publish `LegCompletedEvent`, stop polling |
+
+---
+
+## API 5 — FTL State (Internal)
+
+**Client:** `clients/ftl_client.py`
+**Used by:** Weekly Planner, Disruption Handler, FTL Service
+**Always internal** — `MOCK_FTL_STATE` flag has no effect. Always reads/writes DB.
+
+**Mock seed:** `data/seed_ftl.py` → seeded into `crew_ftl_states` table — 25 states
+
+**Key seeded scenarios:**
+
+| crew_id | Status | Scenario |
+|---------|--------|---------|
+| C-001 | AVAILABLE | `flight_hours_28_day: 72` — normal available pilot |
+| C-002 | AVAILABLE | `flight_hours_28_day: 91` — near 100hr cap |
+| C-003 | AVAILABLE | `consecutive_duty_days: 5` — must rest, cannot be assigned Day 6 |
+| C-004 | AVAILABLE | `duty_hours_7_day: 54` — near 60hr weekly cap |
+| C-005 | RESTING | `at_home_base: False` — away from base, in layover |
+| C-006 | UNAVAILABLE | Sick — triggers disruption demo |
+| C-007 | AVAILABLE | `flight_hours_28_day: 45` — best replacement candidate |
+| C-008 | AVAILABLE | `current_airport: VABB` — at different base |
+| C-009 | AVAILABLE | `flight_hours_28_day: 88` — near cap, FDP warning on D4 long-haul |
+| C-010–C-025 | AVAILABLE | Standard states |
+
+**Model:** `models/crew_flight_time_limits_state.py` → `CrewFlightTimeLimitsState`
+
+---
+
+## API 6 — Leave Records (Internal)
+
+**Client:** `clients/leave_client.py`
+**Used by:** Weekly Planner (legality Gate 6), Disruption Handler (candidate check)
+**Always internal** — reads/writes `crew_leave_records` table directly.
+
+**Mock seed:** `data/mock/leave_records.py` → 5 records
+
+| crew_id | Type | Dates | Impact |
+|---------|------|-------|--------|
+| C-003 | ANNUAL | Feb 05–07 | Excluded D1–D3 |
+| C-014 | SICK | Feb 05–11 | Excluded all week |
+| C-009 | TRAINING | Feb 06 | Excluded D2 only |
+| C-020 | ANNUAL | Feb 08–10 | Excluded D4–D6 |
+| C-025 | SICK | Feb 09 | Excluded D5 only |
+
+**`add_leave_record()` side effect:** after inserting, automatically queries `roster_crew_assignment` for all assigned legs within the leave window and publishes `CrewDisruptedEvent(reason=LEAVE_ADDED)` per affected leg. Disruption Handler picks this up and finds a replacement — no manual ops desk action needed.
+
+**Model:** `models/crew_leave.py` → `CrewLeaveRecord`
+
+---
+
+## API 7 — Reserve Schedule (Internal)
+
+**Client:** `clients/reserve_client.py`
+**Used by:** Weekly Planner (Pass 2 — fill reserve slots)
+
+**Mock seed:** `data/mock/reserve_schedule.py` → 10 slots
+
+| reserve_id | crew_id | Date | Base | Notes |
+|------------|---------|------|------|-------|
+| RSV-001 | C-007 | Feb 05 | VIDP | Best replacement candidate |
+| RSV-002 | C-010 | Feb 05 | VIDP | Backup VIDP |
+| RSV-003 | C-019 | Feb 05 | VABB | VABB standby |
+| RSV-004 | C-022 | Feb 05 | VABB | VABB backup |
+| RSV-005 | C-002 | Feb 06 | VIDP | |
+| RSV-006 | C-016 | Feb 06 | VIDP | |
+| RSV-007 | C-018 | Feb 06 | VABB | |
+| RSV-008 | C-021 | Feb 07 | VIDP | |
+| RSV-009 | C-006 | Feb 08 | VIDP | C-006 back from sick by D4 |
+| RSV-010 | C-025 | Feb 09 | VOBL | |
+
+**Model:** `models/crew_reserve.py` → `CrewReserveSchedule`
+
+---
+
+## Database Tables
+
+All data ultimately lives in PostgreSQL. Schema defined in `docker/init.sql`.
+
+| Table | Owned by | Description |
+|-------|----------|-------------|
+| `crew_members` | Seeded from mock/crew.py | Static crew profiles |
+| `crew_licenses` | Seeded from mock/licenses.py | Type ratings + medical expiry |
+| `crew_ftl_states` | Seeded from seed_ftl.py, updated live | Live FTL counters per crew |
+| `crew_leave_records` | Seeded from mock/leave_records.py, writable via API | Leave periods |
+| `crew_reserve_schedule` | Seeded from mock/reserve_schedule.py | Standby slots |
+| `flight_legs` | Seeded from legs.json | Flight schedule |
+| `roster_leg` | Written by Weekly Planner | One row per leg per planning cycle — DRAFT/PUBLISHED/INVALIDATED |
+| `roster_crew_assignment` | Written by Weekly Planner + Disruption Handler | One row per crew per leg — DRAFT/CONFIRMED/REPLACED/INVALIDATED |
+| `disruption_proposals` | Written by Disruption Handler | Pending replacement proposals — PENDING/ACCEPTED/REJECTED/EXPIRED |
+
+---
+
+## Events Published Between Services
+
+All inter-service communication goes through `services/event_bus.py`. No service calls another directly.
+
+| Event | Published by | Consumed by |
+|-------|-------------|-------------|
+| `FlightDisruptedEvent` | Observer (DELAY/CANCELLATION), Weekly Planner re-plan (AIRCRAFT_SWAP/SCHEDULE_CHANGE/ROUTE_CHANGE) | Disruption Handler |
+| `LegCompletedEvent` | Observer (landed) | FTL Service |
+| `CrewDisruptedEvent` | Ops Desk via `POST /crew/{id}/unavailable`, Leave Client (`add_leave_record`), Weekly Planner Validator (Job B) | Disruption Handler |
+| `RosterModifiedEvent` | Disruption Handler (on proposal accept), Planner Router (manual reassign), Disruption Handler (CANCELLATION — per released crew) | FTL Service, Daily Validator |
+| `FlightTimeLimitsAlertEvent` | FTL Service (proactive scan) | (not yet consumed — notification service not built) |
+
+---
+
+## Scheduled Jobs
+
+Registered in `api/main.py` via APScheduler.
+
+| Job ID | Schedule | What it does |
+|--------|----------|-------------|
+| `roster_build` | Sunday 23:00 | Weekly Planner Job A — builds 7-week roster |
+| `daily_validation` | Daily 03:00 | Weekly Planner Job B — re-validates all future DRAFT/CONFIRMED assignments |
+| `ftl_alert_scan` | Every 15 min | FTL Service — scans all crew for approaching duty limits |
+| `ftl_midnight_recalc` | Daily 00:00 | FTL Service — recalculates rolling 7-day and 28-day counters |
+| `expire_proposals` | Daily 00:30 | Disruption Handler — marks PENDING proposals EXPIRED if leg already departed |
+
+---
+
+## API Endpoints
+
+### Health
+```
+GET  /health
 ```
 
-### config/airport_ref.json
+### Observer
+```
+GET  /observer/legs/today              → today's active legs with crew assigned
+GET  /observer/legs?target_date=...    → legs for a specific date (read-only)
+GET  /observer/legs?offset=1           → legs N days from today (read-only)
+```
 
-```json
-[
-  { "icao": "VIDP", "iata": "DEL", "city": "Delhi",   "timezone": "Asia/Kolkata", "is_hub": true  },
-  { "icao": "VABB", "iata": "BOM", "city": "Mumbai",  "timezone": "Asia/Kolkata", "is_hub": true  },
-  { "icao": "VOBL", "iata": "BLR", "city": "Bengaluru","timezone": "Asia/Kolkata", "is_hub": false },
-  { "icao": "VAPU", "iata": "PNQ", "city": "Pune",    "timezone": "Asia/Kolkata", "is_hub": false },
-  { "icao": "EGLL", "iata": "LHR", "city": "London",  "timezone": "Europe/London","is_hub": false }
-]
+### Planner
+```
+POST /planner/build                    → trigger Job A manually
+POST /planner/validate                 → trigger Job B manually
+GET  /planner/roster?start=&end=       → view assignments for date range
+POST /planner/roster/{leg_id}/approve  → controller approves a leg (DRAFT → PUBLISHED)
+POST /planner/roster/{leg_id}/reassign → manual crew swap with legality check
+```
+
+### Disruptions
+```
+GET  /disruptions/proposals            → all PENDING proposals sorted by severity
+POST /disruptions/proposals/{id}/accept → accept proposal → roster updated + RosterModifiedEvent
+POST /disruptions/proposals/{id}/reject → reject → next candidate proposed automatically
+```
+
+### Crew
+```
+GET  /crew/{crew_id}/ftl               → current FTL state for a crew member
+POST /crew/{crew_id}/unavailable       → ops desk marks crew unavailable → publishes CrewDisruptedEvent
+```
+
+### FTL
+```
+POST /ftl/scan                         → manually trigger proactive alert scan
+POST /ftl/recalculate                  → manually trigger rolling counter recalculation
 ```
 
 ---
 
-## Mock Flight Schedule — 15 Legs for Demo Week
+## Crew Disruption Entry Points
 
-These are the legs seeded in `data/seed_legs.py`. Designed to cover all demo scenarios.
+`CrewDisruptedEvent` enters the system from three places:
 
-| leg_id | Flight | Route | Departure | Duration | Aircraft | Scenario |
-|--------|--------|-------|-----------|----------|----------|---------|
-| AI854-PNQ-DEL-D1 | AI854 | PNQ→DEL | 06:00 | 2.25h | A320 | Normal |
-| AI101-DEL-LHR-D1 | AI101 | DEL→LHR | 11:00 | 9.25h | B787 | Long-haul, augmented crew |
-| AI202-DEL-BOM-D1 | AI202 | DEL→BOM | 09:00 | 2.0h | A320 | Delay scenario |
-| AI305-BOM-CCU-D1 | AI305 | BOM→CCU | 10:00 | 2.5h | B737 | Sick call scenario |
-| AI410-BOM-DEL-D1 | AI410 | BOM→DEL | 15:00 | 2.0h | A320 | Cascade scenario |
-| AI501-DEL-BLR-D2 | AI501 | DEL→BLR | 07:30 | 2.75h | A320 | Normal |
-| AI602-BLR-BOM-D2 | AI602 | BLR→BOM | 13:00 | 1.5h | A320 | Normal |
-| AI703-DEL-BOM-D2 | AI703 | DEL→BOM | 08:00 | 2.0h | B737 | No legal crew at origin → gap demo |
-| AI804-BOM-DEL-D3 | AI804 | BOM→DEL | 06:30 | 2.0h | A320 | Normal |
-| AI905-DEL-PNQ-D3 | AI905 | DEL→PNQ | 14:00 | 2.25h | A320 | Normal |
-| AI111-DEL-LHR-D4 | AI111 | DEL→LHR | 10:30 | 9.25h | B787 | FDP limit warning demo |
-| AI222-BOM-BLR-D4 | AI222 | BOM→BLR | 09:00 | 1.5h | A320 | Normal |
-| AI333-BLR-DEL-D5 | AI333 | BLR→DEL | 11:00 | 2.75h | B737 | Normal |
-| AI444-DEL-BOM-D6 | AI444 | DEL→BOM | 07:00 | 2.0h | A320 | Normal |
-| AI555-BOM-PNQ-D7 | AI555 | BOM→PNQ | 16:00 | 0.75h | A320 | Normal |
+| Entry point | File | Trigger | reason values |
+|------------|------|---------|---------------|
+| Ops desk | `api/routers/crew_router.py` `POST /crew/{id}/unavailable` | Human marks crew unavailable | `SICK_CALL / NO_SHOW / MEDICAL_GROUNDING / EMERGENCY_LEAVE / URGENT_TRAINING` |
+| Leave added | `clients/leave_client.py` `add_leave_record()` | Any leave insert covering an assigned leg | `LEAVE_ADDED` |
+| Weekly Planner Validator | `services/weekly_planner/weekly_planner_service.py` Job B | Runs at 03:00 daily or on `RosterModifiedEvent` | Any legality gate failure |
 
-**D1 = Day 1 of planning week, D2 = Day 2, etc.**
+All three publish to the event bus. Disruption Handler receives all via the same subscription.
 
 ---
 
-## Disruption Types
+## Switching to Real APIs
 
-The system handles two categories of disruption:
+Set flags in `.env`:
 
-### Type 1 — Flight-Side Disruption
+```env
+MOCK_CREW_PROFILE=False
+MOCK_LICENSE=False
+MOCK_FLIGHT_SCHEDULE=False
+MOCK_FLIGHT_STATUS=False
+MOCK_RESERVE_SCHEDULE=False
 
-**Trigger:** Something happens to the flight — delay, cancellation, diversion, aircraft swap.
-**Detected by:** Observer (live polling, today only).
-**Event:** `FlightDisrupted`
-
-### Type 2 — Crew-Side Disruption
-
-**Trigger:** Something happens to a crew member — sick call, emergency leave, medical grounding, no-show, urgent training, or a future assignment becoming invalid (leave added, license expired, FTL drifted).
-**Detected by:** Ops Desk (today) or Planner Job B (future). Both emit the same event.
-**Event:** `CrewDisrupted`
-
-> `PlanDisrupted` is removed. Planner Job B now emits `CrewDisrupted` directly with `source: WEEKLY_PLANNER_VALIDATOR`.
-
-**CrewDisrupted event shape:**
-
-```json
-{
-  "event": "CrewDisrupted",
-  "crew_id": "C-003",
-  "crew_name": "Capt Ravi Singh",
-  "leg_id": "AI305-BOM-CCU-20240304",
-  "reason": "SICK_LEAVE",
-  "days_until_departure": 28,
-  "severity": "LOW",
-  "source": "WEEKLY_PLANNER_VALIDATOR",
-  "detected_at": "2024-02-05T03:00:00+05:30"
-}
+AVIATIONSTACK_API_KEY=your_key
+HRMS_API_BASE_URL=https://your-hrms.internal
+HRMS_API_KEY=your_key
 ```
 
-```json
-{
-  "event": "CrewDisrupted",
-  "crew_id": "C-003",
-  "crew_name": "Capt Ravi Singh",
-  "leg_id": "AI305-BOM-CCU-20240205",
-  "reason": "SICK_CALL",
-  "days_until_departure": 0,
-  "severity": "CRITICAL",
-  "source": "OPS_DESK",
-  "detected_at": "2024-02-05T05:30:00+05:30"
-}
-```
-
-> One event per leg. If crew has 3 affected legs, 3 separate `CrewDisrupted` events are emitted.
-> `source` field is for audit only — Disruption Handler does not branch on it.
-
-**reason values:**
-
-| reason | Cause | Who emits |
-|--------|-------|-----------|
-| `SICK_CALL` | Crew calls in sick | OPS_DESK |
-| `EMERGENCY_LEAVE` | Family emergency, bereavement | OPS_DESK |
-| `MEDICAL_GROUNDING` | Doctor grounds crew immediately | OPS_DESK |
-| `NO_SHOW` | Crew did not report at check-in | OPS_DESK |
-| `URGENT_TRAINING` | Regulator mandates emergency simulator check | OPS_DESK |
-| `LEAVE_ADDED` | New leave entry covers a future assigned leg | WEEKLY_PLANNER_VALIDATOR |
-| `LICENSE_EXPIRED` | Type rating expired before leg date | WEEKLY_PLANNER_VALIDATOR |
-| `MEDICAL_EXPIRED` | Medical certificate expired before leg date | WEEKLY_PLANNER_VALIDATOR |
-| `FTL_BREACH_PROJECTED` | Accumulated hours will breach cap by that week | WEEKLY_PLANNER_VALIDATOR |
-| `AIRCRAFT_TYPE_CHANGED` | Leg now requires different type rating | WEEKLY_PLANNER_VALIDATOR |
-
-**Flow after CrewDisrupted is emitted:**
-
-```
-Disruption Handler receives CrewDisrupted for a specific leg
-  → urgency from days_until_departure + severity
-  < 1 day  → CRITICAL — activate nearest reserve immediately
-  1–2 days → HIGH — Disruption Handler runs now
-  2–7 days → HIGH — full replacement pipeline
-  7–14 days → MEDIUM — controller notified, fix this week
-  > 14 days → LOW — Planner re-assigns in next cycle
-        │
-        ▼
-Same 8-step pipeline as FlightDisrupted
-        │
-        ▼
-roster_crew_assignment updated
-RosterModified emitted → Planner Job B re-validates future weeks
-CrewNotified sent to replacement crew
-```
-
-**API endpoint (ops desk entry):**
-
-```
-POST /v1/crew/{crew_id}/unavailable
-  body: { reason, affected_from, affected_until }
-  → finds all affected legs, emits one CrewDisrupted per leg
-  → returns list of all affected legs so controller sees full impact immediately
-```
-
----
-
-## Disruption Handler — Classify Step (updated)
-
-Handler now receives 2 event types, both routed through the same pipeline:
-
-```
-FlightDisrupted → urgency from severity field
-CrewDisrupted   → urgency from days_until_departure + severity (already computed at emit time)
-```
-
----
-
-## API Endpoints — Disruption
-
-```
-POST /v1/crew/{crew_id}/unavailable
-  body: { disruption_type, affected_from, affected_until }
-  → emits CrewDisrupted event
-  → returns affected_legs[] with severity for each
-
-GET  /v1/disruptions/active
-  → returns all open disruptions (FlightDisrupted + CrewDisrupted) pending resolution
-```
-
----
-
-## How the 3 Services Use This Data (updated)
-
-```
-WEEKLY PLANNER
-  reads:  seed_legs, seed_crew, seed_ftl, seed_leave, seed_reserve
-          fdp_table.json, cost_config.json
-  writes: roster_leg, roster_crew_assignment (DRAFT → PUBLISHED)
-          crew_reserve_schedule
-
-OBSERVER
-  reads:  roster_leg (which legs to watch today)
-  calls:  Aviationstack live status API every 15–60 sec
-  emits:  FlightDisrupted, LegCompleted
-
-DISRUPTION HANDLER
-  receives: FlightDisrupted, PlanDisrupted, CrewDisrupted
-  reads:  roster_crew_assignment, crew_ftl_state, crew_reserve_schedule, crew_leave
-  writes: roster_crew_assignment (remove old, add new)
-          crew_ftl_state (updated for affected + replacement crew)
-  emits:  RosterModified, CrewNotified
-```
-
----
-
-## Polling Strategy Summary
-
-| What | Who polls | Frequency | Trigger to change |
-|------|-----------|-----------|------------------|
-| Full flight schedule | Weekly Planner | Once on startup + weekly | New planning cycle |
-| Scheduled legs (> 2hr to departure) | Observer | Every 15 min | Status changes to BOARDING |
-| Legs at gate / boarding | Observer | Every 5 min | Status changes to ACTIVE |
-| Airborne legs | Observer | Every 60 sec | `estimated_arrival` changes |
-| Landed / cancelled legs | Observer | Stop polling | LegCompleted event emitted |
-| Crew FTL state | FTL Service | On every duty event (not polled) | LegCompleted, RosterModified |
-
----
-
-## Roster Schema — Organisational View
-
-> Display schema only — what the planner writes after publishing and what the UI reads.
-> No FTL fields, no legality fields, no processing data.
-> Shows scheduled flights, legs, and crew alignment for the week.
-
-### Table 1 — `roster` (week header)
-
-```
-roster_id        str       "ROSTER-AI-2024-W06"
-airline_iata     str       "AI"
-week_start       date      2024-02-05
-week_end         date      2024-02-11
-status           enum      DRAFT / PUBLISHED
-created_at       datetime
-published_at     datetime | null
-```
-
-### Table 2 — `roster_leg` (one row per leg)
-
-```
-leg_id           str       "AI854-PNQ-DEL-20240205"
-roster_id        str       FK → roster
-flight_number    str       "AI854"
-origin           str       "PNQ"
-destination      str       "DEL"
-scheduled_dep    datetime  2024-02-05T06:00:00+05:30
-scheduled_arr    datetime  2024-02-05T08:15:00+05:30
-estimated_arr    datetime | null     updated by Observer when delay detected
-aircraft_type    str       "A320"
-aircraft_reg     str       "VT-ABC"
-status           enum      SCHEDULED / AIRBORNE / LANDED / CANCELLED / DIVERTED
-delay_status     enum      ON_TIME / DELAYED / UNKNOWN
-delay_minutes    int        0        updated by Observer on each poll
-```
-
-> `status` = flight lifecycle (where is it right now)
-> `delay_status` = punctuality (is it running on time)
-> These are independent — a flight can be AIRBORNE + DELAYED, or LANDED + DELAYED.
-> `UNKNOWN` on delay_status covers the window before Observer gets first live data.
-> Observer is the only writer of `status`, `delay_status`, `delay_minutes`, `estimated_arr`.
-> Planner writes everything else at publish time and never touches these 4 fields.
-
-### Table 3 — `roster_crew_assignment` (one row per crew per leg)
-
-```
-assignment_id    str       UUID
-leg_id           str       FK → roster_leg
-crew_id          str       "C-001"
-crew_name        str       "Capt Arjun Mehta"
-role             enum      CAPTAIN / FIRST_OFFICER / SENIOR_PURSER / CABIN_CREW
-assignment_type  enum      OPERATING / DEADHEAD / RESERVE
-report_time      datetime  duty start (1.5hrs before departure)
-release_time     datetime  duty end (arrival + 30min debrief)
-```
-
-### UI response shape (one leg)
-
-```json
-{
-  "leg_id": "AI854-PNQ-DEL-20240205",
-  "flight_number": "AI854",
-  "origin": "PNQ",
-  "destination": "DEL",
-  "scheduled_dep": "2024-02-05T06:00:00+05:30",
-  "scheduled_arr": "2024-02-05T08:15:00+05:30",
-  "aircraft_type": "A320",
-  "aircraft_reg": "VT-ABC",
-  "status": "AIRBORNE",
-  "delay_status": "DELAYED",
-  "delay_minutes": 150,
-  "estimated_arr": "2024-02-05T10:45:00+05:30",
-  "crew": [
-    { "crew_id": "C-001", "name": "Capt Arjun Mehta",  "role": "CAPTAIN",       "type": "OPERATING", "report": "04:30", "release": "09:45" },
-    { "crew_id": "C-006", "name": "FO Deepa Rao",       "role": "FIRST_OFFICER", "type": "OPERATING", "report": "04:30", "release": "09:45" },
-    { "crew_id": "C-011", "name": "SP Sunita Kapoor",   "role": "SENIOR_PURSER", "type": "OPERATING", "report": "04:30", "release": "09:45" },
-    { "crew_id": "C-012", "name": "CC Rahul Verma",     "role": "CABIN_CREW",    "type": "OPERATING", "report": "04:30", "release": "09:45" }
-  ]
-}
-```
-
-### What was deliberately excluded
-
-| Field | Reason excluded |
-|-------|-----------------|
-| `roster_flight` as a separate table | `flight_number` on `roster_leg` is enough — UI groups by it at query time |
-| `total_flights`, `total_legs`, `total_crew` | Computed at query time, not stored |
-| `is_fully_crewed`, `required_pilots`, `assigned_pilots` | Processing concern — belongs in planner, not roster view |
-| `leg_sequence` | UI sorts by `scheduled_dep` |
-| `home_base` on assignment | Not needed for organisational display |
-| `is_deadhead` | Redundant — `assignment_type = DEADHEAD` covers it |
-| FTL fields of any kind | FTL is a processing concern — lives in `crew_ftl_state` only |
-| `actual_departure`, `actual_arrival` | Not needed for roster display — Observer uses them internally to compute `delay_minutes` |
+Each client has a `_get_..._from_real_api()` stub with `raise NotImplementedError` — fill these in per client when going live. Flags can be switched independently — e.g. real flight status but mock crew profile.

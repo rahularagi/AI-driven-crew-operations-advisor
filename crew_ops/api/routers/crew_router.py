@@ -58,12 +58,7 @@ def mark_crew_unavailable(
 
 
 def _compute_severity(days_until_departure: int) -> str:
-    if days_until_departure < 1:
-        return "CRITICAL"
-    if days_until_departure <= 2:
-        return "HIGH"
-    if days_until_departure <= 7:
-        return "HIGH"
-    if days_until_departure <= 14:
-        return "MEDIUM"
+    if days_until_departure < 1:  return "CRITICAL"
+    if days_until_departure <= 2: return "HIGH"
+    if days_until_departure <= 7: return "MEDIUM"
     return "LOW"

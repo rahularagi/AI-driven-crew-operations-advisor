@@ -7,6 +7,7 @@ Real mode  : calls Aviationstack API
 Switch: set MOCK_FLIGHT_SCHEDULE=False in .env to use real API.
 """
 
+from datetime import date
 from typing import Optional
 from crew_ops.config.settings import settings
 from crew_ops.db.database import SessionLocal

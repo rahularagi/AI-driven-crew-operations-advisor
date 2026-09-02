@@ -23,6 +23,13 @@ class Settings(BaseSettings):
     hrms_api_base_url: str = ""
     hrms_api_key: str = ""
 
+    # ─── LLM provider ────────────────────────────────────────────────────────────────────
+    llm_provider:      str = "openai"   # openai / anthropic / bedrock
+    openai_api_key:    str = ""
+    anthropic_api_key: str = ""
+    bedrock_model_id:  str = "anthropic.claude-3-5-sonnet-20241022-v2:0"
+    aws_region:        str = "us-east-1"
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
 

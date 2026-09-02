@@ -23,21 +23,21 @@ def check_legality(
     # Gate 2 — Role match (checked via pool separation in Pass 1; explicit check for Job B)
     # No check here — enforced by caller
 
-    # Gate 3 — Aircraft type rating
-    if not any(lic.aircraft_type == leg.aircraft_type for lic in licenses):
-        return False, "NO_TYPE_RATING"
+    # Gates 3-5 — Type rating, license expiry, medical — pilots only
+    # Cabin crew have no aircraft type ratings; these checks do not apply
+    if crew.role == "PILOT":
+        if not any(lic.aircraft_type == leg.aircraft_type for lic in licenses):
+            return False, "NO_TYPE_RATING"
 
-    # Gate 4 — License not expired
-    rated_licenses = [lic for lic in licenses if lic.aircraft_type == leg.aircraft_type]
-    if not any(lic.expiry_date >= leg_date for lic in rated_licenses):
-        return False, "LICENSE_EXPIRED"
+        rated_licenses = [lic for lic in licenses if lic.aircraft_type == leg.aircraft_type]
+        if not any(lic.expiry_date >= leg_date for lic in rated_licenses):
+            return False, "LICENSE_EXPIRED"
 
-    # Gate 5 — Medical not expired
-    if not any(
-        lic.medical_expiry is not None and lic.medical_expiry >= leg_date
-        for lic in rated_licenses
-    ):
-        return False, "MEDICAL_EXPIRED"
+        if not any(
+            lic.medical_expiry is not None and lic.medical_expiry >= leg_date
+            for lic in rated_licenses
+        ):
+            return False, "MEDICAL_EXPIRED"
 
     # Gate 6 — Not on leave
     for leave in leave_records:

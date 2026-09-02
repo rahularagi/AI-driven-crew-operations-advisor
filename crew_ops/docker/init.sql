@@ -145,10 +145,38 @@ CREATE TABLE IF NOT EXISTS roster_crew_assignment (
     leg_id                  VARCHAR(50)     NOT NULL REFERENCES flight_legs(leg_id),
     crew_id                 VARCHAR(10)     NOT NULL REFERENCES crew_members(crew_id),
     status                  VARCHAR(15)     NOT NULL DEFAULT 'DRAFT',
+    -- DRAFT       → planned, not yet approved
+    -- CONFIRMED   → controller approved
+    -- REPLACED    → swapped out by disruption handler or manual reassign
+    -- INVALIDATED → flight cancelled or crew legally blocked
     assigned_by             VARCHAR(50)     NOT NULL,
     assigned_at             TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
     replaced_by             VARCHAR(10)     REFERENCES crew_members(crew_id),
     replaced_at             TIMESTAMPTZ,
     invalidation_reason     VARCHAR(50),
     UNIQUE (leg_id, crew_id)
+);
+
+-- ─── Disruption Proposals ─────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS disruption_proposals (
+    id                  SERIAL          PRIMARY KEY,
+    proposal_id         VARCHAR(50)     NOT NULL UNIQUE,
+    leg_id              VARCHAR(50)     NOT NULL REFERENCES flight_legs(leg_id),
+    disruption_type     VARCHAR(20)     NOT NULL,   -- FLIGHT_DISRUPTED / CREW_DISRUPTED
+    disruption_reason   VARCHAR(50)     NOT NULL,   -- from event
+    removed_crew_id     VARCHAR(10)     REFERENCES crew_members(crew_id),
+    proposed_crew_id    VARCHAR(10)     REFERENCES crew_members(crew_id),
+    proposal_score      FLOAT           NOT NULL DEFAULT 0.0,
+    status              VARCHAR(15)     NOT NULL DEFAULT 'PENDING',
+    -- PENDING   → waiting for controller decision
+    -- ACCEPTED  → controller approved, RosterModifiedEvent published
+    -- REJECTED  → controller rejected, handler must propose next candidate
+    -- EXPIRED   → leg departed before controller acted
+    severity            VARCHAR(10)     NOT NULL,
+    source              VARCHAR(50)     NOT NULL,
+    proposed_at         TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+    decided_at          TIMESTAMPTZ,
+    decided_by          VARCHAR(50),
+    rejection_reason    VARCHAR(100),
+    pushed_at           TIMESTAMPTZ     DEFAULT NULL
 );

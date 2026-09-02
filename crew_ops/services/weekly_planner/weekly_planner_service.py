@@ -58,6 +58,24 @@ class RosterPlanner:
 
         self._run_build(start=resolved_start, end=resolved_end, triggered_by=requested_by)
 
+    def simulate_build(self, start: date, end: date) -> dict:
+        """Dry-run build — no DB write. Returns assignments and validation failures."""
+        all_crew     = get_all_crew_members()
+        all_licenses = get_all_licenses()
+        all_leave    = get_all_leave_records()
+        crew_by_id   = {c.crew_id: c for c in all_crew if c.employment_status == "ACTIVE"}
+        licenses_by_crew: dict = defaultdict(list)
+        for lic in all_licenses:
+            licenses_by_crew[lic.crew_id].append(lic)
+        leave_by_crew: dict = defaultdict(list)
+        for leave in all_leave:
+            leave_by_crew[leave.crew_id].append(leave)
+        simulated_ftl = {f.crew_id: f.model_copy(deep=True) for f in get_all_crew_duty_states()}
+        legs        = get_legs_for_date_range(start, end)
+        assignments = _pass1_assign_crew(legs, crew_by_id, simulated_ftl, licenses_by_crew, leave_by_crew)
+        failures    = _pass3_validate(legs, assignments, crew_by_id, simulated_ftl, licenses_by_crew, leave_by_crew)
+        return {"assignments": assignments, "failures": failures}
+
     def _run_build(self, start: date, end: date, triggered_by: str) -> None:
         all_crew     = get_all_crew_members()
         all_licenses = get_all_licenses()
@@ -114,6 +132,7 @@ class DailyValidator:
 
     def _run_validation(self, triggered_by: str, crew_id: Optional[str] = None) -> None:
         today = date.today()
+        scan_end = today + timedelta(weeks=settings.roster_planning_weeks)
 
         all_crew       = get_all_crew_members()
         all_licenses   = get_all_licenses()
@@ -131,47 +150,40 @@ class DailyValidator:
         for leave in all_leave:
             leave_by_crew[leave.crew_id].append(leave)
 
-        # Fetch assignments 2 days at a time
-        current = today
+        # Fetch all future assignments in one query, then process in memory
         with SessionLocal() as session:
-            while True:
-                batch_end = current + timedelta(days=1)
-                batch = roster_repository.get_future_assignments(
-                    session, from_date=current, to_date=batch_end, crew_id=crew_id
-                )
-                if not batch:
-                    break
+            batch = roster_repository.get_future_assignments(
+                session, from_date=today, to_date=scan_end, crew_id=crew_id
+            )
 
-                for assignment in batch:
-                    leg  = get_flight_leg(assignment["leg_id"])
-                    crew = crew_by_id.get(assignment["crew_id"])
-                    ftl  = ftl_by_id.get(assignment["crew_id"])
+        for assignment in batch:
+            leg  = get_flight_leg(assignment["leg_id"])
+            crew = crew_by_id.get(assignment["crew_id"])
+            ftl  = ftl_by_id.get(assignment["crew_id"])
 
-                    if not leg or not crew or not ftl:
-                        continue
+            if not leg or not crew or not ftl:
+                continue
 
-                    leg_date = leg.scheduled_departure.date()
-                    passed, reason = check_legality(
-                        crew, leg, ftl,
-                        licenses_by_crew.get(assignment["crew_id"], []),
-                        leave_by_crew.get(assignment["crew_id"], []),
-                        leg_date,
-                    )
+            leg_date = leg.scheduled_departure.date()
+            passed, reason = check_legality(
+                crew, leg, ftl,
+                licenses_by_crew.get(assignment["crew_id"], []),
+                leave_by_crew.get(assignment["crew_id"], []),
+                leg_date,
+            )
 
-                    if not passed:
-                        days_until = (leg_date - today).days
-                        event_bus.publish(CrewDisruptedEvent(
-                            crew_id              = assignment["crew_id"],
-                            crew_name            = crew.full_name,
-                            leg_id               = assignment["leg_id"],
-                            reason               = reason,
-                            days_until_departure = days_until,
-                            severity             = _classify_severity(days_until),
-                            source               = "WEEKLY_PLANNER_VALIDATOR",
-                            detected_at          = datetime.now(timezone.utc),
-                        ))
-
-                current = batch_end + timedelta(days=1)
+            if not passed:
+                days_until = (leg_date - today).days
+                event_bus.publish(CrewDisruptedEvent(
+                    crew_id              = assignment["crew_id"],
+                    crew_name            = crew.full_name,
+                    leg_id               = assignment["leg_id"],
+                    reason               = reason,
+                    days_until_departure = days_until,
+                    severity             = _classify_severity(days_until),
+                    source               = "WEEKLY_PLANNER_VALIDATOR",
+                    detected_at          = datetime.now(timezone.utc),
+                ))
 
 
 # ─── Pass 1 — Assign operating crew to legs ───────────────────────────────────
@@ -352,9 +364,9 @@ def _fatigue_score(ftl: CrewFlightTimeLimitsState) -> float:
 
 
 def _classify_severity(days_until_departure: int) -> str:
-    if days_until_departure < 2:  return "CRITICAL"
-    if days_until_departure < 7:  return "HIGH"
-    if days_until_departure < 14: return "MEDIUM"
+    if days_until_departure < 1:  return "CRITICAL"
+    if days_until_departure <= 2: return "HIGH"
+    if days_until_departure <= 7: return "MEDIUM"
     return "LOW"
 
 

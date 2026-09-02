@@ -10,84 +10,362 @@ Registered at startup:
     event_bus.subscribe(CrewDisruptedEvent, disruption_handler.handle_crew_disrupted)
 """
 
-from crew_ops.clients.crew_profile_client import get_all_crew_members
-from crew_ops.clients.ftl_client import get_all_crew_duty_states, get_crew_duty_state
-from crew_ops.models.crew_member import CrewMember
-from crew_ops.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
-from crew_ops.models.events import FlightDisruptedEvent, CrewDisruptedEvent, RosterModifiedEvent
-from crew_ops.services.event_bus import event_bus
 from datetime import datetime, timezone
-
-
-_WEIGHT_LEGAL = 40
-_WEIGHT_SAME_AIRPORT = 30
-_WEIGHT_LOW_FATIGUE = 20
-_WEIGHT_LOW_COST = 10
+from sqlalchemy import text
+from crew_ops.clients.crew_profile_client import get_all_crew_members, get_crew_member
+from crew_ops.clients.ftl_client import get_all_crew_duty_states, get_crew_duty_state
+from crew_ops.clients.flight_schedule_client import get_flight_leg
+from crew_ops.clients.license_client import get_licenses_for_crew_member
+from crew_ops.clients.leave_client import get_leave_records_for_crew
+from crew_ops.db.database import SessionLocal
+from crew_ops.db.repositories import roster_repository, disruption_repository
+from crew_ops.models.events import FlightDisruptedEvent, CrewDisruptedEvent, RosterModifiedEvent
+from crew_ops.rules.legality import check_legality
+from crew_ops.services.event_bus import event_bus
 
 
 class DisruptionHandler:
 
     def handle_flight_disrupted(self, event: FlightDisruptedEvent) -> None:
-        """
-        Subscribed to FlightDisruptedEvent via event bus.
-        Registered at startup: event_bus.subscribe(FlightDisruptedEvent, disruption_handler.handle_flight_disrupted)
-        """
-        candidates = self._find_candidates(role="PILOT", airport=event.origin)
-        ranked = self._rank_candidates(candidates, airport=event.origin)
-        # TODO: present to controller, await confirmation
-        # On approval → event_bus.publish(RosterModifiedEvent(...))
+        leg = get_flight_leg(event.leg_id)
+
+        # Leg not found — already cancelled or removed from schedule, nothing to do
+        if not leg:
+            return
+
+        # Leg already departed — too late to act
+        now = datetime.now(timezone.utc)
+        dep = leg.scheduled_departure
+        if dep.tzinfo is None:
+            dep = dep.replace(tzinfo=timezone.utc)
+        if dep <= now:
+            return
+
+        if event.disruption_type == "CANCELLATION":
+            # Invalidate roster leg and all crew assignments in one transaction
+            with SessionLocal() as session:
+                roster_repository.invalidate_roster_leg(session, event.leg_id, "FLIGHT_CANCELLED")
+                session.commit()
+            # Publish RosterModifiedEvent per released crew so FTL Service updates their state
+            for crew_id in event.assigned_crew:
+                event_bus.publish(RosterModifiedEvent(
+                    leg_id          = event.leg_id,
+                    removed_crew_id = crew_id,
+                    added_crew_id   = None,
+                    modified_at     = datetime.now(timezone.utc),
+                ))
+            return
+
+        if event.disruption_type == "ROUTE_CHANGE":
+            # Too complex to auto-handle — create manual review proposal
+            self._create_proposal(
+                leg_id            = event.leg_id,
+                disruption_type   = "FLIGHT_DISRUPTED",
+                disruption_reason = "ROUTE_CHANGE",
+                removed_crew_id   = None,
+                candidates        = [],
+                severity          = event.severity,
+                source            = event.event,
+            )
+            return
+
+        if event.disruption_type in ("DELAY", "SCHEDULE_CHANGE"):
+            # Re-check legality for all assigned crew against updated departure time
+            # Any delay can breach FTL — no minimum threshold
+            for crew_id in event.assigned_crew:
+                self._check_and_propose(crew_id, leg, reason="DELAY_FTL_BREACH", source=event.event)
+
+        if event.disruption_type == "AIRCRAFT_SWAP":
+            # Cabin crew have no type ratings — only re-check pilots
+            for crew_id in event.assigned_crew:
+                crew = get_crew_member(crew_id)
+                if crew and crew.role == "PILOT":
+                    self._check_and_propose(crew_id, leg, reason="AIRCRAFT_TYPE_CHANGED", source=event.event)
 
     def handle_crew_disrupted(self, event: CrewDisruptedEvent) -> None:
-        """
-        Subscribed to CrewDisruptedEvent via event bus.
-        Registered at startup: event_bus.subscribe(CrewDisruptedEvent, disruption_handler.handle_crew_disrupted)
-        """
-        airport = self._get_crew_airport(event.crew_id)
-        role = self._get_crew_role(event.crew_id)
-        candidates = self._find_candidates(role=role, airport=airport)
-        ranked = self._rank_candidates(candidates, airport=airport)
-        # TODO: present to controller, await confirmation
-        # On approval → event_bus.publish(RosterModifiedEvent(...))
+        leg = get_flight_leg(event.leg_id)
 
-    # ─── Internal pipeline steps ──────────────────────────────────────────────
+        # Leg not found — removed from schedule entirely, skip
+        if not leg:
+            return
 
-    def _find_candidates(self, role: str, airport: str) -> list[CrewMember]:
-        all_crew = get_all_crew_members()
-        ftl_states = {s.crew_id: s for s in get_all_crew_duty_states()}
-        return [
-            crew for crew in all_crew
-            if crew.role == role
-            and crew.employment_status == "ACTIVE"
-            and ftl_states.get(crew.crew_id, CrewFlightTimeLimitsState(
-                crew_id=crew.crew_id, role=crew.role, home_base=crew.home_base, current_airport=crew.home_base
-            )).status == "AVAILABLE"
-        ]
+        # Leg already departed or landed — too late to act
+        now = datetime.now(timezone.utc)
+        dep = leg.scheduled_departure
+        if dep.tzinfo is None:
+            dep = dep.replace(tzinfo=timezone.utc)
+        if dep <= now:
+            return
 
-    def _rank_candidates(self, candidates: list[CrewMember], airport: str) -> list[dict]:
-        ftl_states = {s.crew_id: s for s in get_all_crew_duty_states()}
-        scored = []
-        for crew in candidates:
-            ftl = ftl_states.get(crew.crew_id)
-            score = (
-                _WEIGHT_LEGAL
-                + (_WEIGHT_SAME_AIRPORT if crew.home_base == airport else 0)
-                + int(_WEIGHT_LOW_FATIGUE * (1 - self._fatigue_score(ftl) / 100))
+        # Leg cancelled — no point finding a replacement
+        if leg.status == "CANCELLED":
+            return
+
+        # crew is None — crew record missing but leg still needs coverage
+        # do not skip — check the roster assignment status and find a replacement
+        crew = get_crew_member(event.crew_id)
+        role = crew.role if crew else None
+
+        if role is None:
+            # crew record gone — look up role from the existing roster assignment
+            with SessionLocal() as session:
+                assignment = roster_repository.get_assignment_for_crew(
+                    session, event.leg_id, event.crew_id
+                )
+            if not assignment:
+                return  # no assignment record either — nothing to replace
+            role = assignment.get("role")
+            if not role:
+                return
+
+        candidates = self._find_and_rank_candidates(role, leg)
+        self._create_proposal(
+            leg_id            = event.leg_id,
+            disruption_type   = "CREW_DISRUPTED",
+            disruption_reason = event.reason,
+            removed_crew_id   = event.crew_id,
+            candidates        = candidates,
+            severity          = event.severity,
+            source            = event.source,
+        )
+
+    def reject_and_repropose(self, proposal_id: str, decided_by: str, rejection_reason: str) -> dict:
+        with SessionLocal() as session:
+            result = disruption_repository.reject_proposal(session, proposal_id, decided_by, rejection_reason)
+            if not result:
+                return {"error": "proposal not found"}
+            leg_id           = result["leg_id"]
+            removed_crew_id  = result["removed_crew_id"]
+            already_proposed = disruption_repository.get_already_proposed_crew(session, leg_id, removed_crew_id)
+            session.commit()
+
+        leg = get_flight_leg(leg_id)
+        if not leg:
+            return {"status": "rejected", "new_proposal_id": None, "reason": "leg no longer exists"}
+
+        removed_crew = get_crew_member(removed_crew_id)
+        role = removed_crew.role if removed_crew else None
+        if not role:
+            with SessionLocal() as session:
+                assignment = roster_repository.get_assignment_for_crew(session, leg_id, removed_crew_id)
+            role = assignment.get("role") if assignment else None
+        if not role:
+            return {"status": "rejected", "new_proposal_id": None, "reason": "cannot determine role"}
+
+        candidates = self._find_and_rank_candidates(role, leg)
+        candidates = [c for c in candidates if c["crew"].crew_id not in already_proposed]
+
+        self._create_proposal(
+            leg_id            = leg_id,
+            disruption_type   = "CREW_DISRUPTED",
+            disruption_reason = rejection_reason,
+            removed_crew_id   = removed_crew_id,
+            candidates        = candidates,
+            severity          = "HIGH",
+            source            = "CONTROLLER_REJECT",
+        )
+        next_candidate = candidates[0]["crew"].crew_id if candidates else None
+        return {"status": "rejected", "leg_id": leg_id, "next_candidate": next_candidate}
+
+    def auto_resolve_low_severity(self) -> list[str]:
+        """Scheduled every 30 min. Auto-accepts LOW proposals if candidate is still legal."""
+        from crew_ops.clients.license_client import get_licenses_for_crew_member
+        from crew_ops.clients.leave_client import get_leave_records_for_crew
+        resolved = []
+        with SessionLocal() as session:
+            rows = session.execute(
+                text(
+                    "SELECT proposal_id, leg_id, removed_crew_id, proposed_crew_id "
+                    "FROM disruption_proposals WHERE status='PENDING' AND severity='LOW'"
+                )
+            ).mappings().all()
+            proposals = [dict(r) for r in rows]
+
+        for p in proposals:
+            if not p["proposed_crew_id"]:
+                continue
+            leg  = get_flight_leg(p["leg_id"])
+            crew = get_crew_member(p["proposed_crew_id"])
+            ftl  = get_crew_duty_state(p["proposed_crew_id"])
+            if not leg or not crew or not ftl:
+                continue
+            licenses = get_licenses_for_crew_member(p["proposed_crew_id"])
+            leave    = get_leave_records_for_crew(p["proposed_crew_id"])
+            passed, _ = check_legality(crew, leg, ftl, licenses, leave, leg.scheduled_departure.date())
+            if passed:
+                with SessionLocal() as session:
+                    result = disruption_repository.accept_proposal(session, p["proposal_id"], "AUTO_RESOLVE")
+                    if result and result.get("proposed_crew_id"):
+                        roster_repository.replace_roster_crew_assignment(
+                            session, p["leg_id"], p["removed_crew_id"], p["proposed_crew_id"], "AUTO_RESOLVE"
+                        )
+                    session.commit()
+                event_bus.publish(RosterModifiedEvent(
+                    leg_id          = p["leg_id"],
+                    removed_crew_id = p["removed_crew_id"],
+                    added_crew_id   = p["proposed_crew_id"],
+                    modified_at     = datetime.now(timezone.utc),
+                ))
+                resolved.append(p["proposal_id"])
+            else:
+                # Re-rank; if no candidate escalate to MEDIUM
+                removed_crew = get_crew_member(p["removed_crew_id"])
+                role = removed_crew.role if removed_crew else None
+                if role:
+                    new_candidates = self._find_and_rank_candidates(role, leg)
+                    if new_candidates:
+                        with SessionLocal() as session:
+                            session.execute(
+                                text(
+                                    "UPDATE disruption_proposals SET proposed_crew_id=:cid, proposal_score=:sc "
+                                    "WHERE proposal_id=:pid"
+                                ),
+                                {"cid": new_candidates[0]["crew"].crew_id,
+                                 "sc":  new_candidates[0]["score"],
+                                 "pid": p["proposal_id"]},
+                            )
+                            session.commit()
+                    else:
+                        with SessionLocal() as session:
+                            session.execute(
+                                text(
+                                    "UPDATE disruption_proposals SET severity='MEDIUM' WHERE proposal_id=:pid"
+                                ),
+                                {"pid": p["proposal_id"]},
+                            )
+                            session.commit()
+        return resolved
+
+    def get_proposals_for_push(self) -> list[dict]:
+        """Returns PENDING proposals not yet pushed (pushed_at IS NULL)."""
+        with SessionLocal() as session:
+            return disruption_repository.get_unpushed_proposals(session)
+
+    def expire_stale_proposals(self) -> None:
+        with SessionLocal() as session:
+            disruption_repository.expire_stale_proposals(session)
+            session.commit()
+
+    # ─── Internal pipeline ────────────────────────────────────────────────────
+
+    def _check_and_propose(self, crew_id: str, leg, reason: str, source: str) -> None:
+        crew     = get_crew_member(crew_id)
+        ftl      = get_crew_duty_state(crew_id)
+        licenses = get_licenses_for_crew_member(crew_id)
+        leave    = get_leave_records_for_crew(crew_id)
+        if not crew or not ftl:
+            return
+        dep = leg.scheduled_departure
+        if dep.tzinfo is None:
+            dep = dep.replace(tzinfo=timezone.utc)
+        passed, fail_reason = check_legality(crew, leg, ftl, licenses, leave, dep.date())
+        if not passed:
+            candidates = self._find_and_rank_candidates(crew.role, leg)
+            self._create_proposal(
+                leg_id            = leg.leg_id,
+                disruption_type   = "FLIGHT_DISRUPTED",
+                disruption_reason = fail_reason or reason,
+                removed_crew_id   = crew_id,
+                candidates        = candidates,
+                severity          = "HIGH",
+                source            = source,
             )
-            scored.append({"crew": crew, "score": score, "fatigue": self._fatigue_score(ftl)})
-        return sorted(scored, key=lambda x: x["score"], reverse=True)
 
-    def _fatigue_score(self, ftl: CrewFlightTimeLimitsState | None) -> float:
-        if not ftl:
-            return 50.0
-        score = min(ftl.flight_hours_current_duty * 5, 55)
-        score += min(ftl.consecutive_duty_days * 10, 20)
-        score += min(ftl.flight_hours_28_day / 5, 25)
-        return min(score, 100.0)
+    def _find_and_rank_candidates(self, role: str, leg) -> list[dict]:
+        from collections import defaultdict
+        from crew_ops.clients.license_client import get_all_licenses
+        from crew_ops.clients.leave_client import get_all_leave_records
 
-    def _get_crew_role(self, crew_id: str) -> str:
-        ftl = get_crew_duty_state(crew_id)
-        return ftl.role if ftl else "PILOT"
+        all_crew   = get_all_crew_members()
+        ftl_states = {s.crew_id: s for s in get_all_crew_duty_states()}
 
-    def _get_crew_airport(self, crew_id: str) -> str:
-        ftl = get_crew_duty_state(crew_id)
-        return ftl.current_airport if ftl else ""
+        all_licenses = get_all_licenses()
+        all_leave    = get_all_leave_records()
+        licenses_by_crew: dict = defaultdict(list)
+        for lic in all_licenses:
+            licenses_by_crew[lic.crew_id].append(lic)
+        leave_by_crew: dict = defaultdict(list)
+        for leave in all_leave:
+            leave_by_crew[leave.crew_id].append(leave)
+
+        dep = leg.scheduled_departure
+        if dep.tzinfo is None:
+            dep = dep.replace(tzinfo=timezone.utc)
+        leg_date = dep.date()
+
+        candidates = []
+        for crew in all_crew:
+            if crew.role != role or crew.employment_status != "ACTIVE":
+                continue
+            ftl = ftl_states.get(crew.crew_id)
+            if not ftl:
+                continue
+            passed, _ = check_legality(
+                crew, leg, ftl,
+                licenses_by_crew.get(crew.crew_id, []),
+                leave_by_crew.get(crew.crew_id, []),
+                leg_date,
+            )
+            if passed:
+                score = _score_candidate(crew, ftl, leg)
+                candidates.append({"crew": crew, "ftl": ftl, "score": score})
+
+        return sorted(candidates, key=lambda x: x["score"], reverse=True)
+
+    def _create_proposal(
+        self,
+        leg_id: str,
+        disruption_type: str,
+        disruption_reason: str,
+        removed_crew_id: str | None,
+        candidates: list[dict],
+        severity: str,
+        source: str,
+    ) -> None:
+        with SessionLocal() as session:
+            # Guard — do not create duplicate PENDING proposal for same leg + removed crew
+            if removed_crew_id and disruption_repository.pending_proposal_exists(session, leg_id, removed_crew_id):
+                return
+
+            # Invalidate the disrupted crew's assignment so they no longer appear assigned
+            if removed_crew_id:
+                roster_repository.invalidate_assignment(session, leg_id, removed_crew_id, disruption_reason)
+
+            proposed_crew_id = candidates[0]["crew"].crew_id if candidates else None
+            proposal_score   = candidates[0]["score"] if candidates else 0.0
+            proposal_id      = f"PROP-{leg_id}-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
+
+            disruption_repository.insert_proposal(session, {
+                "proposal_id":       proposal_id,
+                "leg_id":            leg_id,
+                "disruption_type":   disruption_type,
+                "disruption_reason": disruption_reason,
+                "removed_crew_id":   removed_crew_id,
+                "proposed_crew_id":  proposed_crew_id,
+                "proposal_score":    proposal_score,
+                "status":            "PENDING",
+                "severity":          severity,
+                "source":            source,
+            })
+            session.commit()
+
+
+# ─── Helpers ──────────────────────────────────────────────────────────────────
+
+def _score_candidate(crew, ftl, leg) -> float:
+    fatigue = _fatigue_score(ftl)
+    score   = 0.0
+    score  += 40.0 if ftl.current_airport == leg.origin_icao else 0
+    score  += 30.0 * (1 - fatigue / 100)
+    score  += 20.0 if ftl.current_airport == crew.home_base else 0
+    score  += 10.0 if leg.destination_icao == crew.home_base else 0
+    if ftl.current_airport != crew.home_base and leg.destination_icao != crew.home_base:
+        score -= 10.0
+    return score
+
+
+def _fatigue_score(ftl) -> float:
+    score  = min(ftl.flight_hours_current_duty * 5, 55)
+    score += min(ftl.consecutive_duty_days * 10,    20)
+    score += min(ftl.flight_hours_28_day / 5,       25)
+    return min(score, 100.0)

@@ -33,147 +33,23 @@ Before implementing, here is exactly what exists and what is missing.
 | `models/events.py` | ✅ Complete |
 | `clients/crew_profile_client.py` | ✅ Complete |
 | `clients/license_client.py` | ✅ Complete |
-| `clients/ftl_client.py` | ⚠️ Imports old `CrewFTLState` from `crew_ftl_state` — broken |
-| `clients/flight_schedule_client.py` | ⚠️ Imports `FlightLeg` from `leg` — broken |
+| `clients/ftl_client.py` | ✅ Complete |
+| `clients/flight_schedule_client.py` | ✅ Complete |
+| `clients/leave_client.py` | ✅ Complete |
 | `clients/reserve_client.py` | ✅ Complete |
-| `db/repositories/leave_repository.py` | ✅ Complete — but no client wrapping it |
-| `services/weekly_planner/weekly_planner_service.py` | ⚠️ Skeleton only — `_run_build` and `_run_validation` raise `NotImplementedError` |
-| `api/routers/planner_router.py` | ✅ Routes exist — will work once service is implemented |
-| `docker/init.sql` | ⚠️ `crew_ftl_states` table uses old column names — mismatches Pydantic model |
+| `db/repositories/leave_repository.py` | ✅ Complete |
+| `db/repositories/roster_repository.py` | ✅ Complete |
+| `services/weekly_planner/weekly_planner_service.py` | ✅ Complete |
+| `api/routers/planner_router.py` | ✅ Complete |
+| `rules/legality.py` | ✅ Complete |
+| `rules/crew_requirements.py` | ✅ Complete |
+| `rules/duty_period_limits.py` | ✅ Complete |
+| `rules/ftl_simulator.py` | ✅ Complete |
+| `docker/init.sql` | ✅ Complete — all tables and correct column names |
 
-### What is missing entirely
+### What is missing
 
-| What | Why needed |
-|------|-----------|
-| Leave client | No `clients/leave_client.py` — planner cannot fetch leave records |
-| Roster tables in DB | No `roster_leg` or `roster_crew_assignment` tables — planner has nowhere to write output |
-| Roster repository | No `db/repositories/roster_repository.py` |
-| Legality checker | No `rules/legality.py` — the core of both Job A and Job B |
-| Crew requirements config | No `rules/crew_requirements.py` — pilots/cabin count per aircraft type |
-| FTL simulator | No in-memory FTL state simulation for Pass 1 of Job A |
-| Actual planner logic | `_run_build` is `NotImplementedError` |
-| Actual validator logic | `_run_validation` is `NotImplementedError` |
-
----
-
-## Known Bugs to Fix First
-
-These will cause import errors before any planner logic runs.
-
-### Bug 1 — `clients/ftl_client.py` imports wrong model
-
-```python
-# current (broken)
-from crew_ops.models.crew_ftl_state import CrewFTLState
-
-# fix
-from crew_ops.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
-```
-
-All three functions return `CrewFTLState` — rename to `CrewFlightTimeLimitsState`.
-
-### Bug 2 — `clients/flight_schedule_client.py` imports wrong model
-
-```python
-# current (broken)
-from crew_ops.models.leg import FlightLeg
-
-# fix
-from crew_ops.models.flight_leg import FlightLeg
-```
-
-### Bug 3 — `db/repositories/ftl_repository.py` imports wrong model
-
-```python
-# current (broken)
-from crew_ops.models.crew_ftl_state import CrewFTLState
-
-# fix
-from crew_ops.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
-```
-
-All SQL column names in `upsert_ftl_state` also use old names (`projected_fdp_end`, `flight_time_current_duty`, `max_fdp_allowed`, `wocl_encroachment`, `fdp_reduction_applied`, `fdp_extension_used`, `extension_hours`). These must be updated to match the current Pydantic model fields AND the DB schema must be updated to match.
-
-### Bug 4 — `db/repositories/leg_repository.py` imports wrong model
-
-```python
-# current (broken)
-from crew_ops.models.leg import FlightLeg
-
-# fix
-from crew_ops.models.flight_leg import FlightLeg
-```
-
-### Bug 5 — `data/legs.json` has `null` aircraft_type on every leg
-
-Every leg in the mock data has `"aircraft_type": null`. This breaks two things:
-- Gate 3 (type rating check) — `lic.aircraft_type == None` is always false, so every pilot fails the gate and no pilot can be assigned to any leg
-- `required_pilots` / `required_cabin` in `rules/crew_requirements.py` — falls back to default `(2, 3)` for every leg regardless of actual aircraft
-
-Fix: populate `aircraft_type` in `data/legs.json` and re-seed. Use the 3 types already in the system: `A320`, `B737`, `B787`. Assign based on route length — short domestic routes get A320/B737, long-haul international routes get B787.
-
----
-
-## Database Schema Changes Required
-
-Two new tables needed. Also the `crew_ftl_states` column names must be aligned.
-
-### New table — `roster_leg`
-
-One row per leg per planning cycle. Tracks the planning status of a leg.
-
-```sql
-CREATE TABLE IF NOT EXISTS roster_leg (
-    id              SERIAL          PRIMARY KEY,
-    leg_id          VARCHAR(50)     NOT NULL REFERENCES flight_legs(leg_id),
-    plan_start      DATE            NOT NULL,
-    plan_end        DATE            NOT NULL,
-    status          VARCHAR(15)     NOT NULL DEFAULT 'DRAFT',
-    -- DRAFT → controller has not approved yet
-    -- PUBLISHED → approved, crew notified
-    -- INVALIDATED → validator found a problem, needs re-assignment
-    triggered_by    VARCHAR(50)     NOT NULL,
-    created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
-    UNIQUE (leg_id, plan_start)
-);
-```
-
-### New table — `roster_crew_assignment`
-
-One row per crew member per leg in the roster. This is the actual assignment record.
-
-```sql
-CREATE TABLE IF NOT EXISTS roster_crew_assignment (
-    id              SERIAL          PRIMARY KEY,
-    leg_id          VARCHAR(50)     NOT NULL REFERENCES flight_legs(leg_id),
-    crew_id         VARCHAR(10)     NOT NULL REFERENCES crew_members(crew_id),
-    status          VARCHAR(15)     NOT NULL DEFAULT 'DRAFT',
-    -- DRAFT / CONFIRMED / REPLACED / INVALIDATED
-    assigned_by     VARCHAR(50)     NOT NULL,
-    assigned_at     TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
-    replaced_by     VARCHAR(10)     REFERENCES crew_members(crew_id),
-    replaced_at     TIMESTAMPTZ,
-    invalidation_reason VARCHAR(50),
-    UNIQUE (leg_id, crew_id)
-);
-```
-
-### `crew_ftl_states` column rename
-
-The DB schema uses old names. These must be updated to match the current Pydantic model:
-
-| Old column name | New column name |
-|----------------|----------------|
-| `projected_fdp_end` | `projected_duty_period_end` |
-| `flight_time_current_duty` | `flight_hours_current_duty` |
-| `max_fdp_allowed` | `max_duty_period_hours` |
-| `wocl_encroachment` | `circadian_low_window_encroachment` |
-| `fdp_reduction_applied` | `duty_period_reduction_hours` |
-| `fdp_extension_used` | `duty_period_extended` |
-| `extension_hours` | `duty_period_extension_hours` |
-
----
+Nothing — all files are complete and all known bugs are fixed.
 
 ---
 
@@ -197,7 +73,7 @@ No external API. No mock/real split. `clients/leave_client.py` wraps the reposit
 
 - `get_all_leave_records()` — used by Job A and Job B to load all leave upfront
 - `get_leave_records_for_crew(crew_id)` — used when validating a single crew member
-- `add_leave_record(leave_record)` — called by the crew router when manager marks crew unavailable
+- `add_leave_record(leave_record)` — called by the crew router when manager marks crew unavailable. **Also automatically publishes `CrewDisruptedEvent(reason=LEAVE_ADDED)` per assigned leg that falls within the leave window** — Disruption Handler picks this up and finds a replacement without any manual ops desk action.
 
 ### In-Memory Lookup Maps
 
@@ -795,6 +671,8 @@ def _write_roster(
 
 Runs every morning at 3AM. Also triggered by `RosterModifiedEvent`.
 
+**What it validates:** every future `DRAFT` or `CONFIRMED` crew assignment — re-checks whether each assigned crew member is still legally allowed to operate their leg using live data, not simulated. It never fixes anything itself — if legality fails it emits `CrewDisruptedEvent` and the Disruption Handler takes over.
+
 ```python
 def _run_validation(
     triggered_by: str,
@@ -806,64 +684,64 @@ def _run_validation(
     all_crew        = get_all_crew_members()
     all_licenses    = get_all_licenses()
     all_leave       = get_all_leave_records()
-    all_ftl_states  = get_all_ftl_states()
+    all_ftl_states  = get_all_crew_duty_states()
 
     crew_by_id      = {c.crew_id: c for c in all_crew}
     ftl_by_id       = {f.crew_id: f for f in all_ftl_states}
-    licenses_by_crew = defaultdict(list)
+    licenses_by_crew: dict = defaultdict(list)
     for lic in all_licenses:
         licenses_by_crew[lic.crew_id].append(lic)
-    leave_by_crew = defaultdict(list)
+    leave_by_crew: dict = defaultdict(list)
     for leave in all_leave:
         leave_by_crew[leave.crew_id].append(leave)
 
-    # Fetch assignments 2 days at a time — avoids holding full 7-week window in memory
+    # Fetch and process assignments 2 days at a time — avoids holding full 7-week window in memory
     current = today
-    while True:
-        batch_end = current + timedelta(days=1)
-        batch = roster_repository.get_future_assignments(
-            session, from_date=current, to_date=batch_end, crew_id=crew_id
-        )
-        if not batch:
-            break
-        current = batch_end + timedelta(days=1)
+    with SessionLocal() as session:
+        while True:
+            batch_end = current + timedelta(days=1)
+            batch = roster_repository.get_future_assignments(
+                session, from_date=current, to_date=batch_end, crew_id=crew_id
+            )
+            if not batch:
+                break
 
-    for assignment in batch:
-        leg  = flight_schedule_client.get_flight_leg(assignment.leg_id)
-        crew = crew_by_id.get(assignment.crew_id)
-        ftl  = ftl_by_id.get(assignment.crew_id)
+            for assignment in batch:
+                leg  = get_flight_leg(assignment["leg_id"])
+                crew = crew_by_id.get(assignment["crew_id"])
+                ftl  = ftl_by_id.get(assignment["crew_id"])
 
-        if not leg or not crew or not ftl:
-            continue
+                if not leg or not crew or not ftl:
+                    continue
 
-        leg_date = leg.scheduled_departure.date()
-        passed, reason = check_legality(
-            crew, leg, ftl,
-            licenses_by_crew.get(assignment.crew_id, []),
-            leave_by_crew.get(assignment.crew_id, []),
-            leg_date,
-        )
+                leg_date = leg.scheduled_departure.date()
+                passed, reason = check_legality(
+                    crew, leg, ftl,
+                    licenses_by_crew.get(assignment["crew_id"], []),
+                    leave_by_crew.get(assignment["crew_id"], []),
+                    leg_date,
+                )
 
-        if not passed:
-            days_until = (leg_date - today).days
-            severity   = _classify_severity(days_until)
+                if not passed:
+                    days_until = (leg_date - today).days
+                    event_bus.publish(CrewDisruptedEvent(
+                        crew_id              = assignment["crew_id"],
+                        crew_name            = crew.full_name,
+                        leg_id               = assignment["leg_id"],
+                        reason               = reason,
+                        days_until_departure = days_until,
+                        severity             = _classify_severity(days_until),
+                        source               = "WEEKLY_PLANNER_VALIDATOR",
+                        detected_at          = datetime.now(timezone.utc),
+                    ))
 
-            event_bus.publish(CrewDisruptedEvent(
-                crew_id              = assignment.crew_id,
-                crew_name            = crew.full_name,
-                leg_id               = assignment.leg_id,
-                reason               = reason,
-                days_until_departure = days_until,
-                severity             = severity,
-                source               = "WEEKLY_PLANNER_VALIDATOR",
-                detected_at          = datetime.now(timezone.utc),
-            ))
+            current = batch_end + timedelta(days=1)
 
 
 def _classify_severity(days_until_departure: int) -> str:
-    if days_until_departure < 2:   return "CRITICAL"
-    if days_until_departure < 7:   return "HIGH"
-    if days_until_departure < 14:  return "MEDIUM"
+    if days_until_departure < 2:  return "CRITICAL"
+    if days_until_departure < 7:  return "HIGH"
+    if days_until_departure < 14: return "MEDIUM"
     return "LOW"
 ```
 
@@ -887,7 +765,7 @@ def _classify_severity(days_until_departure: int) -> str:
 New file: `db/repositories/roster_repository.py`
 
 ```python
-def upsert_roster_leg(session, data: dict) -> None:
+def upsert_roster_leg(session: Session, data: dict) -> None:
     session.execute(text("""
         INSERT INTO roster_leg (leg_id, plan_start, plan_end, status, triggered_by)
         VALUES (:leg_id, :plan_start, :plan_end, :status, :triggered_by)
@@ -898,7 +776,7 @@ def upsert_roster_leg(session, data: dict) -> None:
     """), data)
 
 
-def upsert_roster_crew_assignment(session, data: dict) -> None:
+def upsert_roster_crew_assignment(session: Session, data: dict) -> None:
     session.execute(text("""
         INSERT INTO roster_crew_assignment (leg_id, crew_id, status, assigned_by)
         VALUES (:leg_id, :crew_id, :status, :assigned_by)
@@ -909,17 +787,42 @@ def upsert_roster_crew_assignment(session, data: dict) -> None:
     """), data)
 
 
+def replace_roster_crew_assignment(session: Session, leg_id: str, old_crew_id: str, new_crew_id: str, requested_by: str) -> None:
+    session.execute(text("""
+        UPDATE roster_crew_assignment
+        SET status = 'REPLACED', replaced_by = :new_crew_id, replaced_at = NOW()
+        WHERE leg_id = :leg_id AND crew_id = :old_crew_id
+    """), {"leg_id": leg_id, "old_crew_id": old_crew_id, "new_crew_id": new_crew_id})
+    session.execute(text("""
+        INSERT INTO roster_crew_assignment (leg_id, crew_id, status, assigned_by)
+        VALUES (:leg_id, :crew_id, 'CONFIRMED', :assigned_by)
+        ON CONFLICT (leg_id, crew_id) DO UPDATE SET
+            status = 'CONFIRMED', assigned_by = EXCLUDED.assigned_by, assigned_at = NOW()
+    """), {"leg_id": leg_id, "crew_id": new_crew_id, "assigned_by": requested_by})
+
+
+def approve_roster_leg(session: Session, leg_id: str, approved_by: str) -> None:
+    session.execute(text("""
+        UPDATE roster_leg SET status = 'PUBLISHED', updated_at = NOW()
+        WHERE leg_id = :leg_id
+    """), {"leg_id": leg_id})
+    session.execute(text("""
+        UPDATE roster_crew_assignment SET status = 'CONFIRMED', assigned_by = :approved_by
+        WHERE leg_id = :leg_id AND status = 'DRAFT'
+    """), {"leg_id": leg_id, "approved_by": approved_by})
+
+
 def get_future_assignments(
-    session, from_date: date, to_date: date, crew_id: str | None = None
+    session: Session, from_date: date, to_date: date, crew_id: str | None = None
 ) -> list[dict]:
     query = """
         SELECT rca.leg_id, rca.crew_id, rca.status
         FROM roster_crew_assignment rca
         JOIN flight_legs fl ON fl.leg_id = rca.leg_id
         WHERE fl.scheduled_departure::date BETWEEN :from_date AND :to_date
-          AND rca.status IN ('DRAFT', 'PUBLISHED')
+          AND rca.status IN ('DRAFT', 'CONFIRMED')
     """
-    params = {"from_date": from_date, "to_date": to_date}
+    params: dict = {"from_date": from_date, "to_date": to_date}
     if crew_id:
         query += " AND rca.crew_id = :crew_id"
         params["crew_id"] = crew_id
@@ -927,9 +830,19 @@ def get_future_assignments(
     return [dict(row) for row in rows]
 
 
-def get_roster_for_date_range(
-    session, start: date, end: date
-) -> list[dict]:
+def get_assignments_for_crew_in_range(session: Session, crew_id: str, from_date: date, to_date: date) -> list[dict]:
+    rows = session.execute(text("""
+        SELECT rca.leg_id, fl.scheduled_departure
+        FROM roster_crew_assignment rca
+        JOIN flight_legs fl ON fl.leg_id = rca.leg_id
+        WHERE rca.crew_id = :crew_id
+          AND fl.scheduled_departure::date BETWEEN :from_date AND :to_date
+          AND rca.status IN ('DRAFT', 'CONFIRMED')
+    """), {"crew_id": crew_id, "from_date": from_date, "to_date": to_date}).mappings().all()
+    return [dict(row) for row in rows]
+
+
+def get_roster_for_date_range(session: Session, start: date, end: date) -> list[dict]:
     rows = session.execute(text("""
         SELECT rca.leg_id, rca.crew_id, rca.status, rca.assigned_by,
                fl.scheduled_departure, fl.origin_iata, fl.destination_iata,
@@ -940,13 +853,10 @@ def get_roster_for_date_range(
         ORDER BY fl.scheduled_departure
     """), {"start": start, "end": end}).mappings().all()
     return [dict(row) for row in rows]
-```
 
 ---
 
 ## API Endpoints
-
-### Existing (already in `planner_router.py`)
 
 ```
 POST /planner/build
@@ -958,11 +868,7 @@ POST /planner/validate
   body: { requested_by }
   → calls DailyValidator.validate()
   → returns: { status, requested_by }
-```
 
-### To Add
-
-```
 GET /planner/roster?start=YYYY-MM-DD&end=YYYY-MM-DD
   → returns all assignments in the date range
   → used by controller to review the draft before approving
@@ -971,7 +877,6 @@ POST /planner/roster/{leg_id}/approve
   body: { approved_by }
   → updates roster_leg.status = PUBLISHED
   → updates all roster_crew_assignment.status = CONFIRMED for this leg
-  → (future: emit RosterPublishedEvent → Observer starts watching)
 
 POST /planner/roster/{leg_id}/reassign
   body: { crew_id, replaced_by, reason, requested_by }
@@ -984,8 +889,6 @@ POST /planner/roster/{leg_id}/reassign
   → publishes RosterModifiedEvent(added_crew_id, removed_crew_id, leg_id)
   → DailyValidator re-validates future legs for both crew members automatically
 ```
-
-These three endpoints are the minimum needed for the controller to see, approve, and manually adjust the draft.
 
 ---
 
@@ -1011,69 +914,7 @@ Both are already registered. No changes needed here. The jobs will work once the
 
 ---
 
-## Implementation Order
-
-Do these in sequence. Each step is independently testable before moving to the next.
-
-### Step 1 — Fix broken imports (15 min)
-
-Fix the 4 import bugs listed in "Known Bugs to Fix First". The server will not start until these are fixed.
-
-Files to change:
-- `clients/ftl_client.py`
-- `clients/flight_schedule_client.py`
-- `db/repositories/ftl_repository.py`
-- `db/repositories/leg_repository.py`
-
-### Step 2 — Align DB schema with Pydantic model (20 min)
-
-Update `docker/init.sql` to rename the 7 columns in `crew_ftl_states`. Add the two new tables (`roster_leg`, `roster_crew_assignment`). Re-seed the database.
-
-```bash
-docker-compose down -v
-docker-compose up -d
-uv run python -m crew_ops.data.pipeline.run_all
-```
-
-### Step 3 — Create leave client (5 min)
-
-Create `clients/leave_client.py` with `get_all_leave_records()`.
-
-### Step 4 — Create rules layer (30 min)
-
-Create `rules/` directory with 3 files:
-- `rules/duty_period_limits.py` — `max_duty_hours(report_hour, sectors)` function
-- `rules/crew_requirements.py` — `required_pilots(aircraft_type)` and `required_cabin(aircraft_type)` functions
-- `rules/legality.py` — `check_legality(crew, leg, ftl, licenses, leave_records, leg_date)` function
-
-### Step 5 — Create FTL simulator (20 min)
-
-Create `rules/ftl_simulator.py` with `simulate_leg_assigned()` and `simulate_rest_after_leg()`.
-
-`simulate_leg_assigned` uses `max_duty_hours` from `rules/duty_period_limits.py` to project the duty period end.
-
-### Step 6 — Create roster repository (20 min)
-
-Create `db/repositories/roster_repository.py` with the 4 functions above.
-
-### Step 7 — Implement `_run_build` in `weekly_planner_service.py` (45 min)
-
-Replace `raise NotImplementedError` with the 3-pass algorithm. Wire in all clients, legality checker, simulator, and roster repository.
-
-### Step 8 — Implement `_run_validation` in `weekly_planner_service.py` (30 min)
-
-Replace `raise NotImplementedError` with the validator logic. Wire in all clients, legality checker, and event bus.
-
-### Step 9 — Add roster endpoints to `planner_router.py` (30 min)
-
-Add three endpoints:
-- `GET /planner/roster` — view draft assignments
-- `POST /planner/roster/{leg_id}/approve` — controller approves a leg
-- `POST /planner/roster/{leg_id}/reassign` — manager manually swaps a crew member
-
-The reassign endpoint must run `check_legality` before writing. If legality fails, return 400 with the failure reason. If it passes, update `roster_crew_assignment` and publish `RosterModifiedEvent`.
-
-### Step 10 — End to end test
+## End to End Test
 
 ```bash
 # Start server
