@@ -1,170 +1,149 @@
 # ftl_tools.py
-# These are the tools the LLM can call to fetch Flight Time Limit (FTL)
-# and rest compliance data from the DB.
-# FTL rules define how many hours a crew member can fly in a given period.
-# Violations are a serious safety and regulatory issue — always flag them clearly.
+# These are the tools the LLM can call to fetch Flight Time Limitations (FTL) data.
+# Each function is decorated with @tool so LangGraph can register it.
+# The docstring of each function is what the LLM reads to decide when to use it.
+#
+# Tables used:
+#   - crew_ftl_states       → live FTL counters per crew member (duty hours, rest, sectors)
+#   - crew_reserve_schedule → standby/reserve roster for a given date
+#   - crew_members          → joined to get crew names and roles
+#
+# NOTE: crew_id is VARCHAR in all tables — always pass as string e.g. "C001"
 
 from langchain_core.tools import tool
 from sqlalchemy import text
-
-# get_db_session gives us a database session to run queries
 from crew_ops.db.database import get_db_session
 
 
-# ── Tool 1: Get FTL Status ────────────────────────────────────────────────────
-# Returns the current FTL status for a specific crew member.
-# Shows how many hours they have flown and how many they have remaining
-# in the current duty period, week, and month.
+# ── Tool 1: Get Crew FTL State ────────────────────────────────────────────────
+# Returns the full FTL snapshot for one crew member.
+# Used when a manager asks "is [name] legal to fly?" or "how many hours does X have left?".
 
 @tool
-def get_ftl_status(employee_id: str) -> str:
-    """Get the current Flight Time Limit (FTL) status for a crew member by their employee ID.
-    Shows hours flown and hours remaining in current duty period, week, and month."""
-    with get_db_session() as db:
+def get_crew_ftl_state(crew_id: str) -> str:
+    """Get the current Flight Time Limitations (FTL) state for a crew member by their crew ID e.g. C001."""
+    db = get_db_session()
+    try:
         result = db.execute(text("""
             SELECT
-                f.employee_id,
-                f.duty_hours_today,
-                f.duty_hours_limit_today,
-                f.flight_hours_7_days,
-                f.flight_hours_limit_7_days,
-                f.flight_hours_28_days,
-                f.flight_hours_limit_28_days,
-                f.rest_hours_last,
-                f.minimum_rest_required
-            FROM ftl_records f
-            WHERE f.employee_id = :employee_id
-        """), {"employee_id": employee_id})
+                role,
+                status,
+                duty_start_time,
+                duty_end_time,
+                flight_hours_current_duty,
+                sectors_current_duty,
+                rest_hours_available,
+                flight_hours_28_day,
+                duty_hours_7_day,
+                duty_hours_28_day,
+                consecutive_duty_days,
+                max_duty_period_hours,
+                current_airport,
+                home_base,
+                at_home_base,
+                earliest_checkout,
+                last_updated
+            FROM crew_ftl_states
+            WHERE crew_id = :crew_id
+        """), {"crew_id": crew_id})
         row = result.fetchone()
+    finally:
+        db.close()
 
     if not row:
-        return f"No FTL records found for employee {employee_id}"
-
-    # Calculate remaining hours for each period
-    remaining_today = row.duty_hours_limit_today - row.duty_hours_today
-    remaining_7_days = row.flight_hours_limit_7_days - row.flight_hours_7_days
-    remaining_28_days = row.flight_hours_limit_28_days - row.flight_hours_28_days
-
-    # Flag if any limit is breached or close to being breached (within 2 hours)
-    today_flag = "🔴 LIMIT BREACHED" if remaining_today < 0 else ("⚠️ NEAR LIMIT" if remaining_today < 2 else "✅ OK")
-    week_flag = "🔴 LIMIT BREACHED" if remaining_7_days < 0 else ("⚠️ NEAR LIMIT" if remaining_7_days < 2 else "✅ OK")
-    month_flag = "🔴 LIMIT BREACHED" if remaining_28_days < 0 else ("⚠️ NEAR LIMIT" if remaining_28_days < 2 else "✅ OK")
+        return f"No FTL state found for crew ID {crew_id}"
 
     return (
-        f"FTL Status for {employee_id}:\n"
-        f"Today:   {row.duty_hours_today}h used / {row.duty_hours_limit_today}h limit — {remaining_today:.1f}h remaining {today_flag}\n"
-        f"7 days:  {row.flight_hours_7_days}h used / {row.flight_hours_limit_7_days}h limit — {remaining_7_days:.1f}h remaining {week_flag}\n"
-        f"28 days: {row.flight_hours_28_days}h used / {row.flight_hours_limit_28_days}h limit — {remaining_28_days:.1f}h remaining {month_flag}\n"
-        f"Last rest: {row.rest_hours_last}h | Minimum required: {row.minimum_rest_required}h"
+        f"FTL State — Crew {crew_id} ({row.role})\n"
+        f"Status: {row.status}\n"
+        f"Current airport: {row.current_airport} | Home base: {row.home_base} | At home: {row.at_home_base}\n"
+        f"Duty start: {row.duty_start_time} | Duty end: {row.duty_end_time}\n"
+        f"Flight hours (current duty): {row.flight_hours_current_duty}\n"
+        f"Sectors (current duty): {row.sectors_current_duty}\n"
+        f"Rest available: {row.rest_hours_available} hrs\n"
+        f"Flight hours (28-day): {row.flight_hours_28_day}\n"
+        f"Duty hours (7-day): {row.duty_hours_7_day} | (28-day): {row.duty_hours_28_day}\n"
+        f"Consecutive duty days: {row.consecutive_duty_days}\n"
+        f"Max duty period: {row.max_duty_period_hours} hrs\n"
+        f"Earliest checkout: {row.earliest_checkout}\n"
+        f"Last updated: {row.last_updated}"
     )
 
 
-# ── Tool 2: Get Crew Rest Compliance ─────────────────────────────────────────
-# Checks whether a crew member has had sufficient rest before their next duty.
-# Minimum rest periods are legally mandated — violations must be flagged immediately.
+# ── Tool 2: Get Crew Near FTL Limit ──────────────────────────────────────────
+# Returns all crew whose FTL status is near_limit, exceeded, or rest_required.
+# Used for daily compliance checks or when a manager asks about FTL risk.
 
 @tool
-def get_crew_rest_compliance(employee_id: str) -> str:
-    """Check if a crew member has had sufficient legally required rest before their next duty."""
-    with get_db_session() as db:
+def get_crew_near_ftl_limit() -> str:
+    """Get all crew members who are approaching or have exceeded FTL limits."""
+    db = get_db_session()
+    try:
         result = db.execute(text("""
             SELECT
-                r.employee_id,
-                r.rest_start,
-                r.rest_end,
-                r.rest_hours,
-                r.minimum_required,
-                r.is_compliant,
-                r.next_duty_start
-            FROM rest_records r
-            WHERE r.employee_id = :employee_id
-            ORDER BY r.rest_end DESC
-            LIMIT 1
-        """), {"employee_id": employee_id})
-        row = result.fetchone()
-
-    if not row:
-        return f"No rest records found for employee {employee_id}"
-
-    # Clearly flag non-compliant rest — this is a regulatory violation
-    if not row.is_compliant:
-        return (
-            f"🔴 REST VIOLATION for {employee_id}\n"
-            f"Rest period: {row.rest_start} to {row.rest_end}\n"
-            f"Rest received: {row.rest_hours}h | Minimum required: {row.minimum_required}h\n"
-            f"Next duty starts: {row.next_duty_start}\n"
-            f"This crew member is NOT compliant for their next duty."
-        )
-
-    return (
-        f"✅ Rest compliant for {employee_id}\n"
-        f"Rest period: {row.rest_start} to {row.rest_end}\n"
-        f"Rest received: {row.rest_hours}h | Minimum required: {row.minimum_required}h\n"
-        f"Next duty starts: {row.next_duty_start}"
-    )
-
-
-# ── Tool 3: Get Crew Hours Last 28 Days ───────────────────────────────────────
-# Returns the total flight hours a crew member has logged in the last 28 days.
-# The 28-day rolling limit is a core FTL regulation for most aviation authorities.
-
-@tool
-def get_crew_hours_last_28_days(employee_id: str) -> str:
-    """Get the total flight hours logged by a crew member in the last 28 days."""
-    with get_db_session() as db:
-        result = db.execute(text("""
-            SELECT
-                SUM(f.block_hours) AS total_hours,
-                COUNT(f.flight_id) AS total_flights
-            FROM flight_duties f
-            WHERE f.employee_id = :employee_id
-              AND f.duty_date >= NOW() - INTERVAL '28 days'
-        """), {"employee_id": employee_id})
-        row = result.fetchone()
-
-    if not row or row.total_hours is None:
-        return f"No flight duties found for employee {employee_id} in the last 28 days."
-
-    return (
-        f"Flight hours for {employee_id} — last 28 days:\n"
-        f"Total hours: {row.total_hours:.1f}h\n"
-        f"Total flights: {row.total_flights}"
-    )
-
-
-# ── Tool 4: Get Crew Approaching FTL Limit ────────────────────────────────────
-# Returns all crew members who are within 5 hours of their 28-day FTL limit.
-# This is a proactive tool — OCC managers use it to plan ahead and avoid
-# last-minute coverage gaps caused by FTL exhaustion.
-
-@tool
-def get_crew_approaching_limit() -> str:
-    """Get all crew members who are within 5 hours of their 28-day flight time limit."""
-    with get_db_session() as db:
-        result = db.execute(text("""
-            SELECT
-                f.employee_id,
-                c.first_name,
-                c.last_name,
+                f.crew_id,
+                c.full_name,
                 c.role,
-                f.flight_hours_28_days,
-                f.flight_hours_limit_28_days,
-                (f.flight_hours_limit_28_days - f.flight_hours_28_days) AS hours_remaining
-            FROM ftl_records f
-            JOIN crew_members c ON c.employee_id = f.employee_id
-            WHERE (f.flight_hours_limit_28_days - f.flight_hours_28_days) <= 5
-              AND (f.flight_hours_limit_28_days - f.flight_hours_28_days) >= 0
-            ORDER BY hours_remaining ASC
+                f.status,
+                f.flight_hours_28_day,
+                f.duty_hours_7_day,
+                f.rest_hours_available,
+                f.consecutive_duty_days
+            FROM crew_ftl_states f
+            JOIN crew_members c ON c.crew_id = f.crew_id
+            WHERE f.status IN ('near_limit', 'exceeded', 'rest_required')
+            ORDER BY f.flight_hours_28_day DESC
         """))
         rows = result.fetchall()
+    finally:
+        db.close()
 
     if not rows:
-        return "No crew members are currently approaching their 28-day FTL limit."
+        return "No crew members are currently near or over FTL limits."
 
     lines = [
-        f"⚠️ {r.employee_id} | {r.first_name} {r.last_name} | {r.role} | "
-        f"{r.flight_hours_28_days}h used / {r.flight_hours_limit_28_days}h limit | "
-        f"{r.hours_remaining:.1f}h remaining"
+        f"{r.full_name} ({r.role}) | Status: {r.status} | "
+        f"28-day hrs: {r.flight_hours_28_day} | 7-day duty: {r.duty_hours_7_day} | "
+        f"Rest available: {r.rest_hours_available} hrs | Consecutive days: {r.consecutive_duty_days}"
         for r in rows
     ]
-    return "Crew approaching 28-day FTL limit:\n" + "\n".join(lines)
+    return f"Crew near/over FTL limits ({len(rows)}):\n" + "\n".join(lines)
+
+
+# ── Tool 3: Get Reserve Crew ──────────────────────────────────────────────────
+# Returns crew on standby/reserve for a given date.
+# Used when a manager needs to find cover quickly for a disrupted flight.
+
+@tool
+def get_reserve_crew(date: str) -> str:
+    """Get crew members on reserve/standby for a given date. Date format: YYYY-MM-DD."""
+    db = get_db_session()
+    try:
+        result = db.execute(text("""
+            SELECT
+                r.crew_id,
+                c.full_name,
+                c.role,
+                r.standby_start,
+                r.standby_end,
+                r.base_airport,
+                r.callable_within,
+                r.status
+            FROM crew_reserve_schedule r
+            JOIN crew_members c ON c.crew_id = r.crew_id
+            WHERE r.date = :date
+            ORDER BY r.standby_start
+        """), {"date": date})
+        rows = result.fetchall()
+    finally:
+        db.close()
+
+    if not rows:
+        return f"No reserve crew scheduled for {date}"
+
+    lines = [
+        f"{r.full_name} ({r.role}) | {r.standby_start}–{r.standby_end} | "
+        f"Base: {r.base_airport} | Callable within: {r.callable_within} min | Status: {r.status}"
+        for r in rows
+    ]
+    return f"Reserve crew for {date} ({len(rows)}):\n" + "\n".join(lines)
