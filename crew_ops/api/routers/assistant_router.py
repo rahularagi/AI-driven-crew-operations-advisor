@@ -82,9 +82,10 @@ async def query_assistant(request: QueryRequest):
         return QueryResponse(answer=answer)
 
     except Exception as e:
-        # Log the error and return a clean error message to the client
-        # Never expose raw exception details to the client in production
+        # Temporary: print full traceback to server console for debugging
+        import traceback
+        traceback.print_exc()
         raise HTTPException(
             status_code=500,
-            detail=f"Assistant encountered an error processing your request. Please try again."
+            detail=f"Assistant error: {str(e)}"
         )
