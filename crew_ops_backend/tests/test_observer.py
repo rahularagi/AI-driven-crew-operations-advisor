@@ -44,7 +44,7 @@ def test_get_legs_by_target_date():
     obs = FlightObserver()
     today_leg     = _make_leg("L-001", dep_date=_TODAY)
     tomorrow_leg  = _make_leg("L-002", dep_date=_TODAY + timedelta(days=1))
-    with patch("crew_ops.services.observer.observer_service.get_all_scheduled_legs",
+    with patch("crew_ops_backend.services.observer.observer_service.get_all_scheduled_legs",
                return_value=[today_leg, tomorrow_leg]):
         result = obs.get_legs(target_date=_TODAY)
     assert len(result) == 1
@@ -57,7 +57,7 @@ def test_get_legs_by_offset():
     obs = FlightObserver()
     tomorrow_leg = _make_leg("L-002", dep_date=_TODAY + timedelta(days=1))
     today_leg    = _make_leg("L-001", dep_date=_TODAY)
-    with patch("crew_ops.services.observer.observer_service.get_all_scheduled_legs",
+    with patch("crew_ops_backend.services.observer.observer_service.get_all_scheduled_legs",
                return_value=[today_leg, tomorrow_leg]):
         result = obs.get_legs(offset=1)
     assert len(result) == 1
@@ -87,7 +87,7 @@ def test_get_legs_assigned_crew_only_filters():
     with_crew    = _make_leg("L-001", assigned_crew=["C-001"])
     # Build a leg with empty assigned_crew by overriding the field directly
     without_crew = with_crew.model_copy(update={"leg_id": "L-002", "assigned_crew": []})
-    with patch("crew_ops.services.observer.observer_service.get_all_scheduled_legs",
+    with patch("crew_ops_backend.services.observer.observer_service.get_all_scheduled_legs",
                return_value=[with_crew, without_crew]):
         result = obs.get_legs(target_date=_TODAY, assigned_crew_only=True)
     assert len(result) == 1
@@ -102,7 +102,7 @@ def test_get_legs_for_range_returns_correct_window():
     end   = _TODAY + timedelta(days=2)
     in_range  = _make_leg("L-001", dep_date=_TODAY + timedelta(days=1))
     out_range = _make_leg("L-002", dep_date=_TODAY + timedelta(days=5))
-    with patch("crew_ops.services.observer.observer_service.get_all_scheduled_legs",
+    with patch("crew_ops_backend.services.observer.observer_service.get_all_scheduled_legs",
                return_value=[in_range, out_range]):
         result = obs.get_legs_for_range(start, end)
     assert len(result) == 1
@@ -115,10 +115,10 @@ def test_poll_landed_publishes_leg_completed_event():
     obs = FlightObserver()
     leg = _make_leg()
     published = []
-    with patch("crew_ops.services.observer.observer_service.get_next_live_status_poll",
+    with patch("crew_ops_backend.services.observer.observer_service.get_next_live_status_poll",
                return_value=_poll_result(status="landed", actual_arrival="2026-01-01T12:00:00+00:00")), \
-         patch("crew_ops.services.observer.observer_service.reset_poll_index_for_leg"), \
-         patch("crew_ops.services.observer.observer_service.event_bus") as mock_bus:
+         patch("crew_ops_backend.services.observer.observer_service.reset_poll_index_for_leg"), \
+         patch("crew_ops_backend.services.observer.observer_service.event_bus") as mock_bus:
         mock_bus.publish.side_effect = lambda e: published.append(e)
         obs.poll(leg)
     assert len(published) == 1
@@ -131,10 +131,10 @@ def test_poll_landed_publishes_leg_completed_event():
 def test_poll_landed_resets_poll_index():
     obs = FlightObserver()
     leg = _make_leg()
-    with patch("crew_ops.services.observer.observer_service.get_next_live_status_poll",
+    with patch("crew_ops_backend.services.observer.observer_service.get_next_live_status_poll",
                return_value=_poll_result(status="landed")), \
-         patch("crew_ops.services.observer.observer_service.reset_poll_index_for_leg") as mock_reset, \
-         patch("crew_ops.services.observer.observer_service.event_bus"):
+         patch("crew_ops_backend.services.observer.observer_service.reset_poll_index_for_leg") as mock_reset, \
+         patch("crew_ops_backend.services.observer.observer_service.event_bus"):
         obs.poll(leg)
     mock_reset.assert_called_once_with("L-001")
 
@@ -145,10 +145,10 @@ def test_poll_landed_uses_actual_arrival_when_present():
     obs = FlightObserver()
     leg = _make_leg()
     published = []
-    with patch("crew_ops.services.observer.observer_service.get_next_live_status_poll",
+    with patch("crew_ops_backend.services.observer.observer_service.get_next_live_status_poll",
                return_value=_poll_result(status="landed", actual_arrival="2026-06-01T14:30:00+00:00")), \
-         patch("crew_ops.services.observer.observer_service.reset_poll_index_for_leg"), \
-         patch("crew_ops.services.observer.observer_service.event_bus") as mock_bus:
+         patch("crew_ops_backend.services.observer.observer_service.reset_poll_index_for_leg"), \
+         patch("crew_ops_backend.services.observer.observer_service.event_bus") as mock_bus:
         mock_bus.publish.side_effect = lambda e: published.append(e)
         obs.poll(leg)
     assert published[0].actual_arrival.year == 2026
@@ -160,10 +160,10 @@ def test_poll_landed_falls_back_to_now_when_no_actual():
     obs = FlightObserver()
     leg = _make_leg()
     published = []
-    with patch("crew_ops.services.observer.observer_service.get_next_live_status_poll",
+    with patch("crew_ops_backend.services.observer.observer_service.get_next_live_status_poll",
                return_value=_poll_result(status="landed", actual_arrival=None)), \
-         patch("crew_ops.services.observer.observer_service.reset_poll_index_for_leg"), \
-         patch("crew_ops.services.observer.observer_service.event_bus") as mock_bus:
+         patch("crew_ops_backend.services.observer.observer_service.reset_poll_index_for_leg"), \
+         patch("crew_ops_backend.services.observer.observer_service.event_bus") as mock_bus:
         mock_bus.publish.side_effect = lambda e: published.append(e)
         obs.poll(leg)
     assert published[0].actual_arrival is not None
@@ -175,9 +175,9 @@ def test_poll_cancelled_publishes_flight_disrupted_cancellation():
     obs = FlightObserver()
     leg = _make_leg()
     published = []
-    with patch("crew_ops.services.observer.observer_service.get_next_live_status_poll",
+    with patch("crew_ops_backend.services.observer.observer_service.get_next_live_status_poll",
                return_value=_poll_result(status="cancelled")), \
-         patch("crew_ops.services.observer.observer_service.event_bus") as mock_bus:
+         patch("crew_ops_backend.services.observer.observer_service.event_bus") as mock_bus:
         mock_bus.publish.side_effect = lambda e: published.append(e)
         obs.poll(leg)
     assert isinstance(published[0], FlightDisruptedEvent)
@@ -191,9 +191,9 @@ def test_poll_delay_240min_publishes_high_severity():
     obs = FlightObserver()
     leg = _make_leg()
     published = []
-    with patch("crew_ops.services.observer.observer_service.get_next_live_status_poll",
+    with patch("crew_ops_backend.services.observer.observer_service.get_next_live_status_poll",
                return_value=_poll_result(status="active", delay=240)), \
-         patch("crew_ops.services.observer.observer_service.event_bus") as mock_bus:
+         patch("crew_ops_backend.services.observer.observer_service.event_bus") as mock_bus:
         mock_bus.publish.side_effect = lambda e: published.append(e)
         obs.poll(leg)
     assert published[0].severity == "HIGH"
@@ -206,9 +206,9 @@ def test_poll_delay_120min_publishes_medium_severity():
     obs = FlightObserver()
     leg = _make_leg()
     published = []
-    with patch("crew_ops.services.observer.observer_service.get_next_live_status_poll",
+    with patch("crew_ops_backend.services.observer.observer_service.get_next_live_status_poll",
                return_value=_poll_result(status="active", delay=120)), \
-         patch("crew_ops.services.observer.observer_service.event_bus") as mock_bus:
+         patch("crew_ops_backend.services.observer.observer_service.event_bus") as mock_bus:
         mock_bus.publish.side_effect = lambda e: published.append(e)
         obs.poll(leg)
     assert published[0].severity == "MEDIUM"
@@ -220,9 +220,9 @@ def test_poll_delay_30min_publishes_low_severity():
     obs = FlightObserver()
     leg = _make_leg()
     published = []
-    with patch("crew_ops.services.observer.observer_service.get_next_live_status_poll",
+    with patch("crew_ops_backend.services.observer.observer_service.get_next_live_status_poll",
                return_value=_poll_result(status="active", delay=30)), \
-         patch("crew_ops.services.observer.observer_service.event_bus") as mock_bus:
+         patch("crew_ops_backend.services.observer.observer_service.event_bus") as mock_bus:
         mock_bus.publish.side_effect = lambda e: published.append(e)
         obs.poll(leg)
     assert published[0].severity == "LOW"
@@ -234,9 +234,9 @@ def test_poll_delay_below_threshold_no_event():
     obs = FlightObserver()
     leg = _make_leg()
     published = []
-    with patch("crew_ops.services.observer.observer_service.get_next_live_status_poll",
+    with patch("crew_ops_backend.services.observer.observer_service.get_next_live_status_poll",
                return_value=_poll_result(status="active", delay=10)), \
-         patch("crew_ops.services.observer.observer_service.event_bus") as mock_bus:
+         patch("crew_ops_backend.services.observer.observer_service.event_bus") as mock_bus:
         mock_bus.publish.side_effect = lambda e: published.append(e)
         obs.poll(leg)
     assert len(published) == 0
@@ -247,9 +247,9 @@ def test_poll_delay_below_threshold_no_event():
 def test_poll_no_result_returns_early():
     obs = FlightObserver()
     leg = _make_leg()
-    with patch("crew_ops.services.observer.observer_service.get_next_live_status_poll",
+    with patch("crew_ops_backend.services.observer.observer_service.get_next_live_status_poll",
                return_value=None), \
-         patch("crew_ops.services.observer.observer_service.event_bus") as mock_bus:
+         patch("crew_ops_backend.services.observer.observer_service.event_bus") as mock_bus:
         obs.poll(leg)
     mock_bus.publish.assert_not_called()
 
@@ -330,7 +330,7 @@ def test_get_todays_active_legs_returns_only_assigned():
     obs = FlightObserver()
     with_crew    = _make_leg("L-001", assigned_crew=["C-001"])
     without_crew = with_crew.model_copy(update={"leg_id": "L-002", "assigned_crew": []})
-    with patch("crew_ops.services.observer.observer_service.get_all_scheduled_legs",
+    with patch("crew_ops_backend.services.observer.observer_service.get_all_scheduled_legs",
                return_value=[with_crew, without_crew]):
         result = obs.get_todays_active_legs()
     assert len(result) == 1

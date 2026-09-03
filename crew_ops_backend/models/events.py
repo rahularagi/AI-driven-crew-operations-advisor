@@ -37,6 +37,8 @@ class CrewDisruptedEvent(BaseModel):
     severity: str                   # LOW / MEDIUM / HIGH / CRITICAL
     source: str                     # OPS_DESK / WEEKLY_PLANNER_VALIDATOR
     detected_at: datetime
+    start_date: Optional[str] = None   # leave period start (YYYY-MM-DD)
+    end_date: Optional[str] = None     # leave period end (YYYY-MM-DD)
 
 
 class RosterModifiedEvent(BaseModel):

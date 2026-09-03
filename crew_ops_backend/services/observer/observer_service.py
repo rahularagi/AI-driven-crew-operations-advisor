@@ -35,8 +35,8 @@ class FlightObserver:
     # ─── Live today (automatic) ───────────────────────────────────────────────
 
     def get_todays_active_legs(self) -> list[FlightLeg]:
-        """Returns today's legs with crew assigned. Used by the automated polling loop."""
-        return self.get_legs(date.today(), assigned_crew_only=True)
+        """Returns all of today's legs. Used by the automated polling loop and Flight Monitor."""
+        return self.get_legs(date.today())
 
     def poll(self, leg: FlightLeg) -> None:
         """
@@ -103,7 +103,6 @@ class FlightObserver:
         if assigned_crew_only:
             legs = [leg for leg in legs if leg.assigned_crew]
         return legs
-
     # ─── Internal helpers ─────────────────────────────────────────────────────
 
     def _delay_severity(self, delay_minutes: int) -> str | None:

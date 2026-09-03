@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     hrms_api_key: str = ""
 
     # ─── LLM provider ────────────────────────────────────────────────────────────────────
+    use_llm:           bool = True       # True = LLM graph, False = rule-based graph
     llm_provider:      str = "openai"   # openai / anthropic / bedrock / gemini
     openai_api_key:    str = ""
     anthropic_api_key: str = ""

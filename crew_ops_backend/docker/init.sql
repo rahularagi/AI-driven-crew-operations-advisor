@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS crew_leave_records (
 
 -- ─── Reserve Schedule ─────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS crew_reserve_schedule (
-    reserve_id          VARCHAR(10)     PRIMARY KEY,
+    reserve_id          VARCHAR(30)     PRIMARY KEY,
     crew_id             VARCHAR(10)     NOT NULL REFERENCES crew_members(crew_id),
     date                DATE            NOT NULL,
     standby_start       TIMESTAMPTZ     NOT NULL,

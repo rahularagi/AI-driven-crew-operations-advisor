@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Optional
 
 
@@ -31,12 +31,7 @@ _sessions: dict[str, SessionState] = {}
 def get_session(session_id: str) -> SessionState:
     if session_id not in _sessions:
         _sessions[session_id] = SessionState(session_id=session_id)
-    session = _sessions[session_id]
-    # Expire stale pending confirmations so they are never silently acted on
-    if session.pending_confirmation and session.pending_confirmation.expires_at < datetime.now(timezone.utc):
-        session.pending_confirmation = None
-        _sessions[session_id] = session
-    return session
+    return _sessions[session_id]
 
 
 def save_session(session_id: str, state: SessionState) -> None:

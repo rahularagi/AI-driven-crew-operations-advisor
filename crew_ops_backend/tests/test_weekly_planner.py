@@ -13,7 +13,7 @@ from crew_ops_backend.models.flight_leg import FlightLeg
 from crew_ops_backend.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
 from crew_ops_backend.models.crew_license import CrewLicense
 
-_MODULE = "crew_ops.services.weekly_planner.weekly_planner_service"
+_MODULE = "crew_ops_backend.services.weekly_planner.weekly_planner_service"
 _TODAY  = date.today()
 
 

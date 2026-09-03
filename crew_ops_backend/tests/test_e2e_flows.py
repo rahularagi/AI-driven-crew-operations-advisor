@@ -18,10 +18,10 @@ from crew_ops_backend.models.crew_member import CrewMember
 from crew_ops_backend.models.flight_leg import FlightLeg
 from crew_ops_backend.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
 
-_DH  = "crew_ops.services.disruption_handler.disruption_handler_service"
-_WP  = "crew_ops.services.weekly_planner.weekly_planner_service"
-_FTL = "crew_ops.services.flight_time_limits.flight_time_limits_service"
-_OBS = "crew_ops.services.observer.observer_service"
+_DH  = "crew_ops_backend.services.disruption_handler.disruption_handler_service"
+_WP  = "crew_ops_backend.services.weekly_planner.weekly_planner_service"
+_FTL = "crew_ops_backend.services.flight_time_limits.flight_time_limits_service"
+_OBS = "crew_ops_backend.services.observer.observer_service"
 
 
 def _now():
@@ -114,8 +114,8 @@ def test_e2e_observer_delay_ftl_breach_creates_proposal():
          patch(f"{_DH}.check_legality", return_value=(False, "DUTY_PERIOD_BREACH")), \
          patch(f"{_DH}.get_all_crew_members", return_value=[]), \
          patch(f"{_DH}.get_all_crew_duty_states", return_value=[]), \
-         patch("crew_ops.clients.license_client.get_all_licenses", return_value=[]), \
-         patch("crew_ops.clients.leave_client.get_all_leave_records", return_value=[]), \
+         patch("crew_ops_backend.clients.license_client.get_all_licenses", return_value=[]), \
+         patch("crew_ops_backend.clients.leave_client.get_all_leave_records", return_value=[]), \
          patch(f"{_DH}.SessionLocal", mock_sl), \
          patch(f"{_DH}.disruption_repository") as mock_repo, \
          patch(f"{_DH}.roster_repository"):
@@ -159,8 +159,8 @@ def test_e2e_validator_illegal_assignment_creates_proposal():
          patch(f"{_DH}.get_crew_member", return_value=crew), \
          patch(f"{_DH}.get_all_crew_members", return_value=[]), \
          patch(f"{_DH}.get_all_crew_duty_states", return_value=[]), \
-         patch("crew_ops.clients.license_client.get_all_licenses", return_value=[]), \
-         patch("crew_ops.clients.leave_client.get_all_leave_records", return_value=[]), \
+         patch("crew_ops_backend.clients.license_client.get_all_licenses", return_value=[]), \
+         patch("crew_ops_backend.clients.leave_client.get_all_leave_records", return_value=[]), \
          patch(f"{_DH}.SessionLocal", mock_sl_dh), \
          patch(f"{_DH}.disruption_repository") as mock_repo_dh, \
          patch(f"{_DH}.roster_repository"):
@@ -213,7 +213,7 @@ def test_e2e_leg_completed_updates_ftl():
     mock_crew.home_base = "VABB"
     updated = []
 
-    with patch("crew_ops.clients.flight_schedule_client.get_flight_leg", return_value=leg), \
+    with patch("crew_ops_backend.clients.flight_schedule_client.get_flight_leg", return_value=leg), \
          patch(f"{_FTL}.get_crew_duty_state", return_value=ftl), \
          patch(f"{_FTL}.get_crew_member", return_value=mock_crew), \
          patch(f"{_FTL}.update_crew_duty_state",
@@ -242,8 +242,8 @@ def test_e2e_duplicate_proposal_guard():
          patch(f"{_DH}.get_crew_member", return_value=crew), \
          patch(f"{_DH}.get_all_crew_members", return_value=[]), \
          patch(f"{_DH}.get_all_crew_duty_states", return_value=[]), \
-         patch("crew_ops.clients.license_client.get_all_licenses", return_value=[]), \
-         patch("crew_ops.clients.leave_client.get_all_leave_records", return_value=[]), \
+         patch("crew_ops_backend.clients.license_client.get_all_licenses", return_value=[]), \
+         patch("crew_ops_backend.clients.leave_client.get_all_leave_records", return_value=[]), \
          patch(f"{_DH}.SessionLocal", mock_sl), \
          patch(f"{_DH}.disruption_repository") as mock_repo, \
          patch(f"{_DH}.roster_repository"):

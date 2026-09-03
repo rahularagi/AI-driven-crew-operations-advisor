@@ -20,6 +20,6 @@ class FlightLeg(BaseModel):
     status: str = "SCHEDULED"
     delay_status: str = "ON_TIME"
     delay_minutes: int = 0
-    assigned_crew: List[str] = []
+    assigned_crew: List[dict] = []
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None

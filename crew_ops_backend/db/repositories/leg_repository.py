@@ -67,19 +67,15 @@ def upsert_flight_leg(session: Session, leg: FlightLeg) -> None:
             updated_at              = NOW()
     """), leg.model_dump(exclude={"assigned_crew", "created_at", "updated_at"}))
 
-    for crew_id in leg.assigned_crew:
-        session.execute(text("""
-            INSERT INTO leg_crew_assignments (leg_id, crew_id)
-            VALUES (:leg_id, :crew_id)
-            ON CONFLICT (leg_id, crew_id) DO NOTHING
-        """), {"leg_id": leg.leg_id, "crew_id": crew_id})
-
     session.commit()
 
 
-def _get_assigned_crew_for_leg(session: Session, leg_id: str) -> list[str]:
+def _get_assigned_crew_for_leg(session: Session, leg_id: str) -> list[dict]:
     rows = session.execute(
-        text("SELECT crew_id FROM leg_crew_assignments WHERE leg_id = :leg_id"),
+        text("""
+            SELECT crew_id, status FROM roster_crew_assignment
+            WHERE leg_id = :leg_id AND status IN ('DRAFT', 'CONFIRMED')
+        """),
         {"leg_id": leg_id}
     ).mappings().all()
-    return [row["crew_id"] for row in rows]
+    return [dict(row) for row in rows]

@@ -60,12 +60,12 @@ export default function Home() {
                 </div>
               </div>
               {/* Right: Disruption Inbox + Chat stacked */}
-              <div className="flex flex-col w-80 shrink-0 overflow-hidden">
+              <div className="flex flex-col w-96 shrink-0 overflow-hidden">
                 <div className="flex-1 overflow-hidden" style={{ borderBottom: '1px solid var(--border)' }}>
                   <DisruptionInbox addToast={addToast} />
                 </div>
-                <div className="h-72 overflow-hidden shrink-0">
-                  <ChatPanel addToast={addToast} injectMessage={chatInject} />
+                <div className="h-96 overflow-hidden shrink-0">
+                  <ChatPanel addToast={addToast} injectMessage={chatInject} onAlertAction={() => setPage('dashboard')} />
                 </div>
               </div>
             </div>

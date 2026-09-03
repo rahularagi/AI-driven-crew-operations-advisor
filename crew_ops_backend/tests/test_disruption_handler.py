@@ -12,7 +12,7 @@ from crew_ops_backend.models.crew_member import CrewMember
 from crew_ops_backend.models.flight_leg import FlightLeg
 from crew_ops_backend.models.crew_flight_time_limits_state import CrewFlightTimeLimitsState
 
-_MODULE = "crew_ops.services.disruption_handler.disruption_handler_service"
+_MODULE = "crew_ops_backend.services.disruption_handler.disruption_handler_service"
 
 
 def _now():
@@ -177,8 +177,8 @@ def test_flight_disrupted_delay_checks_all_crew():
          patch(f"{_MODULE}.check_legality", return_value=(False, "FTL_UNAVAILABLE")), \
          patch(f"{_MODULE}.get_all_crew_members", return_value=[]), \
          patch(f"{_MODULE}.get_all_crew_duty_states", return_value=[]), \
-         patch("crew_ops.clients.license_client.get_all_licenses", return_value=[]), \
-         patch("crew_ops.clients.leave_client.get_all_leave_records", return_value=[]), \
+         patch("crew_ops_backend.clients.license_client.get_all_licenses", return_value=[]), \
+         patch("crew_ops_backend.clients.leave_client.get_all_leave_records", return_value=[]), \
          patch(f"{_MODULE}.SessionLocal", mock_sl), \
          patch(f"{_MODULE}.disruption_repository") as mock_repo, \
          patch(f"{_MODULE}.roster_repository"):
@@ -203,8 +203,8 @@ def test_flight_disrupted_aircraft_swap_only_checks_pilots():
          patch(f"{_MODULE}.check_legality", return_value=(False, "NO_TYPE_RATING")), \
          patch(f"{_MODULE}.get_all_crew_members", return_value=[]), \
          patch(f"{_MODULE}.get_all_crew_duty_states", return_value=[]), \
-         patch("crew_ops.clients.license_client.get_all_licenses", return_value=[]), \
-         patch("crew_ops.clients.leave_client.get_all_leave_records", return_value=[]), \
+         patch("crew_ops_backend.clients.license_client.get_all_licenses", return_value=[]), \
+         patch("crew_ops_backend.clients.leave_client.get_all_leave_records", return_value=[]), \
          patch(f"{_MODULE}.SessionLocal", mock_sl), \
          patch(f"{_MODULE}.disruption_repository") as mock_repo, \
          patch(f"{_MODULE}.roster_repository"):
@@ -262,8 +262,8 @@ def test_crew_disrupted_creates_proposal_with_candidates():
          patch(f"{_MODULE}.get_crew_member", return_value=_make_crew()), \
          patch(f"{_MODULE}.get_all_crew_members", return_value=[candidate]), \
          patch(f"{_MODULE}.get_all_crew_duty_states", return_value=[ftl]), \
-         patch("crew_ops.clients.license_client.get_all_licenses", return_value=[]), \
-         patch("crew_ops.clients.leave_client.get_all_leave_records", return_value=[]), \
+         patch("crew_ops_backend.clients.license_client.get_all_licenses", return_value=[]), \
+         patch("crew_ops_backend.clients.leave_client.get_all_leave_records", return_value=[]), \
          patch(f"{_MODULE}.check_legality", return_value=(True, None)), \
          patch(f"{_MODULE}.SessionLocal", mock_sl), \
          patch(f"{_MODULE}.disruption_repository") as mock_repo, \
@@ -283,8 +283,8 @@ def test_crew_disrupted_no_candidates_proposal_with_null_crew():
          patch(f"{_MODULE}.get_crew_member", return_value=_make_crew()), \
          patch(f"{_MODULE}.get_all_crew_members", return_value=[]), \
          patch(f"{_MODULE}.get_all_crew_duty_states", return_value=[]), \
-         patch("crew_ops.clients.license_client.get_all_licenses", return_value=[]), \
-         patch("crew_ops.clients.leave_client.get_all_leave_records", return_value=[]), \
+         patch("crew_ops_backend.clients.license_client.get_all_licenses", return_value=[]), \
+         patch("crew_ops_backend.clients.leave_client.get_all_leave_records", return_value=[]), \
          patch(f"{_MODULE}.SessionLocal", mock_sl), \
          patch(f"{_MODULE}.disruption_repository") as mock_repo, \
          patch(f"{_MODULE}.roster_repository"):
@@ -303,8 +303,8 @@ def test_crew_disrupted_crew_record_missing_falls_back_to_roster_role():
          patch(f"{_MODULE}.get_crew_member", return_value=None), \
          patch(f"{_MODULE}.get_all_crew_members", return_value=[]), \
          patch(f"{_MODULE}.get_all_crew_duty_states", return_value=[]), \
-         patch("crew_ops.clients.license_client.get_all_licenses", return_value=[]), \
-         patch("crew_ops.clients.leave_client.get_all_leave_records", return_value=[]), \
+         patch("crew_ops_backend.clients.license_client.get_all_licenses", return_value=[]), \
+         patch("crew_ops_backend.clients.leave_client.get_all_leave_records", return_value=[]), \
          patch(f"{_MODULE}.SessionLocal", mock_sl), \
          patch(f"{_MODULE}.disruption_repository") as mock_repo, \
          patch(f"{_MODULE}.roster_repository") as mock_rrepo:
@@ -336,8 +336,8 @@ def test_crew_disrupted_duplicate_proposal_guard():
          patch(f"{_MODULE}.get_crew_member", return_value=_make_crew()), \
          patch(f"{_MODULE}.get_all_crew_members", return_value=[]), \
          patch(f"{_MODULE}.get_all_crew_duty_states", return_value=[]), \
-         patch("crew_ops.clients.license_client.get_all_licenses", return_value=[]), \
-         patch("crew_ops.clients.leave_client.get_all_leave_records", return_value=[]), \
+         patch("crew_ops_backend.clients.license_client.get_all_licenses", return_value=[]), \
+         patch("crew_ops_backend.clients.leave_client.get_all_leave_records", return_value=[]), \
          patch(f"{_MODULE}.SessionLocal", mock_sl), \
          patch(f"{_MODULE}.disruption_repository") as mock_repo, \
          patch(f"{_MODULE}.roster_repository"):
@@ -354,8 +354,8 @@ def test_crew_disrupted_invalidates_assignment():
          patch(f"{_MODULE}.get_crew_member", return_value=_make_crew()), \
          patch(f"{_MODULE}.get_all_crew_members", return_value=[]), \
          patch(f"{_MODULE}.get_all_crew_duty_states", return_value=[]), \
-         patch("crew_ops.clients.license_client.get_all_licenses", return_value=[]), \
-         patch("crew_ops.clients.leave_client.get_all_leave_records", return_value=[]), \
+         patch("crew_ops_backend.clients.license_client.get_all_licenses", return_value=[]), \
+         patch("crew_ops_backend.clients.leave_client.get_all_leave_records", return_value=[]), \
          patch(f"{_MODULE}.SessionLocal", mock_sl), \
          patch(f"{_MODULE}.disruption_repository") as mock_repo, \
          patch(f"{_MODULE}.roster_repository") as mock_rrepo:
@@ -406,8 +406,8 @@ def test_reject_and_repropose_excludes_already_proposed_crew():
          patch(f"{_MODULE}.get_crew_member", return_value=_make_crew("C-001")), \
          patch(f"{_MODULE}.get_all_crew_members", return_value=[c002, c003]), \
          patch(f"{_MODULE}.get_all_crew_duty_states", return_value=[ftl2, ftl3]), \
-         patch("crew_ops.clients.license_client.get_all_licenses", return_value=[]), \
-         patch("crew_ops.clients.leave_client.get_all_leave_records", return_value=[]), \
+         patch("crew_ops_backend.clients.license_client.get_all_licenses", return_value=[]), \
+         patch("crew_ops_backend.clients.leave_client.get_all_leave_records", return_value=[]), \
          patch(f"{_MODULE}.check_legality", return_value=(True, None)), \
          patch(f"{_MODULE}.roster_repository"):
         mock_repo.reject_proposal.return_value = {
@@ -432,8 +432,8 @@ def test_reject_and_repropose_creates_new_proposal():
          patch(f"{_MODULE}.get_crew_member", return_value=_make_crew()), \
          patch(f"{_MODULE}.get_all_crew_members", return_value=[c002]), \
          patch(f"{_MODULE}.get_all_crew_duty_states", return_value=[ftl2]), \
-         patch("crew_ops.clients.license_client.get_all_licenses", return_value=[]), \
-         patch("crew_ops.clients.leave_client.get_all_leave_records", return_value=[]), \
+         patch("crew_ops_backend.clients.license_client.get_all_licenses", return_value=[]), \
+         patch("crew_ops_backend.clients.leave_client.get_all_leave_records", return_value=[]), \
          patch(f"{_MODULE}.check_legality", return_value=(True, None)), \
          patch(f"{_MODULE}.roster_repository"):
         mock_repo.reject_proposal.return_value = {
@@ -456,8 +456,8 @@ def test_reject_and_repropose_no_candidates_returns_none():
          patch(f"{_MODULE}.get_crew_member", return_value=_make_crew()), \
          patch(f"{_MODULE}.get_all_crew_members", return_value=[]), \
          patch(f"{_MODULE}.get_all_crew_duty_states", return_value=[]), \
-         patch("crew_ops.clients.license_client.get_all_licenses", return_value=[]), \
-         patch("crew_ops.clients.leave_client.get_all_leave_records", return_value=[]), \
+         patch("crew_ops_backend.clients.license_client.get_all_licenses", return_value=[]), \
+         patch("crew_ops_backend.clients.leave_client.get_all_leave_records", return_value=[]), \
          patch(f"{_MODULE}.roster_repository"):
         mock_repo.reject_proposal.return_value = {
             "leg_id": "L-001", "removed_crew_id": "C-001", "proposed_crew_id": None
@@ -567,8 +567,8 @@ def test_auto_resolve_re_ranks_when_candidate_no_longer_legal():
          patch(f"{_MODULE}.check_legality", return_value=(False, "FTL_UNAVAILABLE")), \
          patch(f"{_MODULE}.get_all_crew_members", return_value=[new_candidate]), \
          patch(f"{_MODULE}.get_all_crew_duty_states", return_value=[ftl3]), \
-         patch("crew_ops.clients.license_client.get_all_licenses", return_value=[]), \
-         patch("crew_ops.clients.leave_client.get_all_leave_records", return_value=[]), \
+         patch("crew_ops_backend.clients.license_client.get_all_licenses", return_value=[]), \
+         patch("crew_ops_backend.clients.leave_client.get_all_leave_records", return_value=[]), \
          patch(f"{_MODULE}.disruption_repository") as mock_repo:
         ctx.execute.return_value.mappings.return_value.all.return_value = [_low_proposal()]
         # second check_legality call (for new candidate) passes
@@ -591,8 +591,8 @@ def test_auto_resolve_escalates_to_medium_when_no_candidates():
          patch(f"{_MODULE}.check_legality", return_value=(False, "FTL_UNAVAILABLE")), \
          patch(f"{_MODULE}.get_all_crew_members", return_value=[]), \
          patch(f"{_MODULE}.get_all_crew_duty_states", return_value=[]), \
-         patch("crew_ops.clients.license_client.get_all_licenses", return_value=[]), \
-         patch("crew_ops.clients.leave_client.get_all_leave_records", return_value=[]), \
+         patch("crew_ops_backend.clients.license_client.get_all_licenses", return_value=[]), \
+         patch("crew_ops_backend.clients.leave_client.get_all_leave_records", return_value=[]), \
          patch(f"{_MODULE}.disruption_repository") as mock_repo:
         ctx.execute.return_value.mappings.return_value.all.return_value = [_low_proposal()]
         handler.auto_resolve_low_severity()

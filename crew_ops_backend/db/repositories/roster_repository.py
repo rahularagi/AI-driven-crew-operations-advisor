@@ -77,7 +77,7 @@ def get_future_assignments(
 def get_roster_for_date_range(session: Session, start: date, end: date) -> list[dict]:
     rows = session.execute(text("""
         SELECT rca.leg_id, rca.crew_id, rca.status, rca.assigned_by,
-               fl.scheduled_departure, fl.origin_iata, fl.destination_iata,
+               fl.scheduled_departure, fl.scheduled_arrival, fl.origin_iata, fl.destination_iata,
                fl.aircraft_type, fl.flight_number
         FROM roster_crew_assignment rca
         JOIN flight_legs fl ON fl.leg_id = rca.leg_id

@@ -5,6 +5,8 @@ import { api } from '@/lib/api';
 import { MessageBubble } from './MessageBubble';
 import type { ChatMessage, ChatResponse } from '@/types';
 import type { ToastItem } from '@/components/shared/Toast';
+import { AlertBanner } from '@/components/shared/AlertBanner';
+import type { AlertBannerItem } from '@/components/shared/AlertBanner';
 
 const SESSION_KEY = 'crewops_session_id';
 
@@ -25,12 +27,16 @@ const QUICK_CHIPS = [
 interface Props {
   addToast: (t: Omit<ToastItem, 'id'>) => void;
   injectMessage?: string;
+  onAlertAction?: () => void;
 }
 
-export function ChatPanel({ addToast, injectMessage }: Props) {
+let alertCounter = 0;
+
+export function ChatPanel({ addToast, injectMessage, onAlertAction }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [alerts, setAlerts] = useState<AlertBannerItem[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,10 +58,20 @@ export function ChatPanel({ addToast, injectMessage }: Props) {
       let content = res.response;
       // Handle push notification drain
       if (content.startsWith('[ALERT]')) {
-        const parts = content.split('\n\n---\n');
-        const alertPart = parts[0].replace('[ALERT]\n', '');
-        content = parts.slice(1).join('\n\n---\n');
-        addToast({ type: 'critical', message: alertPart.slice(0, 120) });
+        const parts = content.split('||MSG_SEP||\n');
+        const alertsRaw = parts[0].replace('[ALERT]\n', '').trim();
+        content = parts.slice(1).join('');
+        alertsRaw.split('||ALERT_SEP||').forEach(alertPart => {
+          const trimmed = alertPart.trim();
+          if (!trimmed) return;
+          const newAlert: AlertBannerItem = {
+            id: String(++alertCounter),
+            message: trimmed,
+            onAction: onAlertAction,
+            actionLabel: 'View in Inbox',
+          };
+          setAlerts(prev => [...prev, newAlert]);
+        });
       }
       const aiMsg: ChatMessage = {
         role: 'assistant',
@@ -83,6 +99,15 @@ export function ChatPanel({ addToast, injectMessage }: Props) {
         <Bot size={13} style={{ color: 'var(--brand)' }} />
         <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text)' }}>AI Assistant</span>
       </div>
+
+      {/* Alert banners */}
+      {alerts.map(a => (
+        <AlertBanner
+          key={a.id}
+          alert={a}
+          onDismiss={id => setAlerts(prev => prev.filter(x => x.id !== id))}
+        />
+      ))}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-3">

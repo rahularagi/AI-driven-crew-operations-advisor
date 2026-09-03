@@ -83,6 +83,49 @@ class DisruptionHandler:
                     self._check_and_propose(crew_id, leg, reason="AIRCRAFT_TYPE_CHANGED", source=event.event)
 
     def handle_crew_disrupted(self, event: CrewDisruptedEvent) -> None:
+        # Leave-period unavailability — no specific leg, find all affected assignments
+        if not event.leg_id and event.start_date and event.end_date:
+            from datetime import date
+            start = date.fromisoformat(event.start_date)
+            end   = date.fromisoformat(event.end_date)
+            with SessionLocal() as session:
+                assignments = roster_repository.get_future_assignments(
+                    session, from_date=start, to_date=end, crew_id=event.crew_id
+                )
+            for assignment in assignments:
+                leg_id = assignment.get("leg_id") if isinstance(assignment, dict) else getattr(assignment, "leg_id", None)
+                if not leg_id:
+                    continue
+                leg = get_flight_leg(leg_id)
+                if not leg:
+                    continue
+                now = datetime.now(timezone.utc)
+                dep = leg.scheduled_departure
+                if dep.tzinfo is None:
+                    dep = dep.replace(tzinfo=timezone.utc)
+                if dep <= now or leg.status == "CANCELLED":
+                    continue
+                crew = get_crew_member(event.crew_id)
+                role = crew.role if crew else None
+                if not role:
+                    with SessionLocal() as session:
+                        a = roster_repository.get_assignment_for_crew(session, leg_id, event.crew_id)
+                    role = (a.get("role") if isinstance(a, dict) else None) if a else None
+                if not role:
+                    continue
+                candidates = self._find_and_rank_candidates(role, leg)
+                self._create_proposal(
+                    leg_id            = leg_id,
+                    disruption_type   = "CREW_DISRUPTED",
+                    disruption_reason = event.reason,
+                    removed_crew_id   = event.crew_id,
+                    candidates        = candidates,
+                    severity          = event.severity,
+                    source            = event.source,
+                )
+            return
+
+        # Single-leg disruption (legacy path)
         leg = get_flight_leg(event.leg_id)
 
         # Leg not found — removed from schedule entirely, skip
@@ -260,6 +303,10 @@ class DisruptionHandler:
             dep = dep.replace(tzinfo=timezone.utc)
         passed, fail_reason = check_legality(crew, leg, ftl, licenses, leave, dep.date())
         if not passed:
+            # Skip if a proposal already exists for this crew+leg (any non-expired status)
+            with SessionLocal() as session:
+                if disruption_repository.pending_proposal_exists(session, leg.leg_id, crew_id):
+                    return
             candidates = self._find_and_rank_candidates(crew.role, leg)
             self._create_proposal(
                 leg_id            = leg.leg_id,

@@ -117,6 +117,7 @@ export function CrewTable({ addToast, onAskAI }: Props) {
             crew={selected}
             onClose={() => setSelected(null)}
             onAskAI={(msg) => { onAskAI(msg); setSelected(null); }}
+            addToast={addToast}
           />
         </>
       )}

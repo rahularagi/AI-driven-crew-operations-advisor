@@ -1,3 +1,8 @@
+export interface AssignedCrew {
+  crew_id: string;
+  status: 'DRAFT' | 'CONFIRMED';
+}
+
 export interface FlightLeg {
   leg_id: string;
   flight_number: string;
@@ -15,7 +20,7 @@ export interface FlightLeg {
   status: string;
   delay_status: string;
   delay_minutes: number;
-  assigned_crew: string[];
+  assigned_crew: AssignedCrew[];
 }
 
 export interface RosterRow {
@@ -24,6 +29,7 @@ export interface RosterRow {
   status: string;
   assigned_by: string;
   scheduled_departure: string;
+  scheduled_arrival: string;
   origin_iata: string;
   destination_iata: string;
   aircraft_type: string;
@@ -43,6 +49,7 @@ export interface Proposal {
   source: string;
   proposed_at: string;
   scheduled_departure?: string;
+  scheduled_arrival?: string;
   origin_iata?: string;
   destination_iata?: string;
   flight_number?: string;

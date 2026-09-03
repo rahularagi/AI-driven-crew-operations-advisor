@@ -38,9 +38,9 @@ def test_chat_query_returns_response():
     mock_intent.ambiguous   = False
     mock_intent.clarification_needed = None
 
-    with patch("crew_ops.conversation.agent.classify_intent", return_value=mock_intent), \
-         patch("crew_ops.conversation.agent._dispatch_query", return_value={"leg_id": "L-001", "status": "SCHEDULED"}), \
-         patch("crew_ops.conversation.agent.format_response", return_value="AI305 is scheduled."):
+    with patch("crew_ops_backend.conversation.agent_llm.classify_intent", return_value=mock_intent), \
+         patch("crew_ops_backend.conversation.agent_llm._dispatch_query", return_value={"leg_id": "L-001", "status": "SCHEDULED"}), \
+         patch("crew_ops_backend.conversation.agent_llm.format_response", return_value="AI305 is scheduled."):
         data = _chat("sess-q1", "What is the status of AI305?")
 
     assert data["mode"] == "QUERY"
@@ -59,7 +59,7 @@ def test_chat_clarify_returns_question():
     mock_intent.ambiguous   = True
     mock_intent.clarification_needed = "Multiple crew named Sharma. Which one?"
 
-    with patch("crew_ops.conversation.agent.classify_intent", return_value=mock_intent):
+    with patch("crew_ops_backend.conversation.agent_llm.classify_intent", return_value=mock_intent):
         data = _chat("sess-c1", "Mark Sharma as sick")
 
     assert data["mode"] == "CLARIFY"
@@ -84,9 +84,9 @@ def test_chat_simulate_returns_candidates_and_prompt():
         "cascade_impact": [],
     }
 
-    with patch("crew_ops.conversation.agent.classify_intent", return_value=mock_intent), \
-         patch("crew_ops.conversation.agent._dispatch_simulate", return_value=sim_result), \
-         patch("crew_ops.conversation.agent.format_response", return_value="Top candidate: C-007."):
+    with patch("crew_ops_backend.conversation.agent_llm.classify_intent", return_value=mock_intent), \
+         patch("crew_ops_backend.conversation.agent_llm._dispatch_simulate", return_value=sim_result), \
+         patch("crew_ops_backend.conversation.agent_llm.format_response", return_value="Top candidate: C-007."):
         data = _chat("sess-s1", "If Capt Ravi is sick, who covers AI305?")
 
     assert data["mode"] == "SIMULATE"
@@ -111,9 +111,9 @@ def test_chat_action_requires_confirmation():
     mock_intent.ambiguous   = False
     mock_intent.clarification_needed = None
 
-    with patch("crew_ops.conversation.agent.classify_intent", return_value=mock_intent), \
-         patch("crew_ops.conversation.agent._pre_check_legality", return_value={"passed": True, "reason": None}), \
-         patch("crew_ops.conversation.agent.build_confirmation_package",
+    with patch("crew_ops_backend.conversation.agent_llm.classify_intent", return_value=mock_intent), \
+         patch("crew_ops_backend.conversation.agent_llm._pre_check_legality", return_value={"passed": True, "reason": None}), \
+         patch("crew_ops_backend.conversation.agent_llm.build_confirmation_package",
                return_value="Capt Ravi will be marked unavailable. Confirm? [YES / NO]"):
         data = _chat("sess-a1", "Mark Capt Ravi as sick for AI305")
 
@@ -145,9 +145,9 @@ def test_chat_action_yes_executes():
 
     action_result = {"status": "disruption_raised", "crew_id": "C-003", "leg_id": "L-005", "severity": "CRITICAL"}
 
-    with patch("crew_ops.conversation.agent.classify_intent", return_value=mock_intent), \
-         patch("crew_ops.conversation.agent._dispatch_action", return_value=action_result), \
-         patch("crew_ops.conversation.agent.format_response", return_value="Disruption raised. Proposal pending."):
+    with patch("crew_ops_backend.conversation.agent_llm.classify_intent", return_value=mock_intent), \
+         patch("crew_ops_backend.conversation.agent_llm._dispatch_action", return_value=action_result), \
+         patch("crew_ops_backend.conversation.agent_llm.format_response", return_value="Disruption raised. Proposal pending."):
         data = _chat("sess-a2", "YES")
 
     assert data["mode"] == "ACTION"
@@ -176,7 +176,7 @@ def test_chat_action_no_cancels():
     mock_intent.ambiguous   = False
     mock_intent.clarification_needed = None
 
-    with patch("crew_ops.conversation.agent.classify_intent", return_value=mock_intent):
+    with patch("crew_ops_backend.conversation.agent_llm.classify_intent", return_value=mock_intent):
         data = _chat("sess-a3", "NO")
 
     assert data["response"] == "Action cancelled."
@@ -203,8 +203,8 @@ def test_chat_simulate_then_apply():
     mock_intent.ambiguous   = False
     mock_intent.clarification_needed = None
 
-    with patch("crew_ops.conversation.agent.classify_intent", return_value=mock_intent), \
-         patch("crew_ops.conversation.agent.build_confirmation_package",
+    with patch("crew_ops_backend.conversation.agent_llm.classify_intent", return_value=mock_intent), \
+         patch("crew_ops_backend.conversation.agent_llm.build_confirmation_package",
                return_value="Capt Ravi will be marked unavailable. Confirm? [YES / NO]"):
         data = _chat("sess-sim1", "yes apply it")
 
@@ -230,9 +230,9 @@ def test_chat_drains_push_queue():
     mock_intent.ambiguous   = False
     mock_intent.clarification_needed = None
 
-    with patch("crew_ops.conversation.agent.classify_intent", return_value=mock_intent), \
-         patch("crew_ops.conversation.agent._dispatch_query", return_value=[]), \
-         patch("crew_ops.conversation.agent.format_response", return_value="Roster is empty."):
+    with patch("crew_ops_backend.conversation.agent_llm.classify_intent", return_value=mock_intent), \
+         patch("crew_ops_backend.conversation.agent_llm._dispatch_query", return_value=[]), \
+         patch("crew_ops_backend.conversation.agent_llm.format_response", return_value="Roster is empty."):
         data = _chat("sess-push1", "show roster")
 
     assert "[ALERT]" in data["response"]
@@ -251,8 +251,8 @@ def test_chat_action_legality_fail_no_confirmation():
     mock_intent.ambiguous   = False
     mock_intent.clarification_needed = None
 
-    with patch("crew_ops.conversation.agent.classify_intent", return_value=mock_intent), \
-         patch("crew_ops.conversation.agent._pre_check_legality",
+    with patch("crew_ops_backend.conversation.agent_llm.classify_intent", return_value=mock_intent), \
+         patch("crew_ops_backend.conversation.agent_llm._pre_check_legality",
                return_value={"passed": False, "reason": "NO_TYPE_RATING"}):
         data = _chat("sess-legal1", "Assign C-002 instead of C-001 on L-001")
 

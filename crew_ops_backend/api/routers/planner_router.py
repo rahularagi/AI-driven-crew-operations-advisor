@@ -1,21 +1,9 @@
 from fastapi import APIRouter, Body, HTTPException
-from datetime import date, datetime, timezone
-from crew_ops_backend.services.weekly_planner.weekly_planner_service import RosterPlanner, DailyValidator
-from crew_ops_backend.db.database import SessionLocal
-from crew_ops_backend.db.repositories import roster_repository
-from crew_ops_backend.clients.flight_schedule_client import get_flight_leg
-from crew_ops_backend.clients.ftl_client import get_crew_duty_state
-from crew_ops_backend.clients.crew_profile_client import get_crew_member
-from crew_ops_backend.clients.license_client import get_licenses_for_crew_member
-from crew_ops_backend.clients.leave_client import get_leave_records_for_crew
-from crew_ops_backend.rules.legality import check_legality
-from crew_ops_backend.models.events import RosterModifiedEvent
-from crew_ops_backend.services.event_bus import event_bus
+from datetime import date
+
+from crew_ops_backend.services import planner_service
 
 router = APIRouter(prefix="/planner", tags=["Planner"])
-
-_planner   = RosterPlanner()
-_validator = DailyValidator()
 
 
 @router.post("/build")
@@ -25,30 +13,24 @@ def trigger_build(
     end: date | None = Body(default=None),
 ):
     try:
-        _planner.build(start=start, end=end, requested_by=requested_by)
+        return planner_service.build_roster(requested_by, start, end)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    return {"status": "build started", "start": start, "end": end, "requested_by": requested_by}
 
 
 @router.post("/validate")
 def trigger_validation(requested_by: str = Body(...)):
-    _validator.validate(requested_by=requested_by)
-    return {"status": "validation started", "requested_by": requested_by}
+    return planner_service.validate_roster(requested_by)
 
 
 @router.get("/roster")
 def get_roster(start: date, end: date):
-    with SessionLocal() as session:
-        return roster_repository.get_roster_for_date_range(session, start, end)
+    return planner_service.get_roster(start, end)
 
 
 @router.post("/roster/{leg_id}/approve")
 def approve_leg(leg_id: str, approved_by: str = Body(...)):
-    with SessionLocal() as session:
-        roster_repository.approve_roster_leg(session, leg_id, approved_by)
-        session.commit()
-    return {"status": "approved", "leg_id": leg_id, "approved_by": approved_by}
+    return planner_service.approve_leg(leg_id, approved_by)
 
 
 @router.post("/roster/{leg_id}/reassign")
@@ -59,35 +41,13 @@ def reassign_crew(
     reason: str = Body(...),
     requested_by: str = Body(...),
 ):
-    leg  = get_flight_leg(leg_id)
-    if not leg:
+    result = planner_service.reassign_crew(leg_id, crew_id, replaced_by, requested_by)
+    if result.get("error") == "leg_not_found":
         raise HTTPException(status_code=404, detail="Leg not found")
-
-    new_crew = get_crew_member(replaced_by)
-    if not new_crew:
+    if result.get("error") == "crew_not_found":
         raise HTTPException(status_code=404, detail="Replacement crew member not found")
-
-    ftl = get_crew_duty_state(replaced_by)
-    if not ftl:
+    if result.get("error") == "ftl_not_found":
         raise HTTPException(status_code=400, detail="No FTL state found for replacement crew")
-
-    licenses     = get_licenses_for_crew_member(replaced_by)
-    leave_records = get_leave_records_for_crew(replaced_by)
-    leg_date     = leg.scheduled_departure.date()
-
-    passed, fail_reason = check_legality(new_crew, leg, ftl, licenses, leave_records, leg_date)
-    if not passed:
-        raise HTTPException(status_code=400, detail=f"Legality check failed: {fail_reason}")
-
-    with SessionLocal() as session:
-        roster_repository.replace_roster_crew_assignment(session, leg_id, crew_id, replaced_by, requested_by)
-        session.commit()
-
-    event_bus.publish(RosterModifiedEvent(
-        leg_id          = leg_id,
-        removed_crew_id = crew_id,
-        added_crew_id   = replaced_by,
-        modified_at     = datetime.now(timezone.utc),
-    ))
-
-    return {"status": "reassigned", "leg_id": leg_id, "removed": crew_id, "added": replaced_by}
+    if result.get("error") == "legality_failed":
+        raise HTTPException(status_code=400, detail=f"Legality check failed: {result.get('reason')}")
+    return result

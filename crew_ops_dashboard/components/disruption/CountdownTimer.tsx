@@ -22,11 +22,14 @@ export function CountdownTimer({ proposedAt, severity }: { proposedAt: string; s
   const isUrgent = remaining < 300;
 
   return (
-    <span
-      className="text-xs font-mono font-bold"
-      style={{ color: isUrgent ? 'var(--danger)' : 'var(--muted2)' }}
-    >
-      {m}:{String(s).padStart(2, '0')}
-    </span>
+    <div className="flex items-center gap-1">
+      <span className="text-[9px] uppercase tracking-wide" style={{ color: 'var(--muted)' }}>expires</span>
+      <span
+        className="text-xs font-mono font-bold"
+        style={{ color: isUrgent ? 'var(--danger)' : 'var(--muted2)' }}
+      >
+        {m}:{String(s).padStart(2, '0')}
+      </span>
+    </div>
   );
 }

@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, RefreshCw, Check } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRoster } from '@/hooks/useRoster';
 import { useProposals } from '@/hooks/useProposals';
-import { StatusBadge } from '@/components/shared/StatusBadge';
 import { api } from '@/lib/api';
 import type { RosterRow } from '@/types';
 import type { ToastItem } from '@/components/shared/Toast';
@@ -33,7 +32,7 @@ interface Props {
 
 export function RosterPanel({ addToast }: Props) {
   const [weekOffset, setWeekOffset] = useState(0);
-  const [view, setView] = useState<'grid' | 'list'>('grid');
+  const [view, setView] = useState<'grid' | 'list'>('list');
   const { start, end, days } = getWeekDates(weekOffset);
   const { data: rows = [], isLoading, error, refetch } = useRoster(start, end);
   const { data: proposals = [] } = useProposals();
@@ -52,11 +51,11 @@ export function RosterPanel({ addToast }: Props) {
   const grouped = groupByLeg(rows);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full" style={{ background: '#060D1A' }}>
       {/* Header */}
       <div
         className="flex items-center justify-between px-3 py-2 shrink-0"
-        style={{ borderBottom: '1px solid var(--border)' }}
+        style={{ borderBottom: '1px solid #1E3A5F', background: '#0A1628' }}
       >
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text)' }}>Roster</span>
@@ -130,6 +129,8 @@ export function RosterPanel({ addToast }: Props) {
                     {days.map(d => {
                       const dayStr = d.toISOString().split('T')[0];
                       const isLegDay = legDate === dayStr;
+                      const dep = new Date(sample.scheduled_departure).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                      const arr = new Date(sample.scheduled_arrival).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
                       return (
                         <td key={dayStr} className="px-1 py-1 text-center">
                           {isLegDay ? (
@@ -137,14 +138,49 @@ export function RosterPanel({ addToast }: Props) {
                               className={`rounded px-1 py-1 ${isDisrupted ? 'pulse-ring' : ''}`}
                               style={{ background: bg, border: `1px solid ${statusColor}44` }}
                             >
-                              <div className="font-semibold" style={{ color: statusColor }}>
-                                {isDisrupted ? '⚠' : isDraft ? '~' : '✓'}
-                              </div>
-                              <div style={{ color: 'var(--muted)' }}>{legRows.map(r => r.crew_id).join(' ')}</div>
+                              <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+                                <tbody>
+                                  <tr>
+                                    <td className="text-[8px] pr-2 py-0.5" style={{ color: 'var(--muted)', whiteSpace: 'nowrap' }}>Dep</td>
+                                    <td className="text-[8px] py-0.5" style={{ color: 'var(--text)' }}>{dep}</td>
+                                  </tr>
+                                  <tr>
+                                    <td className="text-[8px] pr-2 py-0.5" style={{ color: 'var(--muted)', whiteSpace: 'nowrap' }}>Arr</td>
+                                    <td className="text-[8px] py-0.5" style={{ color: 'var(--text)' }}>{arr}</td>
+                                  </tr>
+                                  <tr>
+                                    <td className="text-[8px] pr-2 py-0.5" style={{ color: 'var(--muted)', whiteSpace: 'nowrap' }}>Roster</td>
+                                    <td className="text-[8px] py-0.5 font-semibold" style={{ color: statusColor }}>
+                                      {isDisrupted ? '⚠ DISRUPTED' : isDraft ? '~ DRAFT' : '✓ PUBLISHED'}
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td className="text-[8px] pr-2 py-0.5 align-top" style={{ color: 'var(--muted)', whiteSpace: 'nowrap' }}>Crew</td>
+                                    <td className="py-0.5">
+                                      <div className="flex flex-col gap-0.5">
+                                        {legRows.map(r => (
+                                          <span
+                                            key={r.crew_id}
+                                            className="text-[8px] font-mono px-1 py-0.5 rounded inline-flex items-center gap-1"
+                                            style={{
+                                              background: r.status === 'CONFIRMED' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)',
+                                              border: `1px solid ${r.status === 'CONFIRMED' ? 'rgba(16,185,129,0.35)' : 'rgba(245,158,11,0.35)'}`,
+                                              color: r.status === 'CONFIRMED' ? '#10B981' : '#F59E0B',
+                                            }}
+                                          >
+                                            {r.crew_id}
+                                            <span style={{ fontSize: '7px' }}>{r.status}</span>
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
                               {isDraft && !isDisrupted && (
                                 <button
                                   onClick={() => approve.mutate(legId)}
-                                  className="mt-0.5 px-1 py-0.5 rounded text-[9px] font-bold"
+                                  className="mt-1 px-1 py-0.5 rounded text-[9px] font-bold w-full"
                                   style={{ background: 'rgba(245,158,11,0.2)', color: '#F59E0B' }}
                                 >
                                   Approve
@@ -174,25 +210,64 @@ export function RosterPanel({ addToast }: Props) {
               const isDisrupted = disruptedLegs.has(legId);
               const isDraft = legRows.some(r => r.status === 'DRAFT');
               const dep = new Date(sample.scheduled_departure).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-              const statusLabel = isDisrupted ? 'DISRUPTED' : isDraft ? 'DRAFT' : 'PUBLISHED';
-
+              const arr = new Date(sample.scheduled_arrival).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
               return (
                 <div
                   key={legId}
-                  className="flex items-center gap-3 px-3 py-2"
+                  className="px-3 py-2"
                   style={{ borderBottom: '1px solid var(--border)', borderLeft: `3px solid ${isDisrupted ? '#EF4444' : isDraft ? '#F59E0B' : '#10B981'}` }}
                 >
-                  <span className="font-mono text-xs font-semibold w-14" style={{ color: 'var(--text)' }}>{sample.flight_number}</span>
-                  <span className="text-xs w-20" style={{ color: 'var(--muted2)' }}>{sample.origin_iata}→{sample.destination_iata}</span>
-                  <span className="text-xs w-12" style={{ color: 'var(--muted)' }}>{dep}</span>
-                  <StatusBadge status={statusLabel} />
-                  <span className="text-[10px] flex-1" style={{ color: 'var(--muted)' }}>
-                    {legRows.map(r => r.crew_id).join(', ')}
-                  </span>
+                  <table className="w-full" style={{ borderCollapse: 'collapse' }}>
+                    <tbody>
+                      <tr>
+                        <td className="text-[10px] pr-4 py-0.5 w-20" style={{ color: 'var(--muted)' }}>Flight</td>
+                        <td className="text-[10px] font-mono font-semibold py-0.5" style={{ color: 'var(--text)' }}>{sample.flight_number}</td>
+                      </tr>
+                      <tr>
+                        <td className="text-[10px] pr-4 py-0.5" style={{ color: 'var(--muted)' }}>Route</td>
+                        <td className="text-[10px] py-0.5" style={{ color: 'var(--muted2)' }}>{sample.origin_iata} → {sample.destination_iata}</td>
+                      </tr>
+                      <tr>
+                        <td className="text-[10px] pr-4 py-0.5" style={{ color: 'var(--muted)' }}>Departure</td>
+                        <td className="text-[10px] py-0.5" style={{ color: 'var(--text)' }}>{dep}</td>
+                      </tr>
+                      <tr>
+                        <td className="text-[10px] pr-4 py-0.5" style={{ color: 'var(--muted)' }}>Arrival</td>
+                        <td className="text-[10px] py-0.5" style={{ color: 'var(--text)' }}>{arr}</td>
+                      </tr>
+                      <tr>
+                        <td className="text-[10px] pr-4 py-0.5" style={{ color: 'var(--muted)' }}>Roster Status</td>
+                        <td className="text-[10px] py-0.5 font-semibold" style={{ color: isDisrupted ? '#EF4444' : isDraft ? '#F59E0B' : '#10B981' }}>
+                          {isDisrupted ? '⚠ DISRUPTED' : isDraft ? '~ DRAFT' : '✓ PUBLISHED'}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="text-[10px] pr-4 py-0.5 align-top" style={{ color: 'var(--muted)' }}>Crew</td>
+                        <td className="py-0.5">
+                          <div className="flex flex-wrap gap-1">
+                            {legRows.map(r => (
+                              <span
+                                key={r.crew_id}
+                                className="text-[9px] font-mono px-1.5 py-0.5 rounded inline-flex items-center gap-1"
+                                style={{
+                                  background: r.status === 'CONFIRMED' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)',
+                                  color: r.status === 'CONFIRMED' ? '#10B981' : '#F59E0B',
+                                  border: `1px solid ${r.status === 'CONFIRMED' ? 'rgba(16,185,129,0.35)' : 'rgba(245,158,11,0.35)'}`,
+                                }}
+                              >
+                                {r.crew_id}
+                                <span style={{ fontSize: '8px' }}>{r.status}</span>
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                   {isDraft && !isDisrupted && (
                     <button
                       onClick={() => approve.mutate(legId)}
-                      className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold"
+                      className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold mt-1.5"
                       style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.3)' }}
                     >
                       <Check size={10} /> Approve

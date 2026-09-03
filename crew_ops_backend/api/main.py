@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
+from datetime import datetime, timedelta
 
 from crew_ops_backend.db.database import check_database_connection
 from crew_ops_backend.config.settings import settings
@@ -54,18 +55,30 @@ scheduler.add_job(
 )
 
 # Job A — roster build every Sunday at 23:00
+# scheduler.add_job(
+#     roster_planner.build,
+#     CronTrigger(day_of_week="sun", hour=23, minute=0),
+#     id="roster_build",
+# )
 scheduler.add_job(
     roster_planner.build,
-    CronTrigger(day_of_week="sun", hour=23, minute=0),
+    trigger="date",
     id="roster_build",
 )
 
 # Job B — daily validation every morning at 03:00
+# scheduler.add_job(
+#     daily_validator.validate,
+#     CronTrigger(hour=3, minute=0),
+#     id="daily_validation",
+# )
 scheduler.add_job(
     daily_validator.validate,
-    CronTrigger(hour=3, minute=0),
+    trigger="date",
+    run_date=datetime.now() + timedelta(minutes=5),
     id="daily_validation",
 )
+
 
 # FTL proactive alert scan every 15 minutes
 scheduler.add_job(
@@ -146,8 +159,8 @@ app.include_router(crew_router.router)
 app.include_router(ftl_router.router)
 app.include_router(disruption_router.router)
 
-from crew_ops_backend.conversation.router import router as conversation_router
-app.include_router(conversation_router)
+from crew_ops_backend.api.routers.chat_router import router as chat_router
+app.include_router(chat_router)
 
 
 @app.get("/health", tags=["Health"])

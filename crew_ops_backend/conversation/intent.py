@@ -19,9 +19,10 @@ QUERY    — user wants to read information. No change to the system.
 SIMULATE — user wants to explore a what-if scenario. No change to the system.
 ACTION   — user wants to make a change that modifies the roster or crew state.
 
-Extract all entities: crew names, flight numbers, dates, airports.
+Extract all entities: crew names, flight numbers, dates, airports, reasons.
 Resolve crew names to crew_id using the provided crew list.
 If a name matches multiple crew members, set ambiguous=true and clarification_needed.
+For MARK_UNAVAILABLE also extract: reason (SICK_CALL/PERSONAL/TRAINING/OTHER), start_date (YYYY-MM-DD), end_date (YYYY-MM-DD) into entities.
 
 ACTION types:
   MARK_UNAVAILABLE   — mark a crew member sick / unavailable for a leg

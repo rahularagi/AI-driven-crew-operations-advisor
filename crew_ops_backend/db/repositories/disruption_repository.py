@@ -3,9 +3,13 @@ from sqlalchemy import text
 
 
 def pending_proposal_exists(session: Session, leg_id: str, removed_crew_id: str) -> bool:
+    """Returns True if an active (non-expired) proposal already exists for this leg+crew.
+    Blocks duplicate creation from repeated observer polls on the same disruption.
+    """
     row = session.execute(text("""
         SELECT 1 FROM disruption_proposals
-        WHERE leg_id = :leg_id AND removed_crew_id = :removed_crew_id AND status = 'PENDING'
+        WHERE leg_id = :leg_id AND removed_crew_id = :removed_crew_id
+          AND status NOT IN ('EXPIRED')
         LIMIT 1
     """), {"leg_id": leg_id, "removed_crew_id": removed_crew_id}).first()
     return row is not None
@@ -27,7 +31,7 @@ def insert_proposal(session: Session, data: dict) -> None:
 
 def get_pending_proposals(session: Session) -> list[dict]:
     rows = session.execute(text("""
-        SELECT dp.*, fl.scheduled_departure, fl.origin_iata, fl.destination_iata,
+        SELECT dp.*, fl.scheduled_departure, fl.scheduled_arrival, fl.origin_iata, fl.destination_iata,
                fl.flight_number, fl.aircraft_type
         FROM disruption_proposals dp
         JOIN flight_legs fl ON fl.leg_id = dp.leg_id
@@ -94,7 +98,7 @@ def get_already_proposed_crew(session: Session, leg_id: str, removed_crew_id: st
 def get_unpushed_proposals(session: Session) -> list[dict]:
     """Returns PENDING proposals not yet pushed to the controller (pushed_at IS NULL)."""
     rows = session.execute(text("""
-        SELECT dp.*, fl.scheduled_departure, fl.origin_iata, fl.destination_iata, fl.flight_number
+        SELECT dp.*, fl.scheduled_departure, fl.scheduled_arrival, fl.origin_iata, fl.destination_iata, fl.flight_number
         FROM disruption_proposals dp
         JOIN flight_legs fl ON fl.leg_id = dp.leg_id
         WHERE dp.status = 'PENDING' AND dp.pushed_at IS NULL

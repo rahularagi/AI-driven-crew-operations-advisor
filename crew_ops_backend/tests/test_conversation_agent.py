@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from crew_ops_backend.conversation.agent import (
+from crew_ops_backend.conversation.agent_llm import (
     route_decision, confirm_node, execute_node, format_node,
     _build_action_args, _pre_check_legality,
 )
@@ -143,7 +143,7 @@ def test_confirm_node_apply_simulation_builds_confirmation():
     )
     intent = _make_intent(mode="ACTION", action_type="APPLY_SIMULATION")
     state  = _make_state(message="yes", session=session, intent=intent)
-    with patch("crew_ops.conversation.agent.build_confirmation_package", return_value="Confirm?"):
+    with patch("crew_ops_backend.conversation.agent_llm.build_confirmation_package", return_value="Confirm?"):
         result = confirm_node(state)
     assert result["requires_confirmation"] is True
     assert result["session"].pending_confirmation is not None
@@ -154,7 +154,7 @@ def test_confirm_node_new_action_legality_fail():
     intent = _make_intent(mode="ACTION", action_type="REASSIGN",
                           entities={"leg_id": "L-001", "old_crew_id": "C-001", "new_crew_id": "C-002"})
     state  = _make_state(message="assign C-002", intent=intent)
-    with patch("crew_ops.conversation.agent._pre_check_legality",
+    with patch("crew_ops_backend.conversation.agent_llm._pre_check_legality",
                return_value={"passed": False, "reason": "NO_TYPE_RATING"}):
         result = confirm_node(state)
     assert "NO_TYPE_RATING" in result["response"]
@@ -164,8 +164,8 @@ def test_confirm_node_new_action_builds_package():
     intent = _make_intent(mode="ACTION", action_type="MARK_UNAVAILABLE",
                           entities={"crew_id": "C-001", "leg_id": "L-001"})
     state  = _make_state(message="mark sick", intent=intent)
-    with patch("crew_ops.conversation.agent._pre_check_legality", return_value={"passed": True, "reason": None}), \
-         patch("crew_ops.conversation.agent.build_confirmation_package", return_value="Confirm? [YES / NO]"):
+    with patch("crew_ops_backend.conversation.agent_llm._pre_check_legality", return_value={"passed": True, "reason": None}), \
+         patch("crew_ops_backend.conversation.agent_llm.build_confirmation_package", return_value="Confirm? [YES / NO]"):
         result = confirm_node(state)
     assert result["requires_confirmation"] is True
     assert "Confirm?" in result["response"]
@@ -184,7 +184,7 @@ def test_execute_node_dispatches_confirmed_action():
     state = _make_state(intent=_make_intent(mode="ACTION", action_type="MARK_UNAVAILABLE"))
     state["_confirmed_args"] = {"crew_id": "C-001", "leg_id": "L-001", "reason": "SICK_CALL"}
     state["_confirmed_type"] = "MARK_UNAVAILABLE"
-    with patch("crew_ops.conversation.agent._dispatch_action",
+    with patch("crew_ops_backend.conversation.agent_llm._dispatch_action",
                return_value={"status": "disruption_raised"}) as mock_dispatch:
         result = execute_node(state)
     mock_dispatch.assert_called_once_with("MARK_UNAVAILABLE", state["_confirmed_args"], "ops_01")
@@ -196,7 +196,7 @@ def test_execute_node_simulate_stores_pending():
     intent  = _make_intent(mode="SIMULATE", entities={"crew_id": "C-001", "leg_id": "L-001"})
     state   = _make_state(intent=intent, session=session)
     sim_result = {"candidates": [{"crew_id": "C-002", "score": 80}], "cascade_impact": []}
-    with patch("crew_ops.conversation.agent._dispatch_simulate", return_value=sim_result):
+    with patch("crew_ops_backend.conversation.agent_llm._dispatch_simulate", return_value=sim_result):
         result = execute_node(state)
     assert result["mode"] == "SIMULATE"
     assert result["session"].pending_simulation is not None
@@ -206,14 +206,14 @@ def test_execute_node_simulate_no_pending_if_no_candidates():
     session = SessionState(session_id="s1")
     intent  = _make_intent(mode="SIMULATE", entities={"crew_id": "C-001", "leg_id": "L-001"})
     state   = _make_state(intent=intent, session=session)
-    with patch("crew_ops.conversation.agent._dispatch_simulate", return_value={"candidates": []}):
+    with patch("crew_ops_backend.conversation.agent_llm._dispatch_simulate", return_value={"candidates": []}):
         result = execute_node(state)
     assert result["session"].pending_simulation is None
 
 def test_execute_node_query():
     intent = _make_intent(mode="QUERY", entities={"leg_id": "L-001"})
     state  = _make_state(intent=intent)
-    with patch("crew_ops.conversation.agent._dispatch_query", return_value={"leg_id": "L-001"}):
+    with patch("crew_ops_backend.conversation.agent_llm._dispatch_query", return_value={"leg_id": "L-001"}):
         result = execute_node(state)
     assert result["mode"] == "QUERY"
     assert result["tool_result"]["leg_id"] == "L-001"
@@ -232,7 +232,7 @@ def test_format_node_calls_formatter():
     state  = _make_state(intent=intent)
     state["mode"]        = "QUERY"
     state["tool_result"] = {"leg_id": "L-001"}
-    with patch("crew_ops.conversation.agent.format_response", return_value="AI305 has 4 crew."):
+    with patch("crew_ops_backend.conversation.agent_llm.format_response", return_value="AI305 has 4 crew."):
         result = format_node(state)
     assert result["response"] == "AI305 has 4 crew."
 
@@ -241,7 +241,7 @@ def test_format_node_appends_simulate_prompt():
     state  = _make_state(intent=intent)
     state["mode"]        = "SIMULATE"
     state["tool_result"] = {"candidates": [{"crew_id": "C-002", "score": 80}]}
-    with patch("crew_ops.conversation.agent.format_response", return_value="Top candidate: C-002."):
+    with patch("crew_ops_backend.conversation.agent_llm.format_response", return_value="Top candidate: C-002."):
         result = format_node(state)
     assert "Want me to raise this as a disruption?" in result["response"]
 
@@ -250,7 +250,7 @@ def test_format_node_no_simulate_prompt_when_no_candidates():
     state  = _make_state(intent=intent)
     state["mode"]        = "SIMULATE"
     state["tool_result"] = {"candidates": []}
-    with patch("crew_ops.conversation.agent.format_response", return_value="No candidates found."):
+    with patch("crew_ops_backend.conversation.agent_llm.format_response", return_value="No candidates found."):
         result = format_node(state)
     assert "Want me to raise" not in result["response"]
 
@@ -287,7 +287,7 @@ def test_pre_check_legality_non_reassign_always_passes():
 def test_pre_check_legality_reassign_missing_leg():
     intent = _make_intent(action_type="REASSIGN",
                           entities={"leg_id": "MISSING", "new_crew_id": "C-002"})
-    with patch("crew_ops.clients.flight_schedule_client.get_flight_leg", return_value=None):
+    with patch("crew_ops_backend.clients.flight_schedule_client.get_flight_leg", return_value=None):
         result = _pre_check_legality(intent, {"leg_id": "MISSING", "new_crew_id": "C-002"})
     assert result["passed"] is False
 
@@ -299,12 +299,12 @@ def test_pre_check_legality_reassign_passes():
     mock_leg.scheduled_departure = datetime.now(timezone.utc)
     mock_crew = MagicMock()
     mock_ftl  = MagicMock()
-    with patch("crew_ops.clients.flight_schedule_client.get_flight_leg", return_value=mock_leg), \
-         patch("crew_ops.clients.crew_profile_client.get_crew_member", return_value=mock_crew), \
-         patch("crew_ops.clients.ftl_client.get_crew_duty_state", return_value=mock_ftl), \
-         patch("crew_ops.clients.license_client.get_licenses_for_crew_member", return_value=[]), \
-         patch("crew_ops.clients.leave_client.get_leave_records_for_crew", return_value=[]), \
-         patch("crew_ops.rules.legality.check_legality", return_value=(True, None)):
+    with patch("crew_ops_backend.clients.flight_schedule_client.get_flight_leg", return_value=mock_leg), \
+         patch("crew_ops_backend.clients.crew_profile_client.get_crew_member", return_value=mock_crew), \
+         patch("crew_ops_backend.clients.ftl_client.get_crew_duty_state", return_value=mock_ftl), \
+         patch("crew_ops_backend.clients.license_client.get_licenses_for_crew_member", return_value=[]), \
+         patch("crew_ops_backend.clients.leave_client.get_leave_records_for_crew", return_value=[]), \
+         patch("crew_ops_backend.rules.legality.check_legality", return_value=(True, None)):
         result = _pre_check_legality(intent, {"leg_id": "L-001", "new_crew_id": "C-002"})
     assert result["passed"] is True
 
@@ -313,7 +313,7 @@ def test_pre_check_legality_reassign_passes():
 
 def test_dispatch_query_insufficient_context_returns_error():
     """No leg_id, no crew_id, no keyword — must return error dict."""
-    from crew_ops_backend.conversation.agent import _dispatch_query
+    from crew_ops_backend.conversation.agent_llm import _dispatch_query
     intent = _make_intent(mode="QUERY", entities={}, raw="hello")
     result = _dispatch_query(intent)
     assert "error" in result
@@ -323,7 +323,7 @@ def test_dispatch_query_insufficient_context_returns_error():
 
 def test_dispatch_simulate_insufficient_entities_returns_error():
     """No crew_id or leg_id — must return error dict."""
-    from crew_ops_backend.conversation.agent import _dispatch_simulate
+    from crew_ops_backend.conversation.agent_llm import _dispatch_simulate
     intent = _make_intent(mode="SIMULATE", entities={}, raw="what if something happens")
     result = _dispatch_simulate(intent)
     assert "error" in result
@@ -333,7 +333,7 @@ def test_dispatch_simulate_insufficient_entities_returns_error():
 
 def test_dispatch_action_unknown_type_returns_error():
     """Unrecognised action_type must return error dict, not raise."""
-    from crew_ops_backend.conversation.agent import _dispatch_action
+    from crew_ops_backend.conversation.agent_llm import _dispatch_action
     result = _dispatch_action("UNKNOWN_ACTION", {}, "ops_01")
     assert "error" in result
     assert "unknown" in result["error"].lower()

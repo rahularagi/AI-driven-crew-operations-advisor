@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, date
 
 
 class CrewMember(BaseModel):
@@ -10,7 +10,7 @@ class CrewMember(BaseModel):
     designation: str
     role: str                       # PILOT or CABIN
     home_base: str                  # ICAO code
-    date_of_joining: str
+    date_of_joining: date
     seniority_number: int
     employment_status: str = "ACTIVE"
     phone: Optional[str] = None
