@@ -19,5 +19,6 @@ def check_database_connection() -> bool:
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
         return True
-    except Exception:
+    except Exception as exc:
+        print(f"Database connection failed: {exc}")
         return False
